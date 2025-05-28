@@ -16,6 +16,7 @@ const workload3 = document.getElementById("workload3");
 const workload4 = document.getElementById("workload4");
 const fraamForm = document.getElementById("form");
 const results = document.getElementById("results");
+const clearBtn = document.getElementById("clear-btn");
 
 
 const assessment = {
@@ -78,10 +79,38 @@ function assessFatigue () {
 };
 
 fraamForm.addEventListener("submit", (e) => {
-	e.preventDefault();
-	const result = assessFatigue();
-	results.innerText = `Sum of Fatigue Factors: ${result[0]}\n  ${result[1]}`
-	results.classList.remove("hidden");
-	
-})
+    e.preventDefault();
+    fraamForm.classList.add("hidden");
+    const result = assessFatigue();
+    results.innerText = `Sum of Fatigue Factors: ${result[0]}\n${result[1]}`;
+    results.classList.remove("hidden");
+
+    // Append back button
+    const backBtn = document.createElement("button");
+    backBtn.id = "back-btn";
+    backBtn.textContent = "Back";
+    results.appendChild(document.createElement("br"));
+    results.appendChild(backBtn);
+    backBtn.addEventListener("click", () => {
+        fraamForm.classList.remove("hidden");
+        results.innerText = "";
+        results.classList.add("hidden");
+    });
+});
+
+
+
+clearBtn.addEventListener("click", () => {
+    // Uncheck all checkboxes
+    [sleepDebt1, sleepDebt2, sleepDebt3, sleepDebt4, 
+     wakefulness1, wakefulness2, wakefulness3, wakefulness4, 
+     circadian1, circadian2, circadian3, circadian4, 
+     workload1, workload2, workload3, workload4].forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    // Clear and hide results
+    results.innerText = "";
+    results.classList.add("hidden");
+    fraamForm.classList.remove("hidden");
+});
 
