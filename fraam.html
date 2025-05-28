@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fatigue Risk Assessment and Mitigation</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <div class="container">
+        <form id="form">
+            <h1>Fatigue Risk Assessment and Mitigation</h1>
+            <hr />
+            <div class="form-row">
+                <label for="sleep-debt1">Less than 8 hours sleep last night</label>
+                <input type="checkbox" id="sleep-debt1" />
+            </div>
+            <div class="form-row">
+                <label for="sleep-debt2">Less than 4 hours sleep last night</label>
+                <input type="checkbox" id="sleep-debt2" />
+            </div>
+            <div class="form-row">
+                <label for="sleep-debt3">Less than 8 hours sleep 2 nights ago</label>
+                <input type="checkbox" id="sleep-debt3" />
+            </div>
+            <div class="form-row">
+                <label for="sleep-debt4">Previous night duty (day sleep only)</label>
+                <input type="checkbox" id="sleep-debt4" />
+            </div>
+			<hr class="form-hr"/>
+			<div class="form-row">
+                <label for="wakefulness1">Time awake prior to duty start > 2hr</label>
+                <input type="checkbox" id="wakefulness1" />
+            </div>
+			<div class="form-row">
+                <label for="wakefulness2">Time awake prior to duty start > 6hr</label>
+                <input type="checkbox" id="wakefulness2" />
+            </div>
+			<div class="form-row">
+                <label for="wakefulness3">Flight Duty Period > 10 hours</label>
+                <input type="checkbox" id="wakefulness3" />
+            </div>
+			<div class="form-row">
+                <label for="wakefulness4">Flight Duty Period > 12 hours</label>
+                <input type="checkbox" id="wakefulness4" />
+            </div>
+			<hr class="form-hr"/>
+			<div class="form-row">
+                <label for="circadian1">Circadian disruption > 4 hours</label>
+                <input type="checkbox" id="circadian1" />
+            </div>
+			<div class="form-row">
+                <label for="circadian2">Flight after 2300L or last landing at night</label>
+                <input type="checkbox" id="circadian2" />
+            </div>
+			<div class="form-row">
+                <label for="circadian3">Flight time < 2 hours during WOCL (0200 - 0600L)</label>
+                <input type="checkbox" id="circadian3" />
+            </div>
+			<div class="form-row">
+                <label for="circadian4">Flight time > 2 hours during WOCL (0200 - 0600L)</label>
+                <input type="checkbox" id="circadian4" />
+            </div>
+			<hr class="form-hr" />
+			<div class="form-row">
+                <label for="workload1">3+ flight legs</label>
+                <input type="checkbox" id="workload1" />
+            </div>
+			<div class="form-row">
+                <label for="workload2">3+ flights during night</label>
+                <input type="checkbox" id="workload2" />
+            </div>
+			<div class="form-row">
+                <label for="workload3">Aircraft MELs impact standard flight procedures</label>
+                <input type="checkbox" id="workload3" />
+            </div>
+			<div class="form-row">
+                <label for="workload4">Adverse weather impacting route/arrival airport</label>
+                <input type="checkbox" id="workload4" />
+            </div>
+            <button type="submit">Submit</button>
+            <button type="reset">Reset</button>
+            <button type="button" id="clear-btn">Clear Form</button>
+        </form>
+        <div id="results" class="hidden"></div>
+    </div>
+    <script src="fraam.js"></script>
+</body>
+</html>

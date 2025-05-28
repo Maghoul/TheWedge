@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Rest Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    
+    <div class="container">
+      
+      <form id="form">
+        <h1>Rest Calculator (3 Pilots)</h1>
+		<hr />
+        <label for="start-time" id="begin-label">Begin rest (Zulu)</label>
+        <input id="start-time" type="text" required>
+		<label for="eta" id="eta-label">ETA (Zulu)</label>
+        <input type="text" id="eta" required>
+        <label for="end-rest">Mins prior ETA to end rest:</label>
+        <input id="end-rest" type="number" min="0" required>
+        <label for="transition">Transition time (mins):</label>
+        <input id="transition" type="number" min="0" required>
+		<label for="local-box">		
+		  <input type="checkbox" name="local" value="local" id="local-box" /> Use local times
+	    </label>
+        <button type="submit">Calculate</button>
+        <button type="reset">Reset Defaults</button>
+		<button type="button" id="clear-btn">Clear Form</button>
+      </form>
+      <div id="results" class="hidden"></div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
