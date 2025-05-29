@@ -1,123 +1,143 @@
 * {
     box-sizing: border-box;
-	margin: 0;
-	padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 :root {
-	--primary-color: #f5f6f7;
-	--secondary-color: #2ecc71;
-	--font-family: 'Arial', sans-serif;
-	--main-bg-color: #003052; /*denim blue*/
-	--se-gray-color: #4a4a4a;
-	--complementary-color: #0d0d2f;
+    --primary-color: #f5f6f7;
+    --secondary-color: #2ecc71;
+    --font-family: 'Arial', sans-serif;
+    --main-bg-color: #003052; /* denim blue */
+    --se-gray-color: #4a4a4a;
+    --complementary-color: #0d0d2f;
 }
 
 body {
-	font-family: var(--font-family);
-	line-height: 1.6;
-	color: var(--primary-color);
-	background-color: var(--main-bg-color);
-	font-size: 1.2rem;
+    font-family: var(--font-family);
+    line-height: 1.6;
+    color: var(--primary-color);
+    background-color: var(--main-bg-color);
+    font-size: 1.2rem;
 }
 
 hr {
-	border: 3px solid var(--primary-color);
-	margin: 15px 0;
+    border: 3px solid var(--primary-color);
+    margin: 15px 0;
 }
 
 .container {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: flex-start;
-	width: 100%;
-	min-height: 69vh;
-	max-width: 69%;
-	padding: 20px auto;
-	border-radius: 10px;
-	border: 1px solid #999;
-	
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 90%; /* Increased for mobile */
+    min-height: 69vh;
+    max-width: 800px; /* Adjusted for better scaling */
+    margin: 20px auto; /* Center like index.html */
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #999;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
 main.container {
-	position: relative;
-	top: 0;
-	margin: 20px auto;
-	box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    position: relative;
+    top: 0;
+    background-color: var(--complementary-color); /* Consistent with other pages */
 }
 
 .container ul {
-	list-style-type: none;
-	padding: 0;
-	margin: 0;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
 }
+
 .container ul li {
-	margin: 10px 0;
-	padding: 10px;
-	background-color: var(--complementary-color);
-	border-radius: 5px;
-	box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    margin: 10px 0;
+    padding: 10px;
+    background-color: var(--complementary-color);
+    border-radius: 5px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
+
 .container ul li a {
-	color: var(--primary-color);
-	text-decoration: none;
-	font-size: 1.2rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 1.4rem; /* Larger for mobile */
 }
+
 .container ul li a:hover {
-	text-decoration: underline;
+    text-decoration: underline;
 }
+
 .container h1 {
-	font-size: 2.5rem;
-	margin-bottom: 20px;
-	text-align: center;
-	color: var(--primary-color);
+    font-size: 2rem; /* Slightly smaller for mobile */
+    margin-bottom: 20px;
+    text-align: center;
+    color: var(--primary-color);
 }
+
 .container p {
-	font-size: 1.2rem;
-	margin-bottom: 20px;
-	text-align: center;
-	color: var(--primary-color);
+    font-size: 1.4rem; /* Larger for mobile */
+    margin-bottom: 20px;
+    text-align: center;
+    color: var(--primary-color);
 }
 
 #form {
     display: flex;
     flex-direction: column;
-    max-width: 70%;
-    margin: auto;
+    width: 100%; /* Full width for mobile */
+    margin: 20px 0;
     border-radius: 10px;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     padding: 20px;
+    background-color: var(--complementary-color);
 }
 
 .form-row {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     border-bottom: 1px solid var(--se-gray-color);
-	padding: 5px;
-	border-radius: 5px;
-	background-color: var(--complementary-color);
+    padding: 10px; /* Increased padding */
+    border-radius: 5px;
+    background-color: var(--complementary-color);
+    margin: 5px 0;
+    width: 100%;
 }
 
 .form-row label {
-	flex: 1;
-	margin-right: 10px;
-	padding: 0 10px;
-	text-align: left;
+    flex: 1;
+    margin-right: 10px;
+    padding: 0 10px;
+    text-align: left;
+    font-size: 1.4rem; /* Larger for mobile */
 }
 
 .form-row input[type="checkbox"] {
-	margin: 0 10px 0 0;
-	vertical-align: middle;
+    margin: 0 10px 0 0;
+    transform: scale(1.5); /* Larger checkboxes */
 }
 
-/* Add after .form-row styles */
+.form-row input[type="text"],
+.form-row input[type="number"] {
+    border-color: rgb(118, 118, 118);
+    transition: border 0.2s, background-color 0.2s;
+    font-size: 1.4rem; /* Larger for mobile */
+    background-color: #a3a3a3;
+    width: 100%;
+    padding: 8px; /* Increased padding */
+    border-radius: 5px;
+}
+
 details {
     width: 100%;
     padding: 10px;
     color: var(--primary-color);
-    font-size: 1.2rem;
+    font-size: 1.4rem; /* Larger for mobile */
 }
 
 summary {
@@ -126,6 +146,7 @@ summary {
     color: var(--primary-color);
     padding: 5px;
     border-radius: 5px;
+    font-size: 1.4rem; /* Larger for mobile */
 }
 
 summary:hover {
@@ -135,32 +156,31 @@ summary:hover {
 details[open] p {
     margin: 10px 0 0 10px;
     color: var(--primary-color);
-    font-size: 1.0rem;
-	text-align: left;
+    font-size: 1.2rem; /* Slightly smaller but readable */
+    text-align: left;
 }
 
 .form-hr {
-	border: 1px solid var(--primary-color);
-	margin: 5px auto;
-	width: 69%;
-	
+    border: 1px solid var(--primary-color);
+    margin: 10px auto;
+    width: 100%;
 }
 
 #form button {
-	background-color: var(--se-gray-color);
-	color: var(--primary-color);
-	border: none;
-	padding: 10px 20px;
-	margin: 10px;
-	border-radius: 5px;
-	cursor: pointer;
-	font-size: 1.0rem;
+    background-color: var(--se-gray-color);
+    color: var(--primary-color);
+    border: none;
+    padding: 12px 24px; /* Larger padding */
+    margin: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.4rem; /* Larger for mobile */
 }
 
 #form h1 {
     text-align: center;
-	font-size: 2.0rem;
-	line-height: 1.2;
+    font-size: 1.8rem; /* Slightly smaller for mobile */
+    line-height: 1.2;
 }
 
 #form.hidden {
@@ -169,80 +189,55 @@ details[open] p {
 
 #results {
     display: flex;
-	flex-direction: column;
-	max-width: 100%;
-	margin: 20 px auto;
-	border-radius: 10px;
-	box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-	padding: 10px;
-	white-space: pre-line;
-	font-size: 20px;
-	white-space: pre-wrap;
-	color: var(--primary-color);
-	background-color: var(--complementary-color);
+    flex-direction: column;
+    width: 100%;
+    margin: 20px 0;
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    padding: 15px;
+    white-space: pre-wrap;
+    font-size: 1.4rem; /* Larger for mobile */
+    color: var(--primary-color);
+    background-color: var(--complementary-color);
 }
 
 #results.hidden {
-	display: none;
+    display: none;
 }
 
 #results #back-btn {
-	background-color: var(--se-gray-color);
-	color: var(--primary-color);
-	border: none;
-	padding: 10px 20px;
-	margin: 10px;
-	border-radius: 5px;
-	cursor: pointer;
-	font-size: 1.0rem;
-	align-self: center;
-}
-
-input[type="text"], input[type="number"] {
-    border-color: rgb(118, 118, 118);
-    transition: border 0.2s, background-color 0.2s;
-	font-size: 1.2rem;
-	background-color: #a3a3a3;
-	width: 100%;
+    background-color: var(--se-gray-color);
+    color: var(--primary-color);
+    border: none;
+    padding: 12px 24px; /* Larger padding */
+    margin: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.4rem; /* Larger for mobile */
+    align-self: center;
 }
 
 .focused {
     border: 2px solid #007bff;
     background-color: #e6f3ff;
-    outline: 2px solid #0056b3; /* Accessible outline */
-} 
-
-.hidden {
-    display: none;
+    outline: 2px solid #0056b3;
 }
 
 .error {
-	background-color: #ffebee;
-	border: 2px solid #d32f2f;
-}
-
-input[type="checkbox"] {
-  margin: 10px 5px;
-  vertical-align: middle;
-}
-
-label {
-  font-size: 1.2rem;
-  margin: 10px 0;
+    background-color: #ffebee;
+    border: 2px solid #d32f2f;
 }
 
 input[type="checkbox"]:checked {
-  accent-color: var(--se-gray-color);
+    accent-color: var(--se-gray-color);
 }
-
-
 
 .citation {
     margin-top: 20px;
     padding: 10px;
     text-align: center;
     color: var(--primary-color);
-    font-size: 1.0rem;
+    font-size: 1.2rem;
     background-color: var(--complementary-color);
     border-radius: 5px;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
@@ -259,4 +254,80 @@ input[type="checkbox"]:checked {
 
 .citation a:hover {
     text-decoration: underline;
+}
+
+/* Media query for mobile devices */
+@media (max-width: 600px) {
+    body {
+        font-size: 1.4rem; /* Base font size for mobile */
+    }
+
+    .container {
+        width: 95%; /* Nearly full width */
+        padding: 10px;
+        margin: 10px auto; /* Consistent centering */
+    }
+
+    #form {
+        padding: 15px;
+    }
+
+    .form-row {
+        flex-direction: column; /* Stack elements vertically */
+        align-items: flex-start;
+        padding: 8px;
+    }
+
+    .form-row label {
+        margin-bottom: 5px;
+        font-size: 1.3rem; /* Slightly smaller for vertical layout */
+        width: 100%;
+    }
+
+    .form-row input[type="text"],
+    .form-row input[type="number"] {
+        font-size: 1.3rem;
+        padding: 10px;
+        width: 100%; /* Full width for inputs */
+    }
+
+    .form-row input[type="checkbox"] {
+        transform: scale(1.3); /* Slightly smaller for mobile */
+    }
+
+    #form button {
+        font-size: 1.3rem;
+        padding: 10px 20px;
+    }
+
+    #results {
+        font-size: 1.3rem;
+        padding: 10px;
+    }
+
+    #results #back-btn {
+        font-size: 1.3rem;
+        padding: 10px 20px;
+    }
+
+    .container h1 {
+        font-size: 1.8rem;
+    }
+
+    .container p {
+        font-size: 1.3rem;
+    }
+
+    .container ul li a {
+        font-size: 1.3rem;
+    }
+
+    details,
+    summary {
+        font-size: 1.3rem;
+    }
+
+    details[open] p {
+        font-size: 1.1rem;
+    }
 }
