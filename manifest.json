@@ -1,0 +1,22 @@
+{
+  "name": "The Wedge",
+  "short_name": "Wedge",
+  "description": "Simple tools for pilots to assess fatigue risk, calculate rest, and check weather.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000080",
+  "icons": [
+    {
+      "src": "./images/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./images/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "scope": "/"
+}
