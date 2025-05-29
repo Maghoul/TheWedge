@@ -84,6 +84,7 @@ flightForm.addEventListener("submit", async (e) => {
 
     // Fetch departure weather
     const deptMetar = await getWeatherData(deptCode, 'metar');
+    console.log(deptMetar);
     if (deptMetar) {
         output += `${deptMetar.station} is currently ${deptMetar.flight_rules || 'N/A'}\n` +
                   `METAR: ${deptMetar.raw}\n`;
