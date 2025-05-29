@@ -4,7 +4,19 @@ const flightForm = document.getElementById("form");
 const results = document.getElementById("results");
 const clearBtn = document.getElementById("clear-btn");
 const apiBaseUrl = "https://avwx.rest/api/metar/";
-const apiToken = "lDSwIxFg00gn9fcqW23dlU8SjblA03Hpijmwpo1PCDE"; // Replace with your token from account.avwx.rest
+
+let apiToken = localStorage.getItem('avwxToken');
+if (!apiToken) {
+    apiToken = prompt('Enter your AVWX API token (get it from https://account.avwx.rest):');
+    if (apiToken) {
+        localStorage.setItem('avwxToken', apiToken);
+    } else {
+        results.innerText = 'Error: AVWX API token required. Please reload and enter a valid token.';
+        results.classList.remove("hidden");
+        flightForm.querySelector('button[type="submit"]').disabled = true; // Disable submit
+        // No return needed; stop execution by disabling form
+    }
+}
 
 async function getWeatherData(airportCode) {
     try {
