@@ -11,6 +11,17 @@
             <h1>Fatigue Risk Assessment and Mitigation</h1>
             <hr />
             <div class="form-row">
+                <details>
+                 <summary>Info: Sleep Debt</summary>
+                 <p>Basic sleep research indicates the best time for good and sufficient sleep 
+                    is between 2200 and 0800 local time. Acceptable performance does occur after
+                     6 hours of sleep assuming less than 12 hours of duty. One hour of sleep should 
+                     enable 2 hours of wakefulness.</p>
+                  <p>Less than 4 hours of night sleep impairs wakefulness. At least 2 consecutive 
+                    nights are needed to determine utility. Daytime-only sleep is less restorative than night.</p>
+                </details>
+            </div>
+            <div class="form-row">
                 <label for="sleep-debt1">Less than 8 hours sleep last night</label>
                 <input type="checkbox" id="sleep-debt1" />
             </div>
@@ -27,6 +38,17 @@
                 <input type="checkbox" id="sleep-debt4" />
             </div>
 			<hr class="form-hr"/>
+            <div class="form-row">
+                <details>
+                 <summary>Info: Wakefulness (Time since awake prior duty plus duty time)</summary>
+                 <p>Two hours awake prior to duty start is normal. More than 2 hours may become relevant 
+                    for extended duty. Up to 6 hours of wakefulness prior to duty with up to 10 hours of 
+                    duty still remains below the 16 hours of acceptable performance.  Fatigue impairment 
+                    is higher than recommended when a combination of wakefulness and duty time exceeds 16 hours.</p>
+                  <p>Additional workload factors or high task demands like a special airport should be 
+                    avoided when duty time exceeds 10 hours without mitigation.</p>
+                </details>
+            </div>
 			<div class="form-row">
                 <label for="wakefulness1">Time awake prior to duty start > 2hr</label>
                 <input type="checkbox" id="wakefulness1" />
@@ -44,6 +66,15 @@
                 <input type="checkbox" id="wakefulness4" />
             </div>
 			<hr class="form-hr"/>
+            <div class="form-row">
+                <details>
+                 <summary>Info: Circadian</summary>
+                 <p>A circadian disruption occurs when sleep happens more than 4 hours from the 
+                    normal sleep schedule. The effect is more pronounced after 2300 local time. 
+                    Expect strong performance impairment when operating through the window of 
+                    circadian low (WOCL).</p>
+                </details>
+            </div>
 			<div class="form-row">
                 <label for="circadian1">Circadian disruption > 4 hours</label>
                 <input type="checkbox" id="circadian1" />
@@ -61,6 +92,15 @@
                 <input type="checkbox" id="circadian4" />
             </div>
 			<hr class="form-hr" />
+            <div class="form-row">
+                <details>
+                 <summary>Info: Workload</summary>
+                 <p>The number of flights impact fatigue. Fatigue is impacted after 2 flights, but 
+                    alertness should be acceptable up to 4 flights.  Three or more flights at night 
+                    negatively impact fatigue. Dealing with aircraft MELs and/or adverse weather also 
+                    negatively impacts fatigue.</p>
+                </details>
+            </div>
 			<div class="form-row">
                 <label for="workload1">3+ flight legs</label>
                 <input type="checkbox" id="workload1" />
@@ -82,6 +122,9 @@
             <button type="button" id="clear-btn">Clear Form</button>
         </form>
         <div id="results" class="hidden"></div>
+        <footer class="citation">
+         <p>Source: Tritschler, K. (2015). <a href="https://www.smartshiftwork.com/sharing/publications/" target="_blank">Fatigue Risk Assessment Methodologies</a>. Presented at the EASA FRMS Workshop, Cologne, Germany.</p>
+        </footer>
     </div>
     <script src="./fraam.js"></script>
 </body>

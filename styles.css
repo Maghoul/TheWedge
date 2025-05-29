@@ -112,6 +112,33 @@ main.container {
 	vertical-align: middle;
 }
 
+/* Add after .form-row styles */
+details {
+    width: 100%;
+    padding: 10px;
+    color: var(--primary-color);
+    font-size: 1.2rem;
+}
+
+summary {
+    cursor: pointer;
+    font-weight: bold;
+    color: var(--primary-color);
+    padding: 5px;
+    border-radius: 5px;
+}
+
+summary:hover {
+    background-color: var(--se-gray-color);
+}
+
+details[open] p {
+    margin: 10px 0 0 10px;
+    color: var(--primary-color);
+    font-size: 1.0rem;
+	text-align: left;
+}
+
 .form-hr {
 	border: 1px solid var(--primary-color);
 	margin: 5px auto;
@@ -144,12 +171,15 @@ main.container {
     display: flex;
 	flex-direction: column;
 	max-width: 100%;
-	margin: auto;
+	margin: 20 px auto;
 	border-radius: 10px;
 	box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 	padding: 10px;
 	white-space: pre-line;
-	font-size: 2.0rem;
+	font-size: 20px;
+	white-space: pre-wrap;
+	color: var(--primary-color);
+	background-color: var(--complementary-color);
 }
 
 #results.hidden {
@@ -203,4 +233,30 @@ label {
 
 input[type="checkbox"]:checked {
   accent-color: var(--se-gray-color);
+}
+
+
+
+.citation {
+    margin-top: 20px;
+    padding: 10px;
+    text-align: center;
+    color: var(--primary-color);
+    font-size: 1.0rem;
+    background-color: var(--complementary-color);
+    border-radius: 5px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+.citation p {
+    margin: 0;
+}
+
+.citation a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.citation a:hover {
+    text-decoration: underline;
 }

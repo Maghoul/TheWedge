@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Weather information for pilots in The Wedge">
+    <meta name="keywords" content="aviation weather, METAR">
+    <meta name="author" content="Rick G.">
+    <link rel="stylesheet" href="./styles.css">
+    <title>Weather Info - The Wedge</title>
+</head>
+<body>
+    <div class="container">
+        <form id="form">
+            <h1>Weather Information</h1>
+            <hr />
+            <div class="form-row">
+                <label for="departure-airport">Departure Airport (ICAO)</label>
+                <input id="departure-airport" type="text" value="KDEN" required>
+            </div>
+            <div class="form-row">
+                <label for="arrival-airport">Arrival Airport (ICAO)</label>
+                <input id="arrival-airport" type="text" placeholder="e.g., KLAX">
+            </div>
+            <button type="submit">Get Weather</button>
+            <button type="button" id="clear-btn">Clear Form</button>
+        </form>
+        <div id="results" class="hidden"></div>
+    </div>
+    <script src="./wx.js"></script>
+</body>
+</html>
