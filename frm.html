@@ -2,33 +2,42 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Rest Calculator</title>
-    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
-    
     <div class="container">
-      
       <form id="form">
         <h1>Rest Calculator (3 Pilots)</h1>
-		<hr />
-        <label for="start-time" id="begin-label">Begin rest (Zulu)</label>
-        <input id="start-time" type="text" required>
-		    <label for="eta" id="eta-label">ETA (Zulu)</label>
-        <input type="text" id="eta" required>
-        <label for="end-rest">Mins prior ETA to end rest:</label>
-        <input id="end-rest" type="number" min="0" required>
-        <label for="transition">Transition time (mins):</label>
-        <input id="transition" type="number" min="0" required>
-		<label for="local-box">		
-		  <input type="checkbox" name="local" value="local" id="local-box" /> Use local times
-	    </label>
+        <hr />
+        <div class="form-row">
+          <label for="start-time" id="begin-label">Begin rest (Zulu)</label>
+          <input id="start-time" type="text" required>
+        </div>
+        <div class="form-row">
+          <label for="eta" id="eta-label">ETA (Zulu)</label>
+          <input type="text" id="eta" required>
+        </div>
+        <div class="form-row">
+          <label for="end-rest">Mins prior ETA to end rest:</label>
+          <input id="end-rest" type="number" min="0" required>
+        </div>
+        <div class="form-row">
+          <label for="transition">Transition time (mins):</label>
+          <input id="transition" type="number" min="0" required>
+        </div>
+        <div class="form-row">
+          <label for="local-box">
+            <input type="checkbox" name="local" value="local" id="local-box" /> Use local times
+          </label>
+        </div>
         <button type="submit">Calculate</button>
         <button type="reset">Reset Defaults</button>
-		<button type="button" id="clear-btn">Clear Form</button>
+        <button type="button" id="clear-btn">Clear Form</button>
       </form>
       <div id="results" class="hidden"></div>
     </div>
-    <script src="./frm.js"></script>
+    <script src="/frm.js"></script>
   </body>
 </html>
