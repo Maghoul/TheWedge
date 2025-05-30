@@ -24,10 +24,15 @@ if (!apiToken) {
     }
 }
 
-// Temp values for testing
- etd.value = "0045"; 
- eta.value = "0418"; 
- arrApt.value = "MMTO";
+//set dynamic placeholders ETA and ETD
+let etdPlaceholder = new Date();
+let etaPlaceholder = new Date(etdPlaceholder.getTime());
+etdPlaceholder.setUTCHours(etdPlaceholder.getUTCHours() + 1); // Adjust to UTC+1 for one hour from now
+etaPlaceholder.setUTCHours(etaPlaceholder.getUTCHours() + 4); // Adjust to UTC+2 for four hours from now
+etdPlaceholder = etdPlaceholder.toISOString().slice(11, 16);
+etaPlaceholder = etaPlaceholder.toISOString().slice(11, 16);
+etd.placeholder = `e.g., ${etdPlaceholder}`; 
+eta.placeholder = `e.g., ${etaPlaceholder}`;
 
 // Add focus and blur event listeners to input fields
 deptApt.addEventListener("focus", () => {
@@ -64,12 +69,6 @@ eta.addEventListener("change", () => {
         etaDate = convertToISODate(new Date(), eta.value.replace(":", ""));
     }
 });
-
- // Trigger the change event listeners: delete after testing
-const changeEvent = new Event("change", { bubbles: true });
-etd.dispatchEvent(changeEvent);
-eta.dispatchEvent(changeEvent);
-  
 
 // Convert time to full UTC time
 
@@ -297,7 +296,11 @@ flightForm.addEventListener("submit", async (e) => {
 const backBtn = document.getElementById("back-btn");
 
 clearBtn.addEventListener("click", () => {
-    if (deptApt) deptApt.value = "";
+    if (deptApt) {
+        deptApt.value = "";
+        deptApt.placeholder = "e.g., KMEM";
+    };
+
     if (arrApt) arrApt.value = "";
     if (etd) etd.value = "";
     if (eta) eta.value = "";
