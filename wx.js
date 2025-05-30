@@ -206,7 +206,6 @@ flightForm.addEventListener("submit", async (e) => {
 
             if (etdDate >= startTime && etdDate <= endTime) {
                 strEtdInfo = ` and forecasted as ${forecast} at departure time ${etd.value}Z.`
-                break;
             }
         }
     }
@@ -238,6 +237,8 @@ flightForm.addEventListener("submit", async (e) => {
     if (arrCode) {
         const arrMetar = await getWeatherData(arrCode, 'metar');
         const arrTaf = await getWeatherData(arrCode, 'taf');
+        console.dir(arrTaf);
+       
 
         if (etaDate) {
             for (let i = 0; i < (arrTaf?.forecast?.length || 0); i++) {
@@ -245,9 +246,11 @@ flightForm.addEventListener("submit", async (e) => {
                 const startTime = arrTaf.forecast[i].start_time.dt || 'N/A';
                 const endTime = arrTaf.forecast[i].end_time.dt || 'N/A';
 
+                console.log(`Forecast: ${forecast}, Start: ${startTime}, End: ${endTime}`);
+                console.log(`ETA Date: ${etaDate}`);
+
                 if (etaDate >= startTime && etaDate <= endTime) {
                     strEtaInfo = ` and forecasted as ${forecast} at arrival time ${eta.value}Z.`;
-                    break;
                 }
             }
         }
