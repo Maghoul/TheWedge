@@ -44,6 +44,24 @@ main.container {
     margin: 20px auto; /* Matches your preferred index.html centering */
 }
 
+main.container hr {
+    border: 2px solid var(--primary-color);
+    width: 69%;
+    max-width: 600px; /* Ensure it scales with container */
+    margin: 15px auto; /* Center the hr */
+}
+
+main.container ul li a {
+    padding: 10px; /* Match hover padding to prevent layout shift */
+}
+
+main.container ul li a:hover {
+    border: 1px solid var(--primary-color);
+    border-radius: 5px;
+    font-style: italic;
+    text-decoration: none;
+}
+
 .container ul {
     list-style-type: none;
     padding: 0;
@@ -96,33 +114,51 @@ main.container {
 
 .form-row {
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* Default for most form rows */
     align-items: stretch;
     border-bottom: 1px solid var(--se-gray-color);
-    padding: 12px; /* Increased padding */
+    padding: 12px;
     border-radius: 5px;
     background-color: var(--complementary-color);
-    margin: 10px 0; /* Increased spacing */
+    margin: 10px 0;
+}
+
+/* Horizontal layout for checkbox-label pairs */
+.form-row:has(input[type="checkbox"]) {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px; /* Space between checkbox and label */
 }
 
 .form-row label {
-    margin-bottom: 10px; /* More space below labels */
+    margin: 0; /* Remove vertical margins for horizontal layout */
     padding: 0 5px;
     text-align: left;
-    font-size: 1.3rem; /* Increased for fraam.html */
+    font-size: 1.3rem;
     width: 100%;
 }
 
-.form-row input[type="checkbox"] {
-    margin: 0 12px 0 0; /* More space between checkbox and label */
-    transform: scale(1.8); /* Larger checkboxes for fraam.html */
+/* For form rows with text/number inputs, keep vertical layout */
+.form-row:has(input[type="text"]),
+.form-row:has(input[type="number"]) {
+    flex-direction: column;
 }
 
+.form-row input[type="checkbox"] {
+    transform: scale(1.8);
+    flex-shrink: 0; /* Prevent checkbox from shrinking */
+}
+
+/* Remove this since checkbox is now a sibling */
 .form-row label:has(input[type="checkbox"]) {
-    display: flex;
-    align-items: center;
-    font-size: 1.3rem; /* Match label size */
-    line-height: 1.4; /* Better text alignment */
+    display: block;
+    font-size: 1.3rem;
+    line-height: 1.4;
+}
+
+/* For frm.html where checkbox is inside the label */
+.form-row label input[type="checkbox"] {
+    margin-right: 12px;
 }
 
 .form-row input[type="text"],
@@ -139,16 +175,16 @@ main.container {
 
 details {
     width: 100%;
-    padding: 12px; /* Increased padding */
+    padding: 12px;
     color: var(--primary-color);
-    font-size: 1.3rem; /* Increased for fraam.html */
+    font-size: 1.3rem;
 }
 
 summary {
     cursor: pointer;
     font-weight: bold;
     color: var(--primary-color);
-    padding: 8px; /* Increased padding */
+    padding: 8px;
     border-radius: 5px;
     font-size: 1.3rem;
 }
@@ -158,16 +194,16 @@ summary:hover {
 }
 
 details[open] p {
-    margin: 10px 0 0 15px; /* More indent for readability */
+    margin: 10px 0 0 15px;
     color: var(--primary-color);
-    font-size: 1.1rem; /* Slightly larger */
+    font-size: 1.1rem;
     text-align: left;
-    line-height: 1.5; /* Better readability */
+    line-height: 1.5;
 }
 
 .form-hr {
     border: 1px solid var(--primary-color);
-    margin: 15px 0; /* More spacing */
+    margin: 15px 0;
     width: 100%;
 }
 
@@ -242,7 +278,7 @@ input[type="checkbox"]:checked {
     padding: 10px;
     text-align: center;
     color: var(--primary-color);
-    font-size: 1.1rem; /* Slightly larger */
+    font-size: 1.1rem;
     background-color: var(--complementary-color);
     border-radius: 5px;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
@@ -290,12 +326,15 @@ input[type="checkbox"]:checked {
 
     .form-row {
         padding: 12px;
-        margin: 12px 0; /* More spacing */
+        margin: 12px 0;
+    }
+
+    .form-row:has(input[type="checkbox"]) {
+        gap: 10px; /* Slightly smaller gap on mobile */
     }
 
     .form-row label {
         font-size: 1.3rem;
-        margin-bottom: 12px;
     }
 
     .form-row input[type="text"],
@@ -307,10 +346,6 @@ input[type="checkbox"]:checked {
 
     .form-row input[type="checkbox"] {
         transform: scale(1.8);
-    }
-
-    .form-row label:has(input[type="checkbox"]) {
-        font-size: 1.3rem;
     }
 
     #form button {
@@ -341,6 +376,7 @@ input[type="checkbox"]:checked {
 
     .container ul li a {
         font-size: 1.1rem;
+        padding: 10px; /* Match hover padding */
     }
 
     details,
