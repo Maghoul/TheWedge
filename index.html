@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Simple tools for pilot planning.">
-    <meta name="keywords" content="fatigue, risk assessment, pilot fatigue, fatigue management, weather">
+    <meta name="description" content="The Wedge - A pilot's simplest tool">
+    <meta name="keywords" content="aviation, weather, fatigue, rest">
     <meta name="author" content="Rick G.">
+    <meta name="theme-color" content="#f5f6f7">
     <link rel="stylesheet" href="./styles.css" />
     <link rel="manifest" href="./manifest.json">
     <link rel="icon" type="image/png" href="./images/icon-192.png">
@@ -16,23 +17,51 @@
     <title>The Wedge</title>
 </head>
 <body>
-    <main class="container">
-        <h1>The Wedge</h1>
-        <hr />
-        <p>Simple tools for pilot flight planning.</p>
-        <p>Developed by Rick G.</p>
-        <ul>
-            <li><a href="./wx.html" >Weather Information</a></li>
-            <li><a href="./frm.html" >Pilot Rest Calculator</a></li>
-            <li><a href="./fraam.html">Fatigue Risk Assessment and Mitigation</a></li>
-        </ul>
-    </main>
+    <div class="container">
+        <header>
+            <h1>The Wedge</h1>
+            <p>A pilot's simplest tool</p>
+            <hr />
+        </header>
+        <main class="container">
+            <ul>
+                <li><a href="./wx.html">Weather Information</a></li>
+                <li><a href="./frm.html">Flight Rest Management</a></li>
+                <li><a href="./fraam.html">Fatigue Risk Assessment</a></li>
+            </ul>
+        </main>
+    </div>
     <script>
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js')
-            .then(() => console.log('Service Worker registered'))
-            .catch(err => console.error('Service Worker error:', err));
-    }
+        // Service Worker Registration with Update Prompt
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(registration => {
+                    console.log('Service Worker registered with scope:', registration.scope);
+
+                    // Listen for updates to the service worker
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        if (newWorker) {
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New service worker is installed and waiting to activate
+                                    if (confirm('A new version of the app is available. Refresh to update?')) {
+                                        newWorker.postMessage({ action: 'skipWaiting' });
+                                    }
+                                }
+                            });
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Service Worker registration failed:', error);
+                });
+
+            // Listen for the controllerchange event to reload the page
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                window.location.reload();
+            });
+        }
     </script>
 </body>
 </html>
