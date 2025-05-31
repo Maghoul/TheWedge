@@ -24,7 +24,7 @@ body {
 }
 
 #version-display {
-	color: light-gray;
+	color: lightgray;
 	font-size: 0.8rem;
 	position: fixed;
 	bottom: 10px;

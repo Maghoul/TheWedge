@@ -37,7 +37,7 @@
     <script>
         // Service Worker Registration with Update Prompt
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
+            navigator.serviceWorker.register('./sw.js')
                 .then(registration => {
                     console.log('Service Worker registered with scope:', registration.scope);
 
@@ -66,7 +66,7 @@
         }
 
         // Fetch the version number from sw.js and display it
-        fetch('/sw.js')
+        fetch('./sw.js')
             .then(response => response.text())
             .then(text => {
                 // Use a regular expression to find CACHE_NAME

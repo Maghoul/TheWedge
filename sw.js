@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wedge-cache-v1.0.3';
+const CACHE_NAME = 'wedge-cache-v1.0.4';
 // Cache versioning to handle updates vMajor.minor.patch
 // Version 1.0.1 - Initial release with basic caching functionality
 // Version 1.0.2 - updated styles for ios support
