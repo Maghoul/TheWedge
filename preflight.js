@@ -10,43 +10,60 @@ const gendec = document.getElementById('preflight9');
 const preflightForm = document.getElementById('form');
 const clearBtn = document.getElementById('clear-btn');
 
-preflightForm.addEventListener("change", () => {
-    // Every time a checkbox is checked strike through the label and change text color
-    // to indicate completion
-    [release, clearance, edt, fuel, dg, finalWandB, security, perishibleLives, 
-        gendec].forEach(checkbox => {
-        const label = checkbox.nextElementSibling; // Assuming the label is the next sibling
-        if (checkbox.checked) {
-            label.style.textDecoration = "line-through";
-            label.style.color = "green"; // Change text color to green
-        } else {
-            label.style.textDecoration = "none";    
-            label.style.color = ""; // Reset text color
-        }
-    });
-    // Check if all checkboxes are checked
-    const allChecked = [release, clearance, edt, fuel, dg, finalWandB, security, perishibleLives, gendec]
-        .every(checkbox => checkbox.checked);
-    // If all are checked, change the background color of the form
-    if (allChecked) {
-        preflightForm.style.backgroundColor = "lightgreen"; // Change to light green
+// Array of checkboxes for easier iteration
+const checkboxes = [release, clearance, edt, fuel, dg, finalWandB, security, perishibleLives, gendec];
+
+// Function to update UI based on checkbox state
+function updateCheckboxUI(checkbox) {
+    const label = checkbox.nextElementSibling;
+    if (checkbox.checked) {
+        label.style.textDecoration = "line-through";
+        label.style.color = "green";
     } else {
-        preflightForm.style.backgroundColor = ""; // Reset background color
+        label.style.textDecoration = "none";
+        label.style.color = "var(--primary-color)"; // Reset to theme color
     }
-   
+}
+
+// Function to update form background based on all checkboxes
+function updateFormBackground() {
+    const allChecked = checkboxes.every(checkbox => checkbox.checked);
+    preflightForm.style.backgroundColor = allChecked ? "lightgreen" : "var(--complementary-color)";
+}
+
+// Restore state from localStorage on page load
+checkboxes.forEach(checkbox => {
+    const savedState = localStorage.getItem(checkbox.id);
+    if (savedState !== null) {
+        checkbox.checked = savedState === "true";
+        updateCheckboxUI(checkbox);
+    }
 });
 
-clearBtn.addEventListener("click", () => {
-    // Uncheck all checkboxes and remove strikethrough from every label
-    [release, clearance, edt, fuel, dg, finalWandB, security, perishibleLives, 
-        gendec, preflightForm].forEach(checkbox => {
-        checkbox.checked = false;
-        const label = checkbox.nextElementSibling; // Assuming the label is the next sibling
-        if (label) {
-            label.style.textDecoration = "none"; // Remove strikethrough
-            label.style.color = ""; // Reset text color
-        }
-    });
-    preflightForm.style.backgroundColor = ""; // Reset background color
+// Update form background on page load
+updateFormBackground();
 
+// Event listener for checkbox changes
+preflightForm.addEventListener("change", () => {
+    // Update UI for all checkboxes
+    checkboxes.forEach(checkbox => {
+        updateCheckboxUI(checkbox);
+        // Save state to localStorage
+        localStorage.setItem(checkbox.id, checkbox.checked);
+    });
+    // Update form background
+    updateFormBackground();
+});
+
+// Event listener for clear button
+clearBtn.addEventListener("click", () => {
+    // Uncheck all checkboxes and reset UI
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+        updateCheckboxUI(checkbox);
+        // Clear state from localStorage
+        localStorage.removeItem(checkbox.id);
+    });
+    // Reset form background
+    preflightForm.style.backgroundColor = "var(--complementary-color)";
 });
