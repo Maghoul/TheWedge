@@ -30,11 +30,14 @@
                 <li><a href="./fraam.html">Fatigue Risk Assessment</a></li>
             </ul>
         </main>
+        <footer>
+            <p id="version-display">Version: Loading...</p>
+        </footer>
     </div>
     <script>
         // Service Worker Registration with Update Prompt
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js')
+            navigator.serviceWorker.register('/sw.js')
                 .then(registration => {
                     console.log('Service Worker registered with scope:', registration.scope);
 
@@ -44,7 +47,6 @@
                         if (newWorker) {
                             newWorker.addEventListener('statechange', () => {
                                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    // New service worker is installed and waiting to activate
                                     if (confirm('A new version of the app is available. Refresh to update?')) {
                                         newWorker.postMessage({ action: 'skipWaiting' });
                                     }
@@ -55,13 +57,36 @@
                 })
                 .catch(error => {
                     console.error('Service Worker registration failed:', error);
+                    alert('Offline support is unavailable due to a service worker error. Please try again later.');
                 });
 
-            // Listen for the controllerchange event to reload the page
             navigator.serviceWorker.addEventListener('controllerchange', () => {
                 window.location.reload();
             });
         }
+
+        // Fetch the version number from sw.js and display it
+        fetch('/sw.js')
+            .then(response => response.text())
+            .then(text => {
+                // Use a regular expression to find CACHE_NAME
+                const match = text.match(/const CACHE_NAME = 'wedge-cache-([^']+)';/);
+                if (match && match[1]) {
+                    let version = match[1]; // e.g., 'v1.0.3'
+                    // Ensure the version has three parts (MAJOR.MINOR.PATCH)
+                    const parts = version.split('.');
+                    if (parts.length === 2) {
+                        version = `${parts[0]}.${parts[1]}.0`; // e.g., 'v1.03' -> 'v1.03.0'
+                    }
+                    document.getElementById('version-display').textContent = `Version: ${version}`;
+                } else {
+                    document.getElementById('version-display').textContent = 'Version: Not found';
+                }
+            })
+            .catch(error => {
+                console.error('Failed to fetch sw.js:', error);
+                document.getElementById('version-display').textContent = 'Version: Error';
+            });
     </script>
 </body>
 </html>

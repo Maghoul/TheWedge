@@ -11,7 +11,7 @@
     --main-bg-color: #003052; /* denim blue */
     --se-gray-color: #4a4a4a;
     --complementary-color: #0d0d2f;
-	--placeholder-color: #ccc; /* Light gray, visible in both light and dark modes */
+	--placeholder-color: #512eb8; /* Light purple, visible in both light and dark modes */
 }
 
 
@@ -21,6 +21,14 @@ body {
     color: var(--primary-color);
     background-color: var(--main-bg-color);
     font-size: 16px; /* Base font size for mobile */
+}
+
+#version-display {
+	color: light-gray;
+	font-size: 0.8rem;
+	position: fixed;
+	bottom: 10px;
+	right: 10px;
 }
 
 hr {
