@@ -11,7 +11,9 @@
     --main-bg-color: #003052; /* denim blue */
     --se-gray-color: #4a4a4a;
     --complementary-color: #0d0d2f;
+	--placeholder-color: #ccc; /* Light gray, visible in both light and dark modes */
 }
+
 
 body {
     font-family: var(--font-family);
@@ -273,6 +275,13 @@ input[type="checkbox"]:checked {
     accent-color: var(--se-gray-color);
 }
 
+input::placeholder {
+    font-family: var(--font-family);
+    font-size: 1.3rem;
+    color: var(--placeholder-color);
+    opacity: 0.7;
+}
+
 .citation {
     margin-top: 20px;
     padding: 10px;
@@ -298,6 +307,12 @@ input[type="checkbox"]:checked {
 }
 
 /* Media query for mobile devices */
+@media (prefers-color-scheme: dark) {
+    input::placeholder {
+        color: #ccc !important;
+    }
+}
+
 @media (max-width: 600px) {
     body {
         font-size: 20px;
