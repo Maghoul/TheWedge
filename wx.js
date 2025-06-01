@@ -114,6 +114,12 @@ function convertToISODate(date, timeStr) {
      return date.toISOString();
 }
 
+function updateSubmitButtonState() {
+  // Enable the submit button as long as deptApt has a value
+  const deptAptFilled = deptApt.value.trim() !== "";
+  submitBtn.disabled = !deptAptFilled;
+}
+
 function formatTime(input) {
   if (!input) return { value: input, error: null }; // Return empty input with no error
 
