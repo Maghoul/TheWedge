@@ -415,3 +415,11 @@ input::placeholder {
         font-size: 1.1rem;
     }
 }
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}

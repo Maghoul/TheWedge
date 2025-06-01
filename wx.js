@@ -2,7 +2,10 @@ const deptApt = document.getElementById("departure-airport");
 const arrApt = document.getElementById("arrival-airport");
 const flightForm = document.getElementById("form");
 const etd = document.getElementById("etd");
+const etdError = document.getElementById("etd-error");
+const etaError = document.getElementById("eta-error");
 const eta = document.getElementById("eta");
+const submitBtn = flightForm.querySelector('button[type="submit"]'); // Add this
 const results = document.getElementById("results");
 const clearBtn = document.getElementById("clear-btn");
 const apiBaseMetar = "https://avwx.rest/api/metar/";
@@ -18,7 +21,8 @@ if (!apiToken) {
     if (apiToken) {
         localStorage.setItem('avwxToken', apiToken);
     } else {
-        results.innerText = 'Error: AVWX API token required. Please reload and enter a valid token.';
+        results.innerHTML = `<p>Error: AVWX API token required. Get your free token from 
+        <a href="https://account.avwx.rest/register" target="_blank">AVWX Account</a><p>`;
         results.classList.remove("hidden");
         flightForm.querySelector('button[type="submit"]').disabled = true;
     }
@@ -56,18 +60,43 @@ eta.addEventListener("focus", () => {
 }); 
 eta.addEventListener("blur", () => eta.classList.remove("focused"));
 
-//Check time formats on eta and etd
+// Check time formats on eta and etd
 etd.addEventListener("change", () => {
-    etd.value = formatTime(etd.value);
-    if (etd.value) {    
-        etdDate = convertToISODate(new Date(), etd.value.replace(":", ""));
+  const result = formatTime(etd.value);
+  if (result.error) {
+    etdError.textContent = result.error;
+    etdError.style.display = "block";
+    etd.classList.add("error");
+  } else {
+    etdError.style.display = "none";
+    etd.classList.remove("error");
+    etd.value = result.value || ""; // Use the formatted value, or empty if null
+    if (etd.value) {
+      etdDate = convertToISODate(new Date(), etd.value.replace(":", ""));
+    } else {
+      etdDate = null; // Reset etdDate if the input is invalid or empty
     }
+  }
+  updateSubmitButtonState();
 });
+
 eta.addEventListener("change", () => {
-    eta.value = formatTime(eta.value);
+  const result = formatTime(eta.value);
+  if (result.error) {
+    etaError.textContent = result.error;
+    etaError.style.display = "block";
+    eta.classList.add("error");
+  } else {
+    etaError.style.display = "none";
+    eta.classList.remove("error");
+    eta.value = result.value || ""; // Use the formatted value, or empty if null
     if (eta.value) {
-        etaDate = convertToISODate(new Date(), eta.value.replace(":", ""));
+      etaDate = convertToISODate(new Date(), eta.value.replace(":", ""));
+    } else {
+      etaDate = null; // Reset etaDate if the input is invalid or empty
     }
+  }
+  updateSubmitButtonState();
 });
 
 // Convert time to full UTC time
@@ -87,24 +116,71 @@ function convertToISODate(date, timeStr) {
      return date.toISOString();
 }
 
-// Add Time functions from frm.js
 function formatTime(input) {
-  if (!input) return input;
-  // Remove non-digits
+  if (!input) return { value: input, error: null }; // Return empty input with no error
+
+  // Define final formats: HH:MM, H:MM, HHMM, HMM
+  const timeFormat = /^((\d{1,2}:\d{2})|(\d{4}))$/;
+  // Allow partial inputs during typing
+  const intermediateFormat = /^(\d{1,2}(:\d{0,2})?|\d{1,3})?$/;
+
+  // If the input doesn't match the final format, check if it's a valid intermediate state
+  if (!timeFormat.test(input)) {
+    if (intermediateFormat.test(input)) {
+      return { value: input, error: null }; // Allow partial input while typing
+    }
+    return { value: null, error: "Invalid time format (e.g., 1234, 12:34, 234, 2:34)" };
+  }
+
+  // Extract digits (remove colons if present)
   let digits = input.replace(/\D/g, "");
-  // Handle 1–4 digits
-  if (digits.length < 3 || digits.length > 4) return "Invalid time format (should be HHmm, e.g., 1430)";
-  // Pad with leading zeros if needed (e.g., "430" → "0430")
+
+  // Pad with leading zeros if needed (e.g., "234" → "0234")
   digits = digits.padStart(4, "0");
+
   // Extract hours and minutes
   let hours = parseInt(digits.slice(0, 2), 10);
   let minutes = parseInt(digits.slice(2, 4), 10);
+
   // Clamp values
   hours = Math.min(Math.max(hours, 0), 23);
   minutes = Math.min(Math.max(minutes, 0), 59);
+
   // Format as HH:mm
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+  const formattedTime = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+  return { value: formattedTime, error: null };
 }
+
+function validateTimeInput(inputElement, errorElement) {
+  const result = formatTime(inputElement.value);
+  if (result.error) {
+    errorElement.textContent = result.error;
+    errorElement.style.display = "block";
+    inputElement.classList.add("error");
+  } else {
+    errorElement.style.display = "none";
+    inputElement.classList.remove("error");
+    // Don't auto-format during input event; let the change event handle it
+  }
+  updateSubmitButtonState();
+}
+
+function updateSubmitButtonState() {
+  const timeInputs = [etd, eta]; // Use etd and eta, not etdInput and etaInput
+  const allValid = timeInputs.every(input => {
+    const result = formatTime(input.value);
+    return !input.value || result.error === null; // Valid if empty or no error
+  });
+  // Check if required fields are filled
+  const requiredFieldsFilled = deptApt.value.trim() !== "";
+  submitBtn.disabled = !allValid || !requiredFieldsFilled;
+}
+
+etd.addEventListener("input", () => validateTimeInput(etd, etdError));
+eta.addEventListener("input", () => validateTimeInput(eta, etaError));
+
+validateTimeInput(etd, etdError); // Initial validation
+validateTimeInput(eta, etaError); // Initial validation
 
 function timeToMin(timeStr) {
   if (!timeStr || !/^[0-2][0-9]:[0-5][0-9]$/.test(timeStr)) {
@@ -296,15 +372,37 @@ flightForm.addEventListener("submit", async (e) => {
 const backBtn = document.getElementById("back-btn");
 
 clearBtn.addEventListener("click", () => {
-    if (deptApt) {
-        deptApt.value = "";
-        deptApt.placeholder = "e.g., KMEM";
-    };
+  // Reset the form
+  flightForm.reset(); // Use flightForm instead of form
 
-    if (arrApt) arrApt.value = "";
-    if (etd) etd.value = "";
-    if (eta) eta.value = "";
-    results.innerText = "";
-    results.classList.add("hidden");
-    flightForm.querySelector('button[type="submit"]').disabled = !apiToken;
+  // Reset dynamic placeholders for ETD and ETA
+  let etdPlaceholder = new Date();
+  let etaPlaceholder = new Date(etdPlaceholder.getTime());
+  etdPlaceholder.setUTCHours(etdPlaceholder.getUTCHours() + 1);
+  etaPlaceholder.setUTCHours(etaPlaceholder.getUTCHours() + 4);
+  etdPlaceholder = etdPlaceholder.toISOString().slice(11, 16);
+  etaPlaceholder = etaPlaceholder.toISOString().slice(11, 16);
+  deptApt.placeholder = "e.g., KMEM";
+  arrApt.placeholder = "e.g., KIND";
+  etd.placeholder = `e.g., ${etdPlaceholder}`;
+  eta.placeholder = `e.g., ${etaPlaceholder}`;
+
+  // Reset validation UI for time inputs
+  [etdError, etaError].forEach(error => {
+    error.style.display = "none";
+  });
+  [etd, eta].forEach(input => {
+    input.classList.remove("error");
+  });
+
+  // Reset etdDate and etaDate
+  etdDate = null;
+  etaDate = null;
+
+  // Hide results
+  results.innerText = "";
+  results.classList.add("hidden");
+
+  // Update submit button state
+  updateSubmitButtonState();
 });
