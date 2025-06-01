@@ -77,7 +77,6 @@ etd.addEventListener("change", () => {
       etdDate = null; // Reset etdDate if the input is invalid or empty
     }
   }
-  updateSubmitButtonState();
 });
 
 eta.addEventListener("change", () => {
@@ -96,7 +95,6 @@ eta.addEventListener("change", () => {
       etaDate = null; // Reset etaDate if the input is invalid or empty
     }
   }
-  updateSubmitButtonState();
 });
 
 // Convert time to full UTC time
@@ -165,22 +163,32 @@ function validateTimeInput(inputElement, errorElement) {
   updateSubmitButtonState();
 }
 
-function updateSubmitButtonState() {
-  const timeInputs = [etd, eta]; // Use etd and eta, not etdInput and etaInput
-  const allValid = timeInputs.every(input => {
-    const result = formatTime(input.value);
-    return !input.value || result.error === null; // Valid if empty or no error
-  });
-  // Check if required fields are filled
-  const requiredFieldsFilled = deptApt.value.trim() !== "";
-  submitBtn.disabled = !allValid || !requiredFieldsFilled;
+// Real-time validation for time inputs
+function validateTimeInput(inputElement, errorElement) {
+  const result = formatTime(inputElement.value);
+  if (result.error) {
+    errorElement.textContent = result.error;
+    errorElement.style.display = "block";
+    inputElement.classList.add("error");
+  } else {
+    errorElement.style.display = "none";
+    inputElement.classList.remove("error");
+  }
 }
 
 etd.addEventListener("input", () => validateTimeInput(etd, etdError));
 eta.addEventListener("input", () => validateTimeInput(eta, etaError));
 
+// Update submit button state when deptApt changes
+deptApt.addEventListener("input", () => {
+  updateSubmitButtonState();
+});
+
 validateTimeInput(etd, etdError); // Initial validation
 validateTimeInput(eta, etaError); // Initial validation
+
+// Update submit button state on page load
+updateSubmitButtonState();
 
 function timeToMin(timeStr) {
   if (!timeStr || !/^[0-2][0-9]:[0-5][0-9]$/.test(timeStr)) {
@@ -382,6 +390,7 @@ clearBtn.addEventListener("click", () => {
   etaPlaceholder.setUTCHours(etaPlaceholder.getUTCHours() + 4);
   etdPlaceholder = etdPlaceholder.toISOString().slice(11, 16);
   etaPlaceholder = etaPlaceholder.toISOString().slice(11, 16);
+  deptApt.value = "";
   deptApt.placeholder = "e.g., KMEM";
   arrApt.placeholder = "e.g., KIND";
   etd.placeholder = `e.g., ${etdPlaceholder}`;
