@@ -352,7 +352,7 @@ function validateForm() {
 
   // If there are errors, display them and return false
   if (errors.length > 0) {
-    results.innerText = errors.join("\n");
+    results.innerHTML = `<p class="weather-report">${errors.join("</p><p class='weather-report'>")}</p>`;
     results.classList.remove("hidden");
     results.classList.add("error");
     return false;
@@ -481,6 +481,8 @@ flightForm.addEventListener("submit", async (e) => {
     const arrStation = arrMetar ? arrMetar.station : (arrTaf ? arrTaf.station : arrCode);
 
     // Handle ETA forecast if available
+
+    let intTaf = 0
     if (etaDate && arrTaf) {
       for (let i = 0; i < (arrTaf?.forecast?.length || 0); i++) {
         const forecast = arrTaf.forecast[i].flight_rules || 'N/A';
@@ -488,9 +490,41 @@ flightForm.addEventListener("submit", async (e) => {
         const endTime = arrTaf.forecast[i].end_time.dt || 'N/A';
         if (etaDate >= startTime && etaDate <= endTime) {
           strEtaInfo = ` and forecasted as ${forecast} at arrival time ${eta.value}Z.`;
+          intTaf = i; // Store the index of the matching forecast
         }
       }
     }
+
+    // Check if alternate airport is required
+    let strAlternateReq = "";
+    if (intTaf >= 0 && intTaf < arrTaf.forecast.length && arrTaf.forecast.length > 1) {
+      let etaMinusOne = new Date(etaDate);
+      let etaPlusOne = new Date(etaDate);
+      etaMinusOne.setUTCHours(etaMinusOne.getUTCHours() - 1); 
+      etaMinusOne = etaMinusOne.toISOString(); 
+      etaPlusOne.setUTCHours(etaPlusOne.getUTCHours() + 1); 
+      etaPlusOne = etaPlusOne.toISOString();
+      const altWx = []; 
+      altWx.push(arrTaf.forecast[intTaf].flight_rules); // Add the current forecast
+
+      if (intTaf > 0 && etaMinusOne >= arrTaf.forecast[intTaf - 1].start_time.dt && etaMinusOne <= arrTaf.forecast[intTaf - 1].end_time.dt) {
+        console.log("ETA minus one hour true: forecast is ", arrTaf.forecast[intTaf - 1].flight_rules);
+        altWx.push(arrTaf.forecast[intTaf - 1].flight_rules);
+      }
+      if (intTaf < arrTaf.forecast.length - 1 && etaPlusOne >= arrTaf.forecast[intTaf + 1].start_time.dt && etaPlusOne <= arrTaf.forecast[intTaf + 1].end_time.dt) {
+        console.log("ETA plus one hour true: forecast is ", arrTaf.forecast[intTaf + 1].flight_rules);
+        altWx.push(arrTaf.forecast[intTaf + 1].flight_rules);
+      }
+      console.log("altWx:", altWx);
+      altWx.some(wx => {
+        if (wx === 'IFR' || wx === 'LIFR') {
+            strAlternateReq = `Note: Alternate airport required for IFR +/- 1 hour.`;
+            return true; // Stops iteration
+        }
+        return false;
+      });
+    }
+    console.log(strAlternateReq);
 
     // Add METAR and TAF age notes for arrival
     if (arrMetarAge !== null) {
@@ -506,6 +540,7 @@ flightForm.addEventListener("submit", async (e) => {
 
     if (arrMetar && arrTaf) {
       output += `<p class="weather-report">${arrStation} is currently ${arrMetar.flight_rules || 'N/A'}${strEtaInfo}</p>` +
+                `<p class="weather-report" style="color: red;">${strAlternateReq}</p>` +
                 `<p class="weather-report">METAR: ${arrMetar.raw}</p>` +
                 `<p class="weather-report">TAF: ${arrStation} ${arrTaf.time.repr} ${arrTaf.forecast[0].raw || 'N/A'}</p>`;
       for (let i = 1; i < arrTaf.forecast.length; i++) {
@@ -519,6 +554,7 @@ flightForm.addEventListener("submit", async (e) => {
     }
     if (arrTaf && !arrMetar) {
       output += `<p class="weather-report">${arrStation} is currently ${arrTaf.flight_rules || 'N/A'}${strEtaInfo}</p>` +
+                `<p class="weather-report" style="color: red;">${strAlternateReq}</p>` +
                 `<p class="weather-report">TAF: ${arrStation} ${arrTaf.time.repr} ${arrTaf.forecast[0].raw || 'N/A'}</p>`;
       for (let i = 1; i < arrTaf.forecast.length; i++) {
         const forecast = arrTaf.forecast[i].raw || 'N/A';
