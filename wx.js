@@ -416,7 +416,11 @@ flightForm.addEventListener("submit", async (e) => {
     if (deptMetar && deptTaf) {
         output += `${deptMetar.station} is currently ${deptMetar.flight_rules || 'N/A'}${strEtdInfo}\n` +
                   `METAR: ${deptMetar.raw}\n\n` +
-                  `TAF: ${deptTaf.raw}\n`;
+                  `TAF: ${deptMetar.station} ${deptTaf.time.repr} ${deptTaf.forecast[0].raw || 'N/A'}\n`;
+                  for (let i = 1; i < deptTaf.forecast.length; i++) {
+                    const forecast = deptTaf.forecast[i].raw || 'N/A';
+                    output += `&nbsp&nbsp&nbsp&nbsp&nbsp${forecast}\n`
+                    };   
     }
     if (deptMetar && !deptTaf) {
         output += `${deptMetar.station} is currently ${deptMetar.flight_rules || 'N/A'}\n` +
@@ -424,7 +428,11 @@ flightForm.addEventListener("submit", async (e) => {
     }
     if (deptTaf && !deptMetar) {
         output += `${deptTaf.station} is currently ${deptTaf.flight_rules || 'N/A'}\n` +
-                  `\nTAF: ${deptTaf.raw}\n`;
+                  `\nTAF: ${deptMetar.station} ${deptTaf.time.repr} ${deptTaf.forecast[0].raw || 'N/A'}\n`;
+                  for (let i = 1; i < deptTaf.forecast.length; i++) {
+                    const forecast = deptTaf.forecast[i].raw || 'N/A';
+                    output += `&nbsp&nbsp&nbsp&nbsp&nbsp${forecast}\n`
+                    };
     }
     if (!deptMetar && !deptTaf) {
         output += `No weather data found for ${deptCode}.`;
@@ -448,10 +456,6 @@ flightForm.addEventListener("submit", async (e) => {
                 const forecast = arrTaf.forecast[i].flight_rules || 'N/A';
                 const startTime = arrTaf.forecast[i].start_time.dt || 'N/A';
                 const endTime = arrTaf.forecast[i].end_time.dt || 'N/A';
-
-                console.log(`Forecast: ${forecast}, Start: ${startTime}, End: ${endTime}`);
-                console.log(`ETA Date: ${etaDate}`);
-
                 if (etaDate >= startTime && etaDate <= endTime) {
                     strEtaInfo = ` and forecasted as ${forecast} at arrival time ${eta.value}Z.`;
                 }
@@ -461,7 +465,11 @@ flightForm.addEventListener("submit", async (e) => {
         if (arrMetar && arrTaf) {
             output += `\n${arrMetar.station} is currently ${arrMetar.flight_rules || 'N/A'}${strEtaInfo}\n` +
                         `METAR: ${arrMetar.raw}\n\n` +
-                        `TAF: ${arrTaf.raw}\n`;
+                        `TAF: ${arrMetar.station} ${arrTaf.time.repr} ${arrTaf.forecast[0].raw || 'N/A'}\n`;
+                  for (let i = 1; i < arrTaf.forecast.length; i++) {
+                    const forecast = arrTaf.forecast[i].raw || 'N/A';
+                    output += `&nbsp&nbsp&nbsp&nbsp&nbsp${forecast}\n`
+                    };
         }
 
         if (arrMetar && !arrTaf) {
@@ -470,7 +478,11 @@ flightForm.addEventListener("submit", async (e) => {
         }
     
         if (arrTaf && !arrMetar) {
-            output += `\nTAF: ${arrTaf.raw}\n`;
+            output += `\nTAF: ${arrMetar.station} ${arrTaf.time.repr} ${arrTaf.forecast[0].raw || 'N/A'}\n`;
+                  for (let i = 1; i < arrTaf.forecast.length; i++) {
+                    const forecast = arrTaf.forecast[i].raw || 'N/A';
+                    output += `&nbsp&nbsp&nbsp&nbsp&nbsp${forecast}\n`
+                    };
         }
 
         if (!arrMetar && !arrTaf) {
