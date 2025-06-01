@@ -423,3 +423,32 @@ a {
 a:hover {
     text-decoration: underline;
 }
+
+.wx-results {
+    align-items: flex-start; /* Left-align flex items (paragraphs) */
+}
+
+.wx-results p {
+    text-align: left; /* Ensure text is left-aligned */
+    margin: 0 0 0.5em 0; /* Single spacing: 0.5em bottom margin */
+    padding: 0; /* Remove any padding */
+    line-height: 1.2; /* Tighten line height for readability */
+    font-size: 1.3rem; /* Consistent font size */
+}
+
+.wx-results p.weather-report {
+    padding-left: 20px; /* Indent all lines by 20px */
+    text-indent: 0;
+}
+
+.wx-results p.indented-forecast {
+    padding-left: 40px; /* Indent all lines by 40px */
+    text-indent: 0;
+}
+
+.wx-results hr {
+    margin: 20px auto;
+    border: 2px solid #ccc;
+    width: 69%;   
+}
+

@@ -376,7 +376,7 @@ function appendBackButton() {
 }
 
 flightForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
   // Validate all fields
   if (!validateForm()) {
@@ -385,118 +385,158 @@ flightForm.addEventListener("submit", async (e) => {
     appendBackButton();
     return; // Stop submission if validation fails
   }
-    flightForm.classList.add("hidden");
-    results.innerText = "";
-    results.innerText = "Loading weather data...";
-    results.classList.remove("hidden");
 
-    // Sanitize inputs
-    const deptCode = (deptApt.value || "").trim().toUpperCase();
-    const arrCode = (arrApt.value || "").trim().toUpperCase();
+  flightForm.classList.add("hidden");
+  results.innerText = "";
+  results.innerText = "Loading weather data...";
+  results.classList.remove("hidden");
 
-    let output = "";
-    let strEtdInfo = "";
-    let strEtaInfo = "";
+  // Sanitize inputs
+  const deptCode = deptApt.value.trim().toUpperCase();
+  const arrCode = arrApt.value.trim().toUpperCase();
 
-    // Fetch departure weather
-    const deptMetar = await getWeatherData(deptCode, 'metar');
-    const deptTaf = await getWeatherData(deptCode, 'taf');
-    if (etdDate) {
-        for (let i = 0; i < (deptTaf?.forecast?.length || 0); i++) {
-            const forecast = deptTaf.forecast[i].flight_rules || 'N/A';
-            const startTime = deptTaf.forecast[i].start_time.dt || 'N/A';
-            const endTime = deptTaf.forecast[i].end_time.dt || 'N/A';
+  let output = "";
+  let strEtdInfo = "";
+  let strEtaInfo = "";
 
-            if (etdDate >= startTime && etdDate <= endTime) {
-                strEtdInfo = ` and forecasted as ${forecast} at departure time ${etd.value}Z.`
-            }
+  // Fetch departure weather
+  const deptMetar = await getWeatherData(deptCode, 'metar');
+  const deptTaf = await getWeatherData(deptCode, 'taf');
+  const deptMetarAge = deptMetar ? Math.floor((new Date() - new Date(deptMetar.time.dt)) / 60000) : null; // Age in minutes
+  const deptTafAge = deptTaf ? Math.floor((new Date() - new Date(deptTaf.end_time.dt)) / 60000) : null; // Age in minutes
+  console.log(`METAR Age: ${deptMetarAge} minutes, TAF Age: ${deptTafAge} minutes`); // Debugging log
+
+  // Log deptMetar and deptTaf to console for debugging
+  console.dir(deptMetar);
+  console.dir(deptTaf);
+
+  // Determine the station code for departure airport
+  const deptStation = deptMetar ? deptMetar.station : (deptTaf ? deptTaf.station : deptCode);
+
+  // Handle ETD forecast if available
+  if (etdDate && deptTaf) {
+    for (let i = 0; i < (deptTaf?.forecast?.length || 0); i++) {
+      const forecast = deptTaf.forecast[i].flight_rules || 'N/A';
+      const startTime = deptTaf.forecast[i].start_time.dt || 'N/A';
+      const endTime = deptTaf.forecast[i].end_time.dt || 'N/A';
+
+      if (etdDate >= startTime && etdDate <= endTime) {
+        strEtdInfo = ` and forecasted as ${forecast} at departure time ${etd.value}Z.`;
+      }
+    }
+  }
+
+  // Add METAR and TAF age notes for departure
+  if (deptMetarAge !== null) {
+    if (deptMetarAge > 60) {
+      strEtdInfo += `<p class="weather-report" style="color: yellow;">Note: ${deptStation} METAR is ${deptMetarAge} minutes old.</p>`;
+    } else {
+      strEtdInfo += `<p class="weather-report">Note: ${deptStation} METAR is ${deptMetarAge} minutes old.</p>`;
+    }
+  }
+  if (deptTafAge !== null && deptTafAge > 60) {
+    strEtdInfo += `<p class="weather-report" style="color: yellow;">Note: ${deptStation} TAF expired ${deptTafAge} minutes ago.</p>`;
+  }
+
+  if (deptMetar && deptTaf) {
+    output += `<p class="weather-report">${deptStation} is currently ${deptMetar.flight_rules || 'N/A'}${strEtdInfo}</p>` +
+              `<p class="weather-report">METAR: ${deptMetar.raw}</p>` +
+              `<p class="weather-report">TAF: ${deptStation} ${deptTaf.time.repr} ${deptTaf.forecast[0].raw || 'N/A'}</p>`;
+    for (let i = 1; i < deptTaf.forecast.length; i++) {
+      const forecast = deptTaf.forecast[i].raw || 'N/A';
+      output += `<p class="weather-report indented-forecast">${forecast}</p>`;
+    }
+  }
+  if (deptMetar && !deptTaf) {
+    output += `<p class="weather-report">${deptStation} is currently ${deptMetar.flight_rules || 'N/A'}${strEtdInfo}</p>` +
+              `<p class="weather-report">METAR: ${deptMetar.raw}</p>`;
+  }
+  if (deptTaf && !deptMetar) {
+    output += `<p class="weather-report">${deptStation} is currently ${deptTaf.flight_rules || 'N/A'}${strEtdInfo}</p>` +
+              `<p class="weather-report">TAF: ${deptStation} ${deptTaf.time.repr} ${deptTaf.forecast[0].raw || 'N/A'}</p>`;
+    for (let i = 1; i < deptTaf.forecast.length; i++) {
+      const forecast = deptTaf.forecast[i].raw || 'N/A';
+      output += `<p class="weather-report indented-forecast">${forecast}</p>`;
+    }
+  }
+  if (!deptMetar && !deptTaf) {
+    output += `<p class="weather-report">No weather data found for ${deptCode}.</p>`;
+    results.classList.add("error");
+  }
+
+  // Add horizontal rule if there’s arrival info to follow
+  if (arrCode) {
+    output += `<hr>`;
+  }
+
+  // Fetch arrival weather if provided
+  if (arrCode) {
+    const arrMetar = await getWeatherData(arrCode, 'metar');
+    const arrTaf = await getWeatherData(arrCode, 'taf');
+    const arrMetarAge = arrMetar ? Math.floor((new Date() - new Date(arrMetar.time.dt)) / 60000) : null; // Age in minutes
+    const arrTafAge = arrTaf ? Math.floor((new Date() - new Date(arrTaf.end_time.dt)) / 60000) : null; // Age in minutes
+    console.dir(arrTaf);
+
+    // Determine the station code for arrival airport
+    const arrStation = arrMetar ? arrMetar.station : (arrTaf ? arrTaf.station : arrCode);
+
+    // Handle ETA forecast if available
+    if (etaDate && arrTaf) {
+      for (let i = 0; i < (arrTaf?.forecast?.length || 0); i++) {
+        const forecast = arrTaf.forecast[i].flight_rules || 'N/A';
+        const startTime = arrTaf.forecast[i].start_time.dt || 'N/A';
+        const endTime = arrTaf.forecast[i].end_time.dt || 'N/A';
+        if (etaDate >= startTime && etaDate <= endTime) {
+          strEtaInfo = ` and forecasted as ${forecast} at arrival time ${eta.value}Z.`;
         }
+      }
     }
 
-    if (deptMetar && deptTaf) {
-        output += `${deptMetar.station} is currently ${deptMetar.flight_rules || 'N/A'}${strEtdInfo}\n` +
-                  `METAR: ${deptMetar.raw}\n\n` +
-                  `TAF: ${deptMetar.station} ${deptTaf.time.repr} ${deptTaf.forecast[0].raw || 'N/A'}\n`;
-                  for (let i = 1; i < deptTaf.forecast.length; i++) {
-                    const forecast = deptTaf.forecast[i].raw || 'N/A';
-                    output += `&nbsp&nbsp&nbsp&nbsp&nbsp${forecast}\n`
-                    };   
+    // Add METAR and TAF age notes for arrival
+    if (arrMetarAge !== null) {
+      if (arrMetarAge > 60) {
+        strEtaInfo += `<p class="weather-report" style="color: yellow;">Note: ${arrStation} METAR is ${arrMetarAge} minutes old.</p>`;
+      } else {
+        strEtaInfo += `<p class="weather-report">Note: ${arrStation} METAR is ${arrMetarAge} minutes old.</p>`;
+      }
     }
-    if (deptMetar && !deptTaf) {
-        output += `${deptMetar.station} is currently ${deptMetar.flight_rules || 'N/A'}\n` +
-                  `METAR: ${deptMetar.raw}\n`;
-    }
-    if (deptTaf && !deptMetar) {
-        output += `${deptTaf.station} is currently ${deptTaf.flight_rules || 'N/A'}\n` +
-                  `\nTAF: ${deptMetar.station} ${deptTaf.time.repr} ${deptTaf.forecast[0].raw || 'N/A'}\n`;
-                  for (let i = 1; i < deptTaf.forecast.length; i++) {
-                    const forecast = deptTaf.forecast[i].raw || 'N/A';
-                    output += `&nbsp&nbsp&nbsp&nbsp&nbsp${forecast}\n`
-                    };
-    }
-    if (!deptMetar && !deptTaf) {
-        output += `No weather data found for ${deptCode}.`;
-        results.classList.add("error");
+    if (arrTafAge !== null && arrTafAge > 60) {
+      strEtaInfo += `<p class="weather-report" style="color: yellow;">Note: ${arrStation} TAF expired ${arrTafAge} minutes ago.</p>`;
     }
 
-    // Add horizontal rule if there’s arrival info to follow
-    if (arrCode) {
-        output += `\n<hr>\n`; // Add the HR between departure and arrival
+    if (arrMetar && arrTaf) {
+      output += `<p class="weather-report">${arrStation} is currently ${arrMetar.flight_rules || 'N/A'}${strEtaInfo}</p>` +
+                `<p class="weather-report">METAR: ${arrMetar.raw}</p>` +
+                `<p class="weather-report">TAF: ${arrStation} ${arrTaf.time.repr} ${arrTaf.forecast[0].raw || 'N/A'}</p>`;
+      for (let i = 1; i < arrTaf.forecast.length; i++) {
+        const forecast = arrTaf.forecast[i].raw || 'N/A';
+        output += `<p class="weather-report indented-forecast">${forecast}</p>`;
+      }
     }
-
-    // Fetch arrival weather if provided
-    if (arrCode) {
-        const arrMetar = await getWeatherData(arrCode, 'metar');
-        const arrTaf = await getWeatherData(arrCode, 'taf');
-        console.dir(arrTaf);
-       
-
-        if (etaDate) {
-            for (let i = 0; i < (arrTaf?.forecast?.length || 0); i++) {
-                const forecast = arrTaf.forecast[i].flight_rules || 'N/A';
-                const startTime = arrTaf.forecast[i].start_time.dt || 'N/A';
-                const endTime = arrTaf.forecast[i].end_time.dt || 'N/A';
-                if (etaDate >= startTime && etaDate <= endTime) {
-                    strEtaInfo = ` and forecasted as ${forecast} at arrival time ${eta.value}Z.`;
-                }
-            }
-        }
-
-        if (arrMetar && arrTaf) {
-            output += `\n${arrMetar.station} is currently ${arrMetar.flight_rules || 'N/A'}${strEtaInfo}\n` +
-                        `METAR: ${arrMetar.raw}\n\n` +
-                        `TAF: ${arrMetar.station} ${arrTaf.time.repr} ${arrTaf.forecast[0].raw || 'N/A'}\n`;
-                  for (let i = 1; i < arrTaf.forecast.length; i++) {
-                    const forecast = arrTaf.forecast[i].raw || 'N/A';
-                    output += `&nbsp&nbsp&nbsp&nbsp&nbsp${forecast}\n`
-                    };
-        }
-
-        if (arrMetar && !arrTaf) {
-            output += `\n\n${arrMetar.station} is currently ${arrMetar.flight_rules || 'N/A'}\n` +
-                      `METAR: ${arrMetar.raw}\n`;
-        }
-    
-        if (arrTaf && !arrMetar) {
-            output += `\nTAF: ${arrMetar.station} ${arrTaf.time.repr} ${arrTaf.forecast[0].raw || 'N/A'}\n`;
-                  for (let i = 1; i < arrTaf.forecast.length; i++) {
-                    const forecast = arrTaf.forecast[i].raw || 'N/A';
-                    output += `&nbsp&nbsp&nbsp&nbsp&nbsp${forecast}\n`
-                    };
-        }
-
-        if (!arrMetar && !arrTaf) {
-            output += `No weather data found for ${arrCode}.`;
-            results.classList.add("error");
-        }
+    if (arrMetar && !arrTaf) {
+      output += `<p class="weather-report">${arrStation} is currently ${arrMetar.flight_rules || 'N/A'}${strEtaInfo}</p>` +
+                `<p class="weather-report">METAR: ${arrMetar.raw}</p>`;
     }
-
-    if (output) {
-        results.innerHTML = output.replace(/\n/g, '<br>'); // Replace newlines with <br> for proper rendering
+    if (arrTaf && !arrMetar) {
+      output += `<p class="weather-report">${arrStation} is currently ${arrTaf.flight_rules || 'N/A'}${strEtaInfo}</p>` +
+                `<p class="weather-report">TAF: ${arrStation} ${arrTaf.time.repr} ${arrTaf.forecast[0].raw || 'N/A'}</p>`;
+      for (let i = 1; i < arrTaf.forecast.length; i++) {
+        const forecast = arrTaf.forecast[i].raw || 'N/A';
+        output += `<p class="weather-report indented-forecast">${forecast}</p>`;
+      }
     }
+    if (!arrMetar && !arrTaf) {
+      output += `<p class="weather-report">No weather data found for ${arrCode}.</p>`;
+      results.classList.add("error");
+    }
+  }
 
-// Append back button
-  appendBackButton(); 
+  if (output) {
+    results.innerHTML = output; // Using <p> tags, so no need for replace
+  }
+
+  // Append back button
+  appendBackButton();
 });
 
 const backBtn = document.getElementById("back-btn");
