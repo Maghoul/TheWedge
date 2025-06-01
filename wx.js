@@ -4,6 +4,8 @@ const flightForm = document.getElementById("form");
 const etd = document.getElementById("etd");
 const etdError = document.getElementById("etd-error");
 const etaError = document.getElementById("eta-error");
+const deptError = document.getElementById("dept-error");
+const arrError = document.getElementById("arr-error");
 const eta = document.getElementById("eta");
 const submitBtn = flightForm.querySelector('button[type="submit"]'); // Add this
 const results = document.getElementById("results");
@@ -97,6 +99,33 @@ eta.addEventListener("change", () => {
   }
 });
 
+// Check ICAO format on deptApt and arrApt
+deptApt.addEventListener("change", () => {
+  const result = isValidIcao(deptApt.value.trim());
+  if (result.error) {
+    deptError.textContent = result.error;
+    deptError.style.display = "block";
+    deptApt.classList.add("error");
+  } else {
+    deptError.style.display = "none";
+    deptApt.classList.remove("error");
+    deptApt.value = result.value || ""; // Use the normalized ICAO code, or empty if null
+  }
+});
+
+arrApt.addEventListener("change", () => {
+  const result = isValidIcao(arrApt.value.trim());
+  if (result.error) {
+    arrError.textContent = result.error;
+    arrError.style.display = "block";
+    arrApt.classList.add("error");
+  } else {
+    arrError.style.display = "none";
+    arrApt.classList.remove("error");
+    arrApt.value = result.value || ""; // Use the normalized ICAO code, or empty if null
+  }
+});
+
 // Convert time to full UTC time
 
 function convertToISODate(date, timeStr) {
@@ -186,9 +215,9 @@ etd.addEventListener("input", () => validateTimeInput(etd, etdError));
 eta.addEventListener("input", () => validateTimeInput(eta, etaError));
 
 // Update submit button state when deptApt changes
-deptApt.addEventListener("input", () => {
-  // updateSubmitButtonState();
-});
+// deptApt.addEventListener("input", () => {
+//   updateSubmitButtonState();
+// });
 
 validateTimeInput(etd, etdError); // Initial validation
 validateTimeInput(eta, etaError); // Initial validation
@@ -220,53 +249,70 @@ function displayTimeFormat(minutes) {
 
 
 // Validate ICAO code (4 letters)
-function isValidIcao(code) {
-    return /^[A-Z]{4}$/.test(code);
-}
+// function isValidIcao(code) {
+//     return /^[A-Z]{4}$/.test(code);
+// }
 
+function isValidIcao(code) {
+  if (!code) return { value: code, error: null }; // Return empty input with no error
+
+  // Convert to uppercase immediately for consistent validation
+  const normalizedCode = code.trim().toUpperCase();
+
+  // Check if the code is exactly 4 uppercase letters
+  if (!/^[A-Z]{4}$/.test(normalizedCode)) {
+    return { value: null, error: `Invalid ICAO code "${code}". Use 4 letters (e.g., KMEM).` };
+  }
+
+  return { value: normalizedCode, error: null }; // Return valid ICAO code
+}
+  
 async function getWeatherData(airportCode, type = 'metar') {
-    if (!apiToken) {
-        results.innerText = 'Error: AVWX API token missing.';
-        results.classList.remove("hidden");
-        return null;
+  if (!apiToken) {
+    results.innerText = 'Error: AVWX API token missing.';
+    results.classList.remove("hidden");
+    return null;
+  }
+
+  const icaoResult = isValidIcao(airportCode);
+  if (icaoResult.error) {
+    results.innerText = icaoResult.error;
+    results.classList.remove("hidden");
+    return null;
+  }
+
+  try {
+    const baseUrl = type === 'metar' ? apiBaseMetar : apiBaseTaf;
+    const response = await fetch(`${baseUrl}${icaoResult.value}`, {
+      headers: {
+        'Authorization': `Bearer ${apiToken}`,
+        'Accept': 'application/json'
+      }
+    });
+    if (!response.ok) {
+      if (response.status === 401) {
+        localStorage.removeItem('avwxToken');
+        results.innerText = 'Error: Invalid AVWX token. Please reload and enter a new token.';
+        flightForm.querySelector('button[type="submit"]').disabled = true;
+      } else {
+        throw new Error(response.statusText);
+      }
+      results.classList.remove("hidden");
+      return null;
     }
-    if (!isValidIcao(airportCode)) {
-        results.innerText = `Error: Invalid ICAO code "${airportCode}". Use 4 letters (e.g., KDEN).`;
-        results.classList.remove("hidden");
-        return null;
+    const data = await response.json();
+    if (data.Error) {
+      results.innerText = `Error: ${data.Error} for ${icaoResult.value}.`;
+      results.classList.remove("hidden");
+      return null;
     }
-    try {
-        const baseUrl = type === 'metar' ? apiBaseMetar : apiBaseTaf;
-        const response = await fetch(`${baseUrl}${airportCode}`, {
-            headers: {
-                'Authorization': `Bearer ${apiToken}`,
-                'Accept': 'application/json'
-            }
-        });
-        if (!response.ok) {
-            if (response.status === 401) {
-                localStorage.removeItem('avwxToken');
-                results.innerText = 'Error: Invalid AVWX token. Please reload and enter a new token.';
-                flightForm.querySelector('button[type="submit"]').disabled = true;
-            } else {
-                throw new Error(response.statusText);
-            }
-            results.classList.remove("hidden");
-            return null;
-        }
-        const data = await response.json();
-        if (data.Error) {
-            results.innerText = `Error: ${data.Error} for ${airportCode}.`;
-            results.classList.remove("hidden");
-            return null;
-        }
-        return data;
-    } catch (error) {
-        console.error(`Failed to fetch ${type} data: ${error.message}`);
-        results.innerText = `Error: Unable to fetch ${type} data for ${airportCode}. ${error.message}`;
-        results.classList.remove("hidden");
-        return null;
-    }
+    return data;
+  } catch (error) {
+    console.error(`Failed to fetch ${type} data: ${error.message}`);
+    results.innerText = `Error: Unable to fetch ${type} data for ${icaoResult.value}. ${error.message}`;
+    results.classList.remove("hidden");
+    return null;
+  }
 }
 
 function validateForm() {
@@ -276,14 +322,20 @@ function validateForm() {
   const deptAptValue = deptApt.value.trim().toUpperCase();
   if (!deptAptValue) {
     errors.push("Departure Airport is required.");
-  } else if (!isValidIcao(deptAptValue)) {
-    errors.push(`Invalid Departure Airport ICAO code "${deptAptValue}". Use 4 letters (e.g., KMEM).`);
+  } else {
+    const deptIcaoResult = isValidIcao(deptAptValue);
+    if (deptIcaoResult.error) {
+      errors.push(deptIcaoResult.error);
+    }
   }
 
   // Validate arrApt (optional)
   const arrAptValue = arrApt.value.trim().toUpperCase();
-  if (arrAptValue && !isValidIcao(arrAptValue)) {
-    errors.push(`Invalid Arrival Airport ICAO code "${arrAptValue}". Use 4 letters (e.g., KIND).`);
+  if (arrAptValue) {
+    const arrIcaoResult = isValidIcao(arrAptValue);
+    if (arrIcaoResult.error) {
+      errors.push(arrIcaoResult.error);
+    }
   }
 
   // Validate etd (optional)
@@ -302,7 +354,7 @@ function validateForm() {
   if (errors.length > 0) {
     results.innerText = errors.join("\n");
     results.classList.remove("hidden");
-    results.classList.add("error"); // Add error styling
+    results.classList.add("error");
     return false;
   }
 
