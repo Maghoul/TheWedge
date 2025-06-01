@@ -114,11 +114,11 @@ function convertToISODate(date, timeStr) {
      return date.toISOString();
 }
 
-function updateSubmitButtonState() {
-  // Enable the submit button as long as deptApt has a value
-  const deptAptFilled = deptApt.value.trim() !== "";
-  submitBtn.disabled = !deptAptFilled;
-}
+// function updateSubmitButtonState() {
+//   // Enable the submit button as long as deptApt has a value
+//   const deptAptFilled = deptApt.value.trim() !== "";
+//   submitBtn.disabled = !deptAptFilled;
+// }
 
 function formatTime(input) {
   if (!input) return { value: input, error: null }; // Return empty input with no error
@@ -166,7 +166,7 @@ function validateTimeInput(inputElement, errorElement) {
     inputElement.classList.remove("error");
     // Don't auto-format during input event; let the change event handle it
   }
-  updateSubmitButtonState();
+  // updateSubmitButtonState();
 }
 
 // Real-time validation for time inputs
@@ -187,14 +187,14 @@ eta.addEventListener("input", () => validateTimeInput(eta, etaError));
 
 // Update submit button state when deptApt changes
 deptApt.addEventListener("input", () => {
-  updateSubmitButtonState();
+  // updateSubmitButtonState();
 });
 
 validateTimeInput(etd, etdError); // Initial validation
 validateTimeInput(eta, etaError); // Initial validation
 
 // Update submit button state on page load
-updateSubmitButtonState();
+// updateSubmitButtonState();
 
 function timeToMin(timeStr) {
   if (!timeStr || !/^[0-2][0-9]:[0-5][0-9]$/.test(timeStr)) {
@@ -269,8 +269,70 @@ async function getWeatherData(airportCode, type = 'metar') {
     }
 }
 
+function validateForm() {
+  let errors = [];
+
+  // Validate deptApt (required)
+  const deptAptValue = deptApt.value.trim().toUpperCase();
+  if (!deptAptValue) {
+    errors.push("Departure Airport is required.");
+  } else if (!isValidIcao(deptAptValue)) {
+    errors.push(`Invalid Departure Airport ICAO code "${deptAptValue}". Use 4 letters (e.g., KMEM).`);
+  }
+
+  // Validate arrApt (optional)
+  const arrAptValue = arrApt.value.trim().toUpperCase();
+  if (arrAptValue && !isValidIcao(arrAptValue)) {
+    errors.push(`Invalid Arrival Airport ICAO code "${arrAptValue}". Use 4 letters (e.g., KIND).`);
+  }
+
+  // Validate etd (optional)
+  const etdResult = formatTime(etd.value);
+  if (etd.value && etdResult.error) {
+    errors.push(`Invalid Departure Time: ${etdResult.error}`);
+  }
+
+  // Validate eta (optional)
+  const etaResult = formatTime(eta.value);
+  if (eta.value && etaResult.error) {
+    errors.push(`Invalid Arrival Time: ${etaResult.error}`);
+  }
+
+  // If there are errors, display them and return false
+  if (errors.length > 0) {
+    results.innerText = errors.join("\n");
+    results.classList.remove("hidden");
+    results.classList.add("error"); // Add error styling
+    return false;
+  }
+
+  return true; // Form is valid
+}
+
+function appendBackButton() {
+  const backBtn = document.createElement("button");
+  backBtn.id = "back-btn";
+  backBtn.textContent = "Back";
+  results.appendChild(document.createElement("br"));
+  results.appendChild(backBtn);
+  backBtn.addEventListener("click", () => {
+    flightForm.classList.remove("hidden");
+    results.innerText = "";
+    results.classList.remove("error");
+    results.classList.add("hidden");
+  });
+}
+
 flightForm.addEventListener("submit", async (e) => {
     e.preventDefault();
+
+  // Validate all fields
+  if (!validateForm()) {
+    flightForm.classList.add("hidden");
+    results.classList.remove("hidden");
+    appendBackButton();
+    return; // Stop submission if validation fails
+  }
     flightForm.classList.add("hidden");
     results.innerText = "";
     results.innerText = "Loading weather data...";
@@ -370,17 +432,7 @@ flightForm.addEventListener("submit", async (e) => {
     }
 
 // Append back button
-  const backBtn = document.createElement("button");
-    backBtn.id = "back-btn";
-	backBtn.textContent = "Back";
-	results.appendChild(document.createElement("br"));
-	results.appendChild(backBtn);
-	backBtn.addEventListener("click", () => {
-		flightForm.classList.remove("hidden");
-        results.innerText = "";
-        results.classList.remove("error");
-	    results.classList.add("hidden");
-	}); 
+  appendBackButton(); 
 });
 
 const backBtn = document.getElementById("back-btn");
@@ -417,7 +469,8 @@ clearBtn.addEventListener("click", () => {
   // Hide results
   results.innerText = "";
   results.classList.add("hidden");
+  results.classList.remove("error");
 
   // Update submit button state
-  updateSubmitButtonState();
+  // updateSubmitButtonState();
 });
