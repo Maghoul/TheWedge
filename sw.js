@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wedge-cache-v1.1.14';
+const CACHE_NAME = 'wedge-cache-v1.1.15';
 // Cache versioning to handle updates vMajor.minor.patch
 // Version 1.0.1 - Initial release with basic caching functionality
 // Version 1.0.2 - updated styles for ios support
@@ -18,6 +18,7 @@ const CACHE_NAME = 'wedge-cache-v1.1.14';
 // Version 1.1.12 - added contact form  
 // Version 1.1.13 - skipped
 // Version 1.1.14 - New icons
+// Version 1.1.15 - More new icons
 // This service worker caches essential files for offline use and handles fetch requests
 const urlsToCache = [
     './',
@@ -34,7 +35,12 @@ const urlsToCache = [
     './manifest.json',
     './images/icon-192.png',
     './images/icon-180.png',
-    './images/icon-512.png'
+    './images/icon-512.png',
+    './images/checklist-icon.svg',
+    './images/contact-icon.svg',
+    './images/rest-icon.svg',
+    './images/risk-icon.svg',
+    './images/weather-icon.svg',
 ];
 
 self.addEventListener('install', event => {
