@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Contact The Wedge - A simple tool for pilots">
+    <meta name="keywords" content="aviation, contact, pilot tools">
+    <meta name="author" content="Rick G.">
+    <meta name="theme-color" content="#f5f6f7">
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/png" href="./images/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon" href="./images/icon-192.png">
+    <title>Contact - The Wedge</title>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Contact The Wedge</h1>
+            <p>Reach out with questions or feedback</p>
+            <hr />
+        </header>
+        <main>
+            <form id="contact-form" action="mailto:pilotwedge@outlook.com" method="post" enctype="text/plain">
+                <div class="form-row">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" required placeholder="Your name">
+                    <span id="name-error" class="error-message" style="display: none;"></span>
+                </div>
+                <div class="form-row">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="Your email">
+                    <span id="email-error" class="error-message" style="display: none;"></span>
+                </div>
+                <div class="form-row">
+                    <label for="subject">Subject</label>
+                    <input type="text" id="subject" name="subject" required placeholder="Message subject">
+                    <span id="subject-error" class="error-message" style="display: none;"></span>
+                </div>
+                <div class="form-row">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" rows="5" required placeholder="Your message"></textarea>
+                    <span id="message-error" class="error-message" style="display: none;"></span>
+                </div>
+                <button type="submit">Send Message</button>
+                <button type="button" id="clear-contact-btn">Clear Form</button>
+            </form>
+        </main>
+        <footer>
+            <p><a href="./index.html">Back to Home</a></p>
+        </footer>
+    </div>
+    <script>
+        const contactForm = document.getElementById('contact-form');
+        const clearBtn = document.getElementById('clear-contact-btn');
+        const inputs = {
+            name: document.getElementById('name'),
+            email: document.getElementById('email'),
+            subject: document.getElementById('subject'),
+            message: document.getElementById('message')
+        };
+        const errors = {
+            name: document.getElementById('name-error'),
+            email: document.getElementById('email-error'),
+            subject: document.getElementById('subject-error'),
+            message: document.getElementById('message-error')
+        };
+
+        // Basic email validation
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        // Form submission validation
+        contactForm.addEventListener('submit', (e) => {
+            let hasError = false;
+
+            // Reset errors
+            Object.values(errors).forEach(error => {
+                error.style.display = 'none';
+                error.textContent = '';
+            });
+
+            // Validate name
+            if (!inputs.name.value.trim()) {
+                errors.name.textContent = 'Name is required.';
+                errors.name.style.display = 'block';
+                hasError = true;
+            }
+
+            // Validate email
+            if (!inputs.email.value.trim()) {
+                errors.email.textContent = 'Email is required.';
+                errors.email.style.display = 'block';
+                hasError = true;
+            } else if (!validateEmail(inputs.email.value)) {
+                errors.email.textContent = 'Please enter a valid email address.';
+                errors.email.style.display = 'block';
+                hasError = true;
+            }
+
+            // Validate subject
+            if (!inputs.subject.value.trim()) {
+                errors.subject.textContent = 'Subject is required.';
+                errors.subject.style.display = 'block';
+                hasError = true;
+            }
+
+            // Validate message
+            if (!inputs.message.value.trim()) {
+                errors.message.textContent = 'Message is required.';
+                errors.message.style.display = 'block';
+                hasError = true;
+            }
+
+            if (hasError) {
+                e.preventDefault(); // Prevent form submission
+            }
+        });
+
+        // Clear form
+        clearBtn.addEventListener('click', () => {
+            contactForm.reset();
+            Object.values(errors).forEach(error => {
+                error.style.display = 'none';
+                error.textContent = '';
+            });
+        });
+    </script>
+</body>
+</html>

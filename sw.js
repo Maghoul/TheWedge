@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wedge-cache-v1.1.11';
+const CACHE_NAME = 'wedge-cache-v1.1.12';
 // Cache versioning to handle updates vMajor.minor.patch
 // Version 1.0.1 - Initial release with basic caching functionality
 // Version 1.0.2 - updated styles for ios support
@@ -15,12 +15,14 @@ const CACHE_NAME = 'wedge-cache-v1.1.11';
 // Version 1.1.9 - Added alternate logic for wx.js
 // Version 1.1.10 - small index update
 // Version 1.1.11 - Updated wx.js to handle new AVWX API key
+// Version 1.1.12 - added contact form
 // This service worker caches essential files for offline use and handles fetch requests
 const urlsToCache = [
     './',
     './index.html',
     './wx.html',
     './fraam.html',
+    './contact.html',
     './frm.html',
     './preflight-checklist.html',
     './preflight.js',

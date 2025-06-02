@@ -128,13 +128,15 @@ main.container ul li a:hover {
 
 .form-row {
     display: flex;
-    flex-direction: column; /* Default for most form rows */
+    flex-direction: column;
     align-items: stretch;
     border-bottom: 1px solid var(--se-gray-color);
     padding: 12px;
     border-radius: 5px;
     background-color: var(--complementary-color);
     margin: 10px 0;
+    min-height: 48px; /* Ensure enough height for content */
+    box-sizing: border-box;
 }
 
 /* Horizontal layout for checkbox-label pairs */
@@ -176,7 +178,8 @@ main.container ul li a:hover {
 }
 
 .form-row input[type="text"],
-.form-row input[type="number"] {
+.form-row input[type="number"],
+.form-row input[type="email"] {
     border-color: rgb(118, 118, 118);
     transition: border 0.2s, background-color 0.2s;
     font-size: 1.3rem;
@@ -185,6 +188,7 @@ main.container ul li a:hover {
     padding: 12px;
     border-radius: 5px;
     box-sizing: border-box;
+    height: 50px; /* Ensure consistent height */
 }
 
 details {
