@@ -7,9 +7,13 @@ const etaError = document.getElementById("eta-error");
 const deptError = document.getElementById("dept-error");
 const arrError = document.getElementById("arr-error");
 const eta = document.getElementById("eta");
-const submitBtn = flightForm.querySelector('button[type="submit"]'); // Add this
+const submitBtn = flightForm.querySelector('button[type="submit"]');
 const results = document.getElementById("results");
 const clearBtn = document.getElementById("clear-btn");
+const tokenForm = document.getElementById("token-form");
+const tokenInput = document.getElementById("token-input");
+const saveTokenBtn = document.getElementById("save-token");
+const tokenError = document.getElementById("token-error");
 const apiBaseMetar = "https://avwx.rest/api/metar/";
 const apiBaseTaf = "https://avwx.rest/api/taf/";
 
@@ -19,16 +23,58 @@ let etaDate;
 // Initialize API token
 let apiToken = localStorage.getItem('avwxToken');
 if (!apiToken) {
-    apiToken = prompt('Enter your AVWX API token (get it from https://account.avwx.rest):');
-    if (apiToken) {
-        localStorage.setItem('avwxToken', apiToken);
-    } else {
-        results.innerHTML = `<p>Error: AVWX API token required. Get your free token from 
-        <a href="https://account.avwx.rest/register" target="_blank">AVWX Account</a><p>`;
-        results.classList.remove("hidden");
-        flightForm.querySelector('button[type="submit"]').disabled = true;
-    }
+    tokenForm.classList.remove("hidden");
+    flightForm.classList.add("hidden");
+} else {
+    tokenForm.classList.add("hidden");
+    flightForm.classList.remove("hidden");
 }
+
+// Handle token save
+saveTokenBtn.addEventListener("click", async () => {
+    const token = tokenInput.value.trim();
+    if (!token) {
+        tokenError.textContent = "Please enter a valid AVWX API token.";
+        tokenError.classList.remove("hidden");
+        tokenError.style.display = "block";
+        return;
+    }
+
+    // Test token validity with a sample API call
+    try {
+        const response = await fetch(`${apiBaseMetar}KMEM`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
+            }
+        });
+        if (!response.ok) {
+            if (response.status === 401 || response.status === 403) {
+                throw new Error("Invalid token. Please check your AVWX token.");
+            } else if (response.status === 429) {
+                throw new Error("API rate limit exceeded. Try again later.");
+            } else {
+                throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
+            }
+        }
+        const data = await response.json();
+        if (data.Error) {
+            throw new Error(data.Error);
+        }
+        // Save token to localStorage and update apiToken
+        localStorage.setItem('avwxToken', token);
+        apiToken = token; // Update apiToken for current session
+        tokenForm.classList.add("hidden");
+        flightForm.classList.remove("hidden");
+        tokenError.classList.add("hidden");
+        tokenError.style.display = "none"; // Reset error display
+        tokenInput.value = "";
+    } catch (error) {
+        tokenError.textContent = `Error: ${error.message}`;
+        tokenError.classList.remove("hidden");
+        tokenError.style.display = "block"; // Ensure error is visible
+    }
+});
 
 //set dynamic placeholders ETA and ETD
 let etdPlaceholder = new Date();

@@ -23,6 +23,10 @@ body {
     font-size: 16px; /* Base font size for mobile */
 }
 
+.hidden {
+    display: none;
+}
+
 #version-display {
 	color: lightgray;
 	font-size: 0.8rem;
@@ -452,3 +456,33 @@ a:hover {
     width: 69%;   
 }
 
+#token-form {
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: center;
+}
+#token-form input {
+    width: 80%;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 1em;
+}
+#token-form button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+#token-form button:hover {
+    background-color: #0056b3;
+}
+#token-error {
+    margin-top: 10px;
+    display: block; /* Ensure visibility */
+    color: red;
+}
