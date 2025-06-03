@@ -189,12 +189,6 @@ function convertToISODate(date, timeStr) {
      return date.toISOString();
 }
 
-// function updateSubmitButtonState() {
-//   // Enable the submit button as long as deptApt has a value
-//   const deptAptFilled = deptApt.value.trim() !== "";
-//   submitBtn.disabled = !deptAptFilled;
-// }
-
 function formatTime(input) {
   if (!input) return { value: input, error: null }; // Return empty input with no error
 
@@ -230,20 +224,6 @@ function formatTime(input) {
   return { value: formattedTime, error: null };
 }
 
-function validateTimeInput(inputElement, errorElement) {
-  const result = formatTime(inputElement.value);
-  if (result.error) {
-    errorElement.textContent = result.error;
-    errorElement.style.display = "block";
-    inputElement.classList.add("error");
-  } else {
-    errorElement.style.display = "none";
-    inputElement.classList.remove("error");
-    // Don't auto-format during input event; let the change event handle it
-  }
-  // updateSubmitButtonState();
-}
-
 // Real-time validation for time inputs
 function validateTimeInput(inputElement, errorElement) {
   const result = formatTime(inputElement.value);
@@ -260,16 +240,8 @@ function validateTimeInput(inputElement, errorElement) {
 etd.addEventListener("input", () => validateTimeInput(etd, etdError));
 eta.addEventListener("input", () => validateTimeInput(eta, etaError));
 
-// Update submit button state when deptApt changes
-// deptApt.addEventListener("input", () => {
-//   updateSubmitButtonState();
-// });
-
 validateTimeInput(etd, etdError); // Initial validation
 validateTimeInput(eta, etaError); // Initial validation
-
-// Update submit button state on page load
-// updateSubmitButtonState();
 
 function timeToMin(timeStr) {
   if (!timeStr || !/^[0-2][0-9]:[0-5][0-9]$/.test(timeStr)) {
@@ -293,12 +265,6 @@ function displayTimeFormat(minutes) {
   return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
 }
 
-
-// Validate ICAO code (4 letters)
-// function isValidIcao(code) {
-//     return /^[A-Z]{4}$/.test(code);
-// }
-
 function isValidIcao(code) {
   if (!code) return { value: code, error: null }; // Return empty input with no error
 
@@ -315,16 +281,12 @@ function isValidIcao(code) {
   
 async function getWeatherData(airportCode, type = 'metar') {
   if (!apiToken) {
-    results.innerText = 'Error: AVWX API token missing.';
-    results.classList.remove("hidden");
-    return null;
+    return { error: 'AVWX API token missing.' };
   }
 
   const icaoResult = isValidIcao(airportCode);
   if (icaoResult.error) {
-    results.innerText = icaoResult.error;
-    results.classList.remove("hidden");
-    return null;
+    return { error: icaoResult.error };
   }
 
   try {
@@ -335,29 +297,44 @@ async function getWeatherData(airportCode, type = 'metar') {
         'Accept': 'application/json'
       }
     });
+
     if (!response.ok) {
       if (response.status === 401) {
         localStorage.removeItem('avwxToken');
-        results.innerText = 'Error: Invalid AVWX token. Please reload and enter a new token.';
         flightForm.querySelector('button[type="submit"]').disabled = true;
+        return { error: 'Invalid AVWX token. Please reload and enter a new token.' };
+      } else if (response.status === 404) {
+        // Handle case where TAF data is not available
+        return { error: `No ${type.toUpperCase()} data available for ${icaoResult.value}.` };
       } else {
         throw new Error(response.statusText);
       }
-      results.classList.remove("hidden");
-      return null;
     }
-    const data = await response.json();
+
+    // Read the response as text first to check if it's empty
+    const text = await response.text();
+    if (!text) {
+      // Handle empty response (no TAF data)
+      return { error: `No ${type.toUpperCase()} data available for ${icaoResult.value}.` };
+    }
+
+    // Try to parse the text as JSON
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (jsonError) {
+      // Handle invalid JSON response
+      return { error: `Invalid ${type.toUpperCase()} data format for ${icaoResult.value}.` };
+    }
+
     if (data.Error) {
-      results.innerText = `Error: ${data.Error} for ${icaoResult.value}.`;
-      results.classList.remove("hidden");
-      return null;
+      return { error: `${data.Error} for ${icaoResult.value}.` };
     }
-    return data;
+
+    return { data }; // Return the data if successful
   } catch (error) {
     console.error(`Failed to fetch ${type} data: ${error.message}`);
-    results.innerText = `Error: Unable to fetch ${type} data for ${icaoResult.value}. ${error.message}`;
-    results.classList.remove("hidden");
-    return null;
+    return { error: `Unable to fetch ${type.toUpperCase()} data for ${icaoResult.value}. ${error.message}` };
   }
 }
 
@@ -421,6 +398,23 @@ function appendBackButton() {
   });
 }
 
+function colorFlightRules(flightRules) {
+  switch (flightRules) {
+    case 'VFR':
+      return '<span style="color: lightgreen;">VFR</span>';
+    case 'MVFR':
+      return '<span style="color: yellow;">MVFR</span>';
+    case 'IFR':
+      return '<span style="color: orange;">IFR</span>';
+    case 'LIFR':
+      return '<span style="color: red;">LIFR</span>';
+    case 'N/A':
+      return '<span style="color: var(--primary-color);">N/A</span>'; // Use gray for N/A
+    default:
+      return '<span style="color: var(--primary-color);"></span>'; // Default color for unknown flight rules
+  }
+}
+
 flightForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -433,7 +427,7 @@ flightForm.addEventListener("submit", async (e) => {
   }
 
   flightForm.classList.add("hidden");
-  results.innerText = "";
+  results.innerHTML = ""; // Use innerHTML since you're using HTML for display
   results.innerText = "Loading weather data...";
   results.classList.remove("hidden");
 
@@ -441,16 +435,31 @@ flightForm.addEventListener("submit", async (e) => {
   const deptCode = deptApt.value.trim().toUpperCase();
   const arrCode = arrApt.value.trim().toUpperCase();
 
-  let output = "";
-  let strEtdInfo = "";
-  let strEtaInfo = "";
+  // Put together weather output
+  let output = "", strEtdInfo = "", strEtdAge = "", strTafWarning = "";
+  let strEtaInfo = "", strEtaAge = "";
 
   // Fetch departure weather
-  const deptMetar = await getWeatherData(deptCode, 'metar');
-  const deptTaf = await getWeatherData(deptCode, 'taf');
+  const deptMetarResult = await getWeatherData(deptCode, 'metar');
+  const deptTafResult = await getWeatherData(deptCode, 'taf');
+  let deptMetar = null, deptTaf = null;
+
+  // Extract data or handle errors
+  if (deptMetarResult.data) {
+    deptMetar = deptMetarResult.data;
+  } else if (deptMetarResult.error) {
+    output += `<p class="weather-report error">${deptMetarResult.error}</p>`;
+  }
+
+  if (deptTafResult.data) {
+    deptTaf = deptTafResult.data;
+  } else if (deptTafResult.error) {
+    strTafWarning = `<p class="weather-report error">${deptTafResult.error}</p>`;
+  }
+
   const deptMetarAge = deptMetar ? Math.floor((new Date() - new Date(deptMetar.time.dt)) / 60000) : null; // Age in minutes
   const deptTafAge = deptTaf ? Math.floor((new Date() - new Date(deptTaf.end_time.dt)) / 60000) : null; // Age in minutes
-  console.log(`METAR Age: ${deptMetarAge} minutes, TAF Age: ${deptTafAge} minutes`); // Debugging log
+  let wxEtdFlightRules = deptMetar ? colorFlightRules(deptMetar.flight_rules ? deptMetar.flight_rules : 'N/A') : `N/A`;
 
   // Log deptMetar and deptTaf to console for debugging
   console.dir(deptMetar);
@@ -467,7 +476,7 @@ flightForm.addEventListener("submit", async (e) => {
       const endTime = deptTaf.forecast[i].end_time.dt || 'N/A';
 
       if (etdDate >= startTime && etdDate <= endTime) {
-        strEtdInfo = ` and forecasted as ${forecast} at departure time ${etd.value}Z.`;
+        strEtdInfo = ` and forecasted as ${colorFlightRules(forecast)} at departure time ${etd.value}Z.`;
       }
     }
   }
@@ -475,18 +484,18 @@ flightForm.addEventListener("submit", async (e) => {
   // Add METAR and TAF age notes for departure
   if (deptMetarAge !== null) {
     if (deptMetarAge > 60) {
-      strEtdInfo += `<p class="weather-report" style="color: yellow;">Note: ${deptStation} METAR is ${deptMetarAge} minutes old.</p>`;
+      strEtdAge = `<span class="weather-report" style="color: yellow;">\[-- ${deptMetarAge} minutes old --]</span>`;
     } else {
-      strEtdInfo += `<p class="weather-report">Note: ${deptStation} METAR is ${deptMetarAge} minutes old.</p>`;
+      strEtdAge = `<span class="weather-report" style="color: lightgreen;">\[-- ${deptMetarAge} minutes old --]</span>`;
     }
   }
   if (deptTafAge !== null && deptTafAge > 60) {
-    strEtdInfo += `<p class="weather-report" style="color: yellow;">Note: ${deptStation} TAF expired ${deptTafAge} minutes ago.</p>`;
+    strEtdInfo += `<p class="weather-report" style="color: red;">TAF expired ${deptTafAge} minutes ago.</p>`;
   }
 
   if (deptMetar && deptTaf) {
-    output += `<p class="weather-report">${deptStation} is currently ${deptMetar.flight_rules || 'N/A'}${strEtdInfo}</p>` +
-              `<p class="weather-report">METAR: ${deptMetar.raw}</p>` +
+    output += `<p class="weather-report">${deptStation} is currently ${wxEtdFlightRules} ${strEtdInfo}</p>` +
+              `<p class="weather-report">METAR: ${deptMetar.raw} ${strEtdAge}</p>` +
               `<p class="weather-report">TAF: ${deptStation} ${deptTaf.time.repr} ${deptTaf.forecast[0].raw || 'N/A'}</p>`;
     for (let i = 1; i < deptTaf.forecast.length; i++) {
       const forecast = deptTaf.forecast[i].raw || 'N/A';
@@ -494,11 +503,12 @@ flightForm.addEventListener("submit", async (e) => {
     }
   }
   if (deptMetar && !deptTaf) {
-    output += `<p class="weather-report">${deptStation} is currently ${deptMetar.flight_rules || 'N/A'}${strEtdInfo}</p>` +
-              `<p class="weather-report">METAR: ${deptMetar.raw}</p>`;
+    output += `<p class="weather-report">${deptStation} is currently ${wxEtdFlightRules} ${strEtdInfo}</p>` +
+              `<p class="weather-report">METAR: ${deptMetar.raw} ${strEtdAge}</p>`;
   }
   if (deptTaf && !deptMetar) {
-    output += `<p class="weather-report">${deptStation} is currently ${deptTaf.flight_rules || 'N/A'}${strEtdInfo}</p>` +
+    wxEtdFlightRules = colorFlightRules(deptTaf.flight_rules ? deptTaf.flight_rules : 'N/A');
+    output += `<p class="weather-report">${deptStation} is currently ${wxEtdFlightRules}${strEtdInfo}</p>` +
               `<p class="weather-report">TAF: ${deptStation} ${deptTaf.time.repr} ${deptTaf.forecast[0].raw || 'N/A'}</p>`;
     for (let i = 1; i < deptTaf.forecast.length; i++) {
       const forecast = deptTaf.forecast[i].raw || 'N/A';
@@ -510,6 +520,11 @@ flightForm.addEventListener("submit", async (e) => {
     results.classList.add("error");
   }
 
+  // Append TAF warning if it exists
+  if (strTafWarning) {
+    output += strTafWarning;
+  }
+
   // Add horizontal rule if there’s arrival info to follow
   if (arrCode) {
     output += `<hr>`;
@@ -517,77 +532,99 @@ flightForm.addEventListener("submit", async (e) => {
 
   // Fetch arrival weather if provided
   if (arrCode) {
-    const arrMetar = await getWeatherData(arrCode, 'metar');
-    const arrTaf = await getWeatherData(arrCode, 'taf');
+    const arrMetarResult = await getWeatherData(arrCode, 'metar');
+    const arrTafResult = await getWeatherData(arrCode, 'taf');
+    let arrMetar = null, arrTaf = null;
+    let arrTafError = "";
+
+    // Extract data or handle errors
+    if (arrMetarResult.data) {
+      arrMetar = arrMetarResult.data;
+    } else if (arrMetarResult.error) {
+      output += `<p class="weather-report error">${arrMetarResult.error}</p>`;
+    }
+
+    if (arrTafResult.data) {
+      arrTaf = arrTafResult.data;
+    } else if (arrTafResult.error) {
+      arrTafError = arrTafResult.error;
+    }
+
     const arrMetarAge = arrMetar ? Math.floor((new Date() - new Date(arrMetar.time.dt)) / 60000) : null; // Age in minutes
     const arrTafAge = arrTaf ? Math.floor((new Date() - new Date(arrTaf.end_time.dt)) / 60000) : null; // Age in minutes
+    let wxArrFlightRules = arrMetar ? colorFlightRules(arrMetar.flight_rules ? arrMetar.flight_rules : 'N/A') : `N/A`;
     console.dir(arrTaf);
 
     // Determine the station code for arrival airport
     const arrStation = arrMetar ? arrMetar.station : (arrTaf ? arrTaf.station : arrCode);
 
     // Handle ETA forecast if available
-
-    let intTaf = 0
+    let intTaf = 0;
     if (etaDate && arrTaf) {
       for (let i = 0; i < (arrTaf?.forecast?.length || 0); i++) {
         const forecast = arrTaf.forecast[i].flight_rules || 'N/A';
         const startTime = arrTaf.forecast[i].start_time.dt || 'N/A';
         const endTime = arrTaf.forecast[i].end_time.dt || 'N/A';
         if (etaDate >= startTime && etaDate <= endTime) {
-          strEtaInfo = ` and forecasted as ${forecast} at arrival time ${eta.value}Z.`;
+          strEtaInfo = ` and forecasted as ${colorFlightRules(forecast)} at arrival time ${eta.value}Z.`;
           intTaf = i; // Store the index of the matching forecast
         }
       }
     }
 
     // Check if alternate airport is required
-    let strAlternateReq = "";
-    if (intTaf >= 0 && intTaf < arrTaf.forecast.length && arrTaf.forecast.length > 1) {
-      let etaMinusOne = new Date(etaDate);
-      let etaPlusOne = new Date(etaDate);
-      etaMinusOne.setUTCHours(etaMinusOne.getUTCHours() - 1); 
-      etaMinusOne = etaMinusOne.toISOString(); 
-      etaPlusOne.setUTCHours(etaPlusOne.getUTCHours() + 1); 
-      etaPlusOne = etaPlusOne.toISOString();
-      const altWx = []; 
-      altWx.push(arrTaf.forecast[intTaf].flight_rules); // Add the current forecast
+    // Check if alternate airport is required
+let strAlternateReq = "";
+if (intTaf >= 0 && intTaf < arrTaf?.forecast?.length && arrTaf?.forecast?.length > 1 && etaDate) {
+  try {
+    let etaMinusOne = new Date(etaDate);
+    let etaPlusOne = new Date(etaDate);
+    etaMinusOne.setUTCHours(etaMinusOne.getUTCHours() - 1);
+    etaMinusOne = etaMinusOne.toISOString();
+    etaPlusOne.setUTCHours(etaPlusOne.getUTCHours() + 1);
+    etaPlusOne = etaPlusOne.toISOString();
+    const altWx = [];
+    altWx.push(arrTaf.forecast[intTaf].flight_rules); // Add the current forecast
 
-      if (intTaf > 0 && etaMinusOne >= arrTaf.forecast[intTaf - 1].start_time.dt && etaMinusOne <= arrTaf.forecast[intTaf - 1].end_time.dt) {
-        console.log("ETA minus one hour true: forecast is ", arrTaf.forecast[intTaf - 1].flight_rules);
-        altWx.push(arrTaf.forecast[intTaf - 1].flight_rules);
-      }
-      if (intTaf < arrTaf.forecast.length - 1 && etaPlusOne >= arrTaf.forecast[intTaf + 1].start_time.dt && etaPlusOne <= arrTaf.forecast[intTaf + 1].end_time.dt) {
-        console.log("ETA plus one hour true: forecast is ", arrTaf.forecast[intTaf + 1].flight_rules);
-        altWx.push(arrTaf.forecast[intTaf + 1].flight_rules);
-      }
-      console.log("altWx:", altWx);
-      altWx.some(wx => {
-        if (wx === 'IFR' || wx === 'LIFR') {
-            strAlternateReq = `Note: Alternate airport required for IFR +/- 1 hour.`;
-            return true; // Stops iteration
-        }
-        return false;
-      });
+    if (intTaf > 0 && etaMinusOne >= arrTaf.forecast[intTaf - 1].start_time.dt && etaMinusOne <= arrTaf.forecast[intTaf - 1].end_time.dt) {
+      console.log("ETA minus one hour true: forecast is ", arrTaf.forecast[intTaf - 1].flight_rules);
+      altWx.push(arrTaf.forecast[intTaf - 1].flight_rules);
     }
-    console.log(strAlternateReq);
+    if (intTaf < arrTaf.forecast.length - 1 && etaPlusOne >= arrTaf.forecast[intTaf + 1].start_time.dt && etaPlusOne <= arrTaf.forecast[intTaf + 1].end_time.dt) {
+      console.log("ETA plus one hour true: forecast is ", arrTaf.forecast[intTaf + 1].flight_rules);
+      altWx.push(arrTaf.forecast[intTaf + 1].flight_rules);
+    }
+    console.log("altWx:", altWx);
+    altWx.some(wx => {
+      if (wx === 'IFR' || wx === 'LIFR') {
+        strAlternateReq = `Note: Alternate airport required for IFR +/- 1 hour.`;
+        return true; // Stops iteration
+      }
+      return false;
+    });
+  } catch (error) {
+    console.error("Error in alternate airport check:", error.message);
+    strAlternateReq = `Note: Unable to check alternate requirements due to invalid ETA.`;
+  }
+}
+console.log(strAlternateReq);
 
     // Add METAR and TAF age notes for arrival
     if (arrMetarAge !== null) {
       if (arrMetarAge > 60) {
-        strEtaInfo += `<p class="weather-report" style="color: yellow;">Note: ${arrStation} METAR is ${arrMetarAge} minutes old.</p>`;
+        strEtaAge = `<span class="weather-report" style="color: yellow;">\[-- ${arrMetarAge} minutes old --]</span>`;
       } else {
-        strEtaInfo += `<p class="weather-report">Note: ${arrStation} METAR is ${arrMetarAge} minutes old.</p>`;
+        strEtaAge = `<span class="weather-report" style="color: lightgreen">\[-- ${arrMetarAge} minutes old --]</span>`;
       }
     }
     if (arrTafAge !== null && arrTafAge > 60) {
-      strEtaInfo += `<p class="weather-report" style="color: yellow;">Note: ${arrStation} TAF expired ${arrTafAge} minutes ago.</p>`;
+      strEtaInfo += `<p class="weather-report" style="color: red;">Note: ${arrStation} TAF expired ${arrTafAge} minutes ago.</p>`;
     }
 
     if (arrMetar && arrTaf) {
-      output += `<p class="weather-report">${arrStation} is currently ${arrMetar.flight_rules || 'N/A'}${strEtaInfo}</p>` +
+      output += `<p class="weather-report">${arrStation} is currently ${wxArrFlightRules} ${strEtaInfo}</p>` +
                 `<p class="weather-report" style="color: red;">${strAlternateReq}</p>` +
-                `<p class="weather-report">METAR: ${arrMetar.raw}</p>` +
+                `<p class="weather-report">METAR: ${arrMetar.raw} ${strEtaAge}</p>` +
                 `<p class="weather-report">TAF: ${arrStation} ${arrTaf.time.repr} ${arrTaf.forecast[0].raw || 'N/A'}</p>`;
       for (let i = 1; i < arrTaf.forecast.length; i++) {
         const forecast = arrTaf.forecast[i].raw || 'N/A';
@@ -595,8 +632,8 @@ flightForm.addEventListener("submit", async (e) => {
       }
     }
     if (arrMetar && !arrTaf) {
-      output += `<p class="weather-report">${arrStation} is currently ${arrMetar.flight_rules || 'N/A'}${strEtaInfo}</p>` +
-                `<p class="weather-report">METAR: ${arrMetar.raw}</p>`;
+      output += `<p class="weather-report">${arrStation} is currently ${wxArrFlightRules} ${strEtaInfo}</p>` +
+                `<p class="weather-report">METAR: ${arrMetar.raw} ${strEtaAge}</p>`;
     }
     if (arrTaf && !arrMetar) {
       output += `<p class="weather-report">${arrStation} is currently ${arrTaf.flight_rules || 'N/A'}${strEtaInfo}</p>` +
@@ -610,6 +647,11 @@ flightForm.addEventListener("submit", async (e) => {
     if (!arrMetar && !arrTaf) {
       output += `<p class="weather-report">No weather data found for ${arrCode}.</p>`;
       results.classList.add("error");
+    }
+
+    // Append TAF error if it exists
+    if (arrTafError) {
+      output += `<p class="weather-report">TAF: ${arrTafError}</p>`;
     }
   }
 

@@ -1,6 +1,7 @@
-const CACHE_NAME = 'wedge-cache-v1.2.0';
+const CACHE_NAME = 'wedge-cache-v1.2.1';
 // Cache versioning to handle updates vMajor.minor.patch
 // Version 1.2.0 - Updated icons and added navbar
+// Version 1.2.1 - Updated wx.js output format
 // This service worker caches essential files for offline use and handles fetch requests
 const urlsToCache = [
     './',
