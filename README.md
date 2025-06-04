@@ -13,7 +13,7 @@ VS Code with the Live Server extension (or another local server) to run the app 
 
 Installation
 
-Clone the repository from GitHub:git clone https://github.com/your-username/the-wedge.git
+Clone the repository from GitHub:git clone https://github.com/Maghoul/TheWedge.git
 
 (Replace your-username with your actual GitHub username.)
 Open the project in VS Code:
