@@ -24,7 +24,8 @@
             <hr />
             <div class="form-row">
                 <label for="departure-airport">Departure Airport (ICAO)</label>
-                <input id="departure-airport" type="text" value="KMEM" required>
+                <span><input type="radio" id="favorite"/> Favorite?</span>
+                <input id="departure-airport" type="text" required>
                 <span id="dept-error" class="error-message" style="color: red; font-size: 0.9rem; display: none;"></span>
             </div>
             <div class="form-row">
@@ -43,6 +44,7 @@
                 <span id="eta-error" class="error-message" style="color: red; font-size: 0.9rem; display: none;"></span>
              </div>
             <button type="submit">Get Weather</button>
+            <button type="button" id="swap-btn">Swap Depture and Arrival</button>
             <button type="button" id="clear-btn">Clear Form</button>
         </form>
         <div id="results" class="hidden wx-results"></div>

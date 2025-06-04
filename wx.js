@@ -9,6 +9,8 @@ const arrError = document.getElementById("arr-error");
 const eta = document.getElementById("eta");
 const submitBtn = flightForm.querySelector('button[type="submit"]');
 const results = document.getElementById("results");
+const favorite = document.getElementById("favorite");
+const swapBtn = document.getElementById("swap-btn");
 const clearBtn = document.getElementById("clear-btn");
 const tokenForm = document.getElementById("token-form");
 const tokenInput = document.getElementById("token-input");
@@ -17,8 +19,7 @@ const tokenError = document.getElementById("token-error");
 const apiBaseMetar = "https://avwx.rest/api/metar/";
 const apiBaseTaf = "https://avwx.rest/api/taf/";
 
-let etdDate;
-let etaDate;
+let etdDate, etaDate;
 
 // Initialize API token
 let apiToken = localStorage.getItem('avwxToken');
@@ -85,6 +86,18 @@ etdPlaceholder = etdPlaceholder.toISOString().slice(11, 16);
 etaPlaceholder = etaPlaceholder.toISOString().slice(11, 16);
 etd.placeholder = `e.g., ${etdPlaceholder}`; 
 eta.placeholder = `e.g., ${etaPlaceholder}`;
+
+// Add Departure and Arrival Airport placeholders
+if (localStorage.getItem('departureAirport')) {
+    deptApt.value = localStorage.getItem('departureAirport');
+} else if (localStorage.getItem('favoriteAirport')) {
+    deptApt.value = localStorage.getItem('favoriteAirport');
+} else {
+    deptApt.value = "e.g., KMEM";
+}
+
+// localStorage.getItem('deptAirport') ? deptApt.value = localStorage.getItem('deptAirport') : deptApt.value = "KMEM";
+localStorage.getItem('arrAirport') ? arrApt.value = localStorage.getItem('arrAirport') : arrApt.placeholder = "e.g., KIND";
 
 // Add focus and blur event listeners to input fields
 deptApt.addEventListener("focus", () => {
@@ -435,6 +448,13 @@ flightForm.addEventListener("submit", async (e) => {
   const deptCode = deptApt.value.trim().toUpperCase();
   const arrCode = arrApt.value.trim().toUpperCase();
 
+    if (favorite.checked) {
+    localStorage.setItem('favoriteAirport', deptCode);
+  }
+
+  localStorage.setItem('deptAirport', deptCode); // Store departure airport code
+  localStorage.setItem('arrAirport', arrCode); // Store arrival airport code
+  
   // Put together weather output
   let output = "", strEtdInfo = "", strEtdAge = "", strTafWarning = "";
   let strEtaInfo = "", strEtaAge = "";
@@ -681,6 +701,8 @@ clearBtn.addEventListener("click", () => {
   arrApt.placeholder = "e.g., KIND";
   etd.placeholder = `e.g., ${etdPlaceholder}`;
   eta.placeholder = `e.g., ${etaPlaceholder}`;
+  localStorage.removeItem('deptAirport'); // Clear stored departure airport
+  localStorage.removeItem('arrAirport'); // Clear stored arrival airport
 
   // Reset validation UI for time inputs
   [etdError, etaError].forEach(error => {
@@ -698,7 +720,26 @@ clearBtn.addEventListener("click", () => {
   results.innerText = "";
   results.classList.add("hidden");
   results.classList.remove("error");
+});
 
-  // Update submit button state
-  // updateSubmitButtonState();
+swapBtn.addEventListener("click", () => {
+  // Swap values of departure and arrival airports
+  const temp = deptApt.value;
+  deptApt.value = arrApt.value;
+  arrApt.value = temp;
+
+  // Reset validation UI
+  [deptError, arrError].forEach(error => {
+    error.style.display = "none";
+  });
+  [deptApt, arrApt].forEach(input => {
+    input.classList.remove("error");
+  });
+
+  // Reset etdDate and etaDate
+  etdDate = null;
+  etaDate = null;
+
+  // Clear results
+  results.innerText = "";
 });
