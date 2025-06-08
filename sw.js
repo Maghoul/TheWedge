@@ -1,10 +1,11 @@
-const CACHE_NAME = 'wedge-cache-v1.2.4';
+const CACHE_NAME = 'wedge-cache-v1.2.5';
 // Cache versioning to handle updates vMajor.minor.patch
 // Version 1.2.0 - Updated icons and added navbar
 // Version 1.2.1 - Updated wx.js output format
 // Version 1.2.2 - Updated wx.js to add favorite and swap dept/arr
 // Version 1.2.3 - Updated README
 // Version 1.2.4 - bug fixes to wx.js
+// Version 1.2.5 - Updated contact page for email handling
 // This service worker caches essential files for offline use and handles fetch requests
 const urlsToCache = [
     './',
@@ -20,6 +21,7 @@ const urlsToCache = [
     './frm.js',
     './fraam.js',
     './wx.js',
+    'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js',
     './styles.css',
     './manifest.json',
     './images/icon-192.png',

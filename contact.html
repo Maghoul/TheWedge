@@ -24,7 +24,7 @@
             <hr />
         </header>
         <main>
-            <form id="contact-form" action="mailto:pilotwedge@outlook.com" method="post" enctype="text/plain">
+            <form id="contact-form">
                 <div class="form-row">
                     <label for="name">Name</label>
                     <input type="text" id="name" name="name" required placeholder="Your name">
@@ -48,89 +48,122 @@
                 <button type="submit">Send Message</button>
                 <button type="button" id="clear-contact-btn">Clear Form</button>
             </form>
+            <span id="form-response" class="error-message" style="display: none; text-align: center; margin-top: 10px;"></span>
         </main>
         <footer>
             <p><a href="./index.html">Back to Home</a></p>
         </footer>
     </div>
-    <script src="navbar.js"></script>
-    <script>
-        const contactForm = document.getElementById('contact-form');
-        const clearBtn = document.getElementById('clear-contact-btn');
-        const inputs = {
-            name: document.getElementById('name'),
-            email: document.getElementById('email'),
-            subject: document.getElementById('subject'),
-            message: document.getElementById('message')
-        };
-        const errors = {
-            name: document.getElementById('name-error'),
-            email: document.getElementById('email-error'),
-            subject: document.getElementById('subject-error'),
-            message: document.getElementById('message-error')
-        };
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="navbar.js"></script>
+<script type="text/javascript">
+    (function() {
+        emailjs.init({
+            publicKey: "gfRcIg14FKH0WVTKA" 
+        });
+    })();
 
-        // Basic email validation
-        function validateEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(email);
+    const contactForm = document.getElementById('contact-form');
+    const clearBtn = document.getElementById('clear-contact-btn');
+    const responseMessage = document.getElementById('form-response');
+    const inputs = {
+        name: document.getElementById('name'),
+        email: document.getElementById('email'),
+        subject: document.getElementById('subject'),
+        message: document.getElementById('message')
+    };
+    const errors = {
+        name: document.getElementById('name-error'),
+        email: document.getElementById('email-error'),
+        subject: document.getElementById('subject-error'),
+        message: document.getElementById('message-error')
+    };
+
+    // Basic email validation
+    function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+
+    // Form submission validation and EmailJS sending
+    contactForm.addEventListener('submit', (e) => {
+        e.preventDefault(); // Prevent default form submission
+        let hasError = false;
+
+        // Reset errors and response
+        Object.values(errors).forEach(error => {
+            error.style.display = 'none';
+            error.textContent = '';
+        });
+        responseMessage.style.display = 'none';
+        responseMessage.textContent = '';
+
+        // Validate name
+        if (!inputs.name.value.trim()) {
+            errors.name.textContent = 'Name is required.';
+            errors.name.style.display = 'block';
+            hasError = true;
         }
 
-        // Form submission validation
-        contactForm.addEventListener('submit', (e) => {
-            let hasError = false;
+        // Validate email
+        if (!inputs.email.value.trim()) {
+            errors.email.textContent = 'Email is required.';
+            errors.email.style.display = 'block';
+            hasError = true;
+        } else if (!validateEmail(inputs.email.value)) {
+            errors.email.textContent = 'Please enter a valid email address.';
+            errors.email.style.display = 'block';
+            hasError = true;
+        }
 
-            // Reset errors
-            Object.values(errors).forEach(error => {
-                error.style.display = 'none';
-                error.textContent = '';
-            });
+        // Validate subject
+        if (!inputs.subject.value.trim()) {
+            errors.subject.textContent = 'Subject is required.';
+            errors.subject.style.display = 'block';
+            hasError = true;
+        }
 
-            // Validate name
-            if (!inputs.name.value.trim()) {
-                errors.name.textContent = 'Name is required.';
-                errors.name.style.display = 'block';
-                hasError = true;
-            }
+        // Validate message
+        if (!inputs.message.value.trim()) {
+            errors.message.textContent = 'Message is required.';
+            errors.message.style.display = 'block';
+            hasError = true;
+        }
 
-            // Validate email
-            if (!inputs.email.value.trim()) {
-                errors.email.textContent = 'Email is required.';
-                errors.email.style.display = 'block';
-                hasError = true;
-            } else if (!validateEmail(inputs.email.value)) {
-                errors.email.textContent = 'Please enter a valid email address.';
-                errors.email.style.display = 'block';
-                hasError = true;
-            }
+        if (hasError) {
+            return; // Stop if validation fails
+        }
 
-            // Validate subject
-            if (!inputs.subject.value.trim()) {
-                errors.subject.textContent = 'Subject is required.';
-                errors.subject.style.display = 'block';
-                hasError = true;
-            }
-
-            // Validate message
-            if (!inputs.message.value.trim()) {
-                errors.message.textContent = 'Message is required.';
-                errors.message.style.display = 'block';
-                hasError = true;
-            }
-
-            if (hasError) {
-                e.preventDefault(); // Prevent form submission
-            }
-        });
-
-        // Clear form
-        clearBtn.addEventListener('click', () => {
+        // Send form data using EmailJS
+        emailjs.send("service_7t77bnk", "template_qb63qyf", {
+            name: inputs.name.value,
+            email: inputs.email.value,
+            subject: inputs.subject.value,
+            message: inputs.message.value
+        })
+        .then(() => {
+            responseMessage.style.display = 'block';
+            responseMessage.style.color = 'var(--primary-color)';
+            responseMessage.textContent = 'Message sent successfully!';
             contactForm.reset();
-            Object.values(errors).forEach(error => {
-                error.style.display = 'none';
-                error.textContent = '';
-            });
+        }, (error) => {
+            responseMessage.style.display = 'block';
+            responseMessage.style.color = 'red';
+            responseMessage.textContent = 'Failed to send message. Please try again.';
+            console.error('EmailJS error:', error);
         });
-    </script>
+    });
+
+    // Clear form
+    clearBtn.addEventListener('click', () => {
+        contactForm.reset();
+        Object.values(errors).forEach(error => {
+            error.style.display = 'none';
+            error.textContent = '';
+        });
+        responseMessage.style.display = 'none';
+        responseMessage.textContent = '';
+    });
+</script>
 </body>
 </html>
