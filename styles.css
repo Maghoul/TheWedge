@@ -142,7 +142,7 @@ main.container ul li a:hover {
 /* Horizontal layout for checkbox-label pairs */
 .form-row:has(input[type="checkbox"]) {
     flex-direction: row;
-    align-items: center;
+    align-items: left;
     gap: 12px; /* Space between checkbox and label */
 }
 
@@ -285,6 +285,7 @@ details[open] p {
 .error {
     background-color: #ffebee;
     border: 2px solid #d32f2f;
+    color: red !important;
 }
 
 input[type="checkbox"]:checked {

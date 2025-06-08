@@ -88,8 +88,8 @@ etd.placeholder = `e.g., ${etdPlaceholder}`;
 eta.placeholder = `e.g., ${etaPlaceholder}`;
 
 // Add Departure and Arrival Airport placeholders
-if (localStorage.getItem('departureAirport')) {
-    deptApt.value = localStorage.getItem('departureAirport');
+if (localStorage.getItem('deptAirport')) {
+    deptApt.value = localStorage.getItem('deptAirport');
 } else if (localStorage.getItem('favoriteAirport')) {
     deptApt.value = localStorage.getItem('favoriteAirport');
 } else {
@@ -346,8 +346,8 @@ async function getWeatherData(airportCode, type = 'metar') {
 
     return { data }; // Return the data if successful
   } catch (error) {
-    console.error(`Failed to fetch ${type} data: ${error.message}`);
-    return { error: `Unable to fetch ${type.toUpperCase()} data for ${icaoResult.value}. ${error.message}` };
+    console.error(`Failed to fetch ${type} data: ${error.message} `);
+    return { error: `Unable to fetch ${type.toUpperCase()} data for ${icaoResult.value}. ${error.message} ` };
   }
 }
 
@@ -450,6 +450,7 @@ flightForm.addEventListener("submit", async (e) => {
 
     if (favorite.checked) {
     localStorage.setItem('favoriteAirport', deptCode);
+    favorite.checked = false; // Uncheck after saving
   }
 
   localStorage.setItem('deptAirport', deptCode); // Store departure airport code
@@ -687,7 +688,7 @@ const backBtn = document.getElementById("back-btn");
 
 clearBtn.addEventListener("click", () => {
   // Reset the form
-  flightForm.reset(); // Use flightForm instead of form
+  flightForm.reset(); 
 
   // Reset dynamic placeholders for ETD and ETA
   let etdPlaceholder = new Date();
@@ -696,7 +697,13 @@ clearBtn.addEventListener("click", () => {
   etaPlaceholder.setUTCHours(etaPlaceholder.getUTCHours() + 4);
   etdPlaceholder = etdPlaceholder.toISOString().slice(11, 16);
   etaPlaceholder = etaPlaceholder.toISOString().slice(11, 16);
-  deptApt.value = "";
+
+  if (localStorage.getItem('favoriteAirport')) {
+      deptApt.value = localStorage.getItem('favoriteAirport');
+  } else {
+      deptApt.value = "";
+  }
+
   deptApt.placeholder = "e.g., KMEM";
   arrApt.placeholder = "e.g., KIND";
   etd.placeholder = `e.g., ${etdPlaceholder}`;
