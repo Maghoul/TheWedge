@@ -93,7 +93,7 @@ if (localStorage.getItem('deptAirport')) {
 } else if (localStorage.getItem('favoriteAirport')) {
     deptApt.value = localStorage.getItem('favoriteAirport');
 } else {
-    deptApt.value = "e.g., KMEM";
+    deptApt.value = "KMEM";
 }
 
 // localStorage.getItem('deptAirport') ? deptApt.value = localStorage.getItem('deptAirport') : deptApt.value = "KMEM";
