@@ -304,7 +304,7 @@ async function getWeatherData(airportCode, type = 'metar') {
 
   try {
     const baseUrl = type === 'metar' ? apiBaseMetar : apiBaseTaf;
-    const response = await fetch(`${baseUrl}${icaoResult.value}`, {
+    const response = await fetch(`${baseUrl}${icaoResult.value}?options=info`, {
       headers: {
         'Authorization': `Bearer ${apiToken}`,
         'Accept': 'application/json'
@@ -637,7 +637,7 @@ if (intTaf >= 0 && intTaf < arrTaf?.forecast?.length && arrTaf?.forecast?.length
     strAlternateReq = `Note: Unable to check alternate requirements due to invalid ETA.`;
   }
 }
-    console.log("etaDate:", etaDate.slice(11,16), "intTaf:", intTaf, "Alternate required:", strAlternateReq);
+    //console.log("etaDate:", etaDate.slice(11,16), "intTaf:", intTaf, "Alternate required:", strAlternateReq);
     // Add METAR and TAF age notes for arrival
     if (arrMetarAge !== null) {
       if (arrMetarAge > 60) {
