@@ -488,6 +488,7 @@ flightForm.addEventListener("submit", async (e) => {
 
   // Determine the station code for departure airport
   const deptStation = deptMetar ? deptMetar.station : (deptTaf ? deptTaf.station : deptCode);
+  const deptCity = deptMetar ? deptMetar.info.city : deptCode; // Use city from METAR if available, otherwise use ICAO code
 
   // Handle ETD forecast if available
   if (etdDate && deptTaf) {
@@ -515,7 +516,7 @@ flightForm.addEventListener("submit", async (e) => {
   }
 
   if (deptMetar && deptTaf) {
-    output += `<p class="weather-report">${deptStation} is currently ${wxEtdFlightRules} ${strEtdInfo}</p>` +
+    output += `<p class="weather-report">${deptCity} is currently ${wxEtdFlightRules} ${strEtdInfo}</p>` +
               `<p class="weather-report">METAR: ${deptMetar.raw} ${strEtdAge}</p>` +
               `<p class="weather-report">TAF: ${deptStation} ${deptTaf.time.repr} ${deptTaf.forecast[0].raw || 'N/A'}</p>`;
     for (let i = 1; i < deptTaf.forecast.length; i++) {
@@ -524,12 +525,12 @@ flightForm.addEventListener("submit", async (e) => {
     }
   }
   if (deptMetar && !deptTaf) {
-    output += `<p class="weather-report">${deptStation} is currently ${wxEtdFlightRules} ${strEtdInfo}</p>` +
+    output += `<p class="weather-report">${deptCity} is currently ${wxEtdFlightRules} ${strEtdInfo}</p>` +
               `<p class="weather-report">METAR: ${deptMetar.raw} ${strEtdAge}</p>`;
   }
   if (deptTaf && !deptMetar) {
     wxEtdFlightRules = colorFlightRules(deptTaf.flight_rules ? deptTaf.flight_rules : 'N/A');
-    output += `<p class="weather-report">${deptStation} is currently ${wxEtdFlightRules}${strEtdInfo}</p>` +
+    output += `<p class="weather-report">${deptCity} is currently ${wxEtdFlightRules}${strEtdInfo}</p>` +
               `<p class="weather-report">TAF: ${deptStation} ${deptTaf.time.repr} ${deptTaf.forecast[0].raw || 'N/A'}</p>`;
     for (let i = 1; i < deptTaf.forecast.length; i++) {
       const forecast = deptTaf.forecast[i].raw || 'N/A';
@@ -578,6 +579,8 @@ flightForm.addEventListener("submit", async (e) => {
 
     // Determine the station code for arrival airport
     const arrStation = arrMetar ? arrMetar.station : (arrTaf ? arrTaf.station : arrCode);
+    const arrCity = arrMetar ? arrMetar.info.city : arrCode; // Use city from METAR if available, otherwise use ICAO code
+    console.log("Arrival Station:", arrStation, "City:", arrCity);
 
     // Handle ETA forecast if available
     let intTaf = 0;
@@ -651,7 +654,7 @@ if (intTaf >= 0 && intTaf < arrTaf?.forecast?.length && arrTaf?.forecast?.length
     }
 
     if (arrMetar && arrTaf) {
-      output += `<p class="weather-report">${arrStation} is currently ${wxArrFlightRules} ${strEtaInfo}</p>` +
+      output += `<p class="weather-report">${arrCity} is currently ${wxArrFlightRules} ${strEtaInfo}</p>` +
                 `<p class="weather-report" style="color: red;">${strAlternateReq}</p>` +
                 `<p class="weather-report">METAR: ${arrMetar.raw} ${strEtaAge}</p>` +
                 `<p class="weather-report">TAF: ${arrStation} ${arrTaf.time.repr} ${arrTaf.forecast[0].raw || 'N/A'}</p>`;
@@ -661,11 +664,11 @@ if (intTaf >= 0 && intTaf < arrTaf?.forecast?.length && arrTaf?.forecast?.length
       }
     }
     if (arrMetar && !arrTaf) {
-      output += `<p class="weather-report">${arrStation} is currently ${wxArrFlightRules} ${strEtaInfo}</p>` +
+      output += `<p class="weather-report">${arrCity} is currently ${wxArrFlightRules} ${strEtaInfo}</p>` +
                 `<p class="weather-report">METAR: ${arrMetar.raw} ${strEtaAge}</p>`;
     }
     if (arrTaf && !arrMetar) {
-      output += `<p class="weather-report">${arrStation} is currently ${arrTaf.flight_rules || 'N/A'}${strEtaInfo}</p>` +
+      output += `<p class="weather-report">${arrCity} is currently ${arrTaf.flight_rules || 'N/A'}${strEtaInfo}</p>` +
                 `<p class="weather-report" style="color: red;">${strAlternateReq}</p>` +
                 `<p class="weather-report">TAF: ${arrStation} ${arrTaf.time.repr} ${arrTaf.forecast[0].raw || 'N/A'}</p>`;
       for (let i = 1; i < arrTaf.forecast.length; i++) {
