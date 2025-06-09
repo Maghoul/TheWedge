@@ -581,11 +581,21 @@ flightForm.addEventListener("submit", async (e) => {
 
     // Handle ETA forecast if available
     let intTaf = 0;
+    let startTime, endTime;
     if (etaDate && arrTaf) {
       for (let i = 0; i < (arrTaf?.forecast?.length || 0); i++) {
         const forecast = arrTaf.forecast[i].flight_rules || 'N/A';
-        const startTime = arrTaf.forecast[i].start_time.dt || 'N/A';
-        const endTime = arrTaf.forecast[i].end_time.dt || 'N/A';
+        // Use Transition start time for BECMG forecasts
+        if (arrTaf.forecast[i].type === 'BECMG') {
+          startTime = arrTaf.forecast[i].transition_start.dt || 'N/A';
+          endTime = arrTaf.forecast[i].end_time.dt || 'N/A';  // No change for end_time
+        } else {
+        // Use regular start and end times for other forecasts
+          startTime = arrTaf.forecast[i].start_time.dt || 'N/A';
+          endTime = arrTaf.forecast[i].end_time.dt || 'N/A';
+          console.log(`Forecast ${i} start time:`, startTime, "end time:", endTime);
+        }
+       console.log("ETA > Start?", etaDate >= startTime, "ETA < End?", etaDate <= endTime, "Forecast:", forecast);
         if (etaDate >= startTime && etaDate <= endTime) {
           strEtaInfo = ` and forecasted as ${colorFlightRules(forecast)} at arrival time ${eta.value}Z.`;
           intTaf = i; // Store the index of the matching forecast
@@ -593,7 +603,6 @@ flightForm.addEventListener("submit", async (e) => {
       }
     }
 
-    // Check if alternate airport is required
     // Check if alternate airport is required
 let strAlternateReq = "";
 if (intTaf >= 0 && intTaf < arrTaf?.forecast?.length && arrTaf?.forecast?.length > 1 && etaDate) {
@@ -628,8 +637,7 @@ if (intTaf >= 0 && intTaf < arrTaf?.forecast?.length && arrTaf?.forecast?.length
     strAlternateReq = `Note: Unable to check alternate requirements due to invalid ETA.`;
   }
 }
-console.log(strAlternateReq);
-
+    console.log("etaDate:", etaDate.slice(11,16), "intTaf:", intTaf, "Alternate required:", strAlternateReq);
     // Add METAR and TAF age notes for arrival
     if (arrMetarAge !== null) {
       if (arrMetarAge > 60) {
