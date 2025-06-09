@@ -428,6 +428,121 @@ function colorFlightRules(flightRules) {
   }
 }
 
+function generateWeatherOutput(airportCode, type, timeStr, timeDate) {
+  let output = "";
+  let timeInfo = "";
+  let timeAge = "";
+  let tafWarning = "";
+
+  // Fetch weather data
+  const metarResult = getWeatherData(airportCode, 'metar');
+  const tafResult = getWeatherData(airportCode, 'taf');
+
+  return Promise.all([metarResult, tafResult]).then(([metarResult, tafResult]) => {
+    let metar = null, taf = null;
+
+    // Extract data or handle errors
+    if (metarResult.data) {
+      metar = metarResult.data;
+    } else if (metarResult.error) {
+      output += `<p class="weather-report error">${metarResult.error}</p>`;
+    }
+
+    if (tafResult.data) {
+      taf = tafResult.data;
+    } else if (tafResult.error) {
+      tafWarning = `<p class="weather-report error">${tafResult.error}</p>`;
+    }
+    console.log("METAR:", metar);
+    console.log("TAF", taf);
+
+    const metarAge = metar ? Math.floor((new Date() - new Date(metar.time.dt)) / 60000) : null;
+    const tafAge = taf ? Math.floor((new Date() - new Date(taf.end_time.dt)) / 60000) : null;
+    const flightRules = metar ? colorFlightRules(metar.flight_rules || 'N/A') : (taf ? colorFlightRules(taf.flight_rules || 'N/A') : 'N/A');
+
+    const station = metar ? metar.station : (taf ? taf.station : airportCode);
+    const city = metar ? metar.info.city : airportCode;
+
+    // Handle time-specific forecast (ETD or ETA)
+    let alternateReq = "";
+    if (timeDate && taf) {
+      let matchingForecastIndex = -1;
+      for (let i = 0; i < (taf.forecast?.length || 0); i++) {
+        const forecast = taf.forecast[i].flight_rules || 'N/A';
+        const startTime = taf.forecast[i].type === 'BECMG' ? taf.forecast[i].transition_start.dt : taf.forecast[i].start_time.dt;
+        const endTime = taf.forecast[i].end_time.dt;
+
+        if (timeDate >= startTime && timeDate <= endTime) {
+          timeInfo = ` and forecasted as ${colorFlightRules(forecast)} at ${type} time ${timeStr}Z.`;
+          matchingForecastIndex = i;
+        }
+      }
+
+      // Check for alternate airport requirement
+      if (matchingForecastIndex >= 0 && taf.forecast.length > 1 && timeDate) {
+        try {
+          let timeMinusOne = new Date(timeDate);
+          let timePlusOne = new Date(timeDate);
+          timeMinusOne.setUTCHours(timeMinusOne.getUTCHours() - 1);
+          timePlusOne.setUTCHours(timePlusOne.getUTCHours() + 1);
+          const altWx = [taf.forecast[matchingForecastIndex].flight_rules];
+
+          if (matchingForecastIndex > 0 && timeMinusOne >= taf.forecast[matchingForecastIndex - 1].start_time.dt && timeMinusOne <= taf.forecast[matchingForecastIndex - 1].end_time.dt) {
+            altWx.push(taf.forecast[matchingForecastIndex - 1].flight_rules);
+          }
+          if (matchingForecastIndex < taf.forecast.length - 1 && timePlusOne >= taf.forecast[matchingForecastIndex + 1].start_time.dt && timePlusOne <= taf.forecast[matchingForecastIndex + 1].end_time.dt) {
+            altWx.push(taf.forecast[matchingForecastIndex + 1].flight_rules);
+          }
+          if (altWx.some(wx => wx === 'IFR' || wx === 'LIFR')) {
+            alternateReq = `Note: Alternate airport required for IFR +/- 1 hour.`;
+          }
+        } catch (error) {
+          console.error(`Error in alternate airport check for ${type}:`, error.message);
+          alternateReq = `Note: Unable to check alternate requirements due to invalid ${type} time.`;
+        }
+      }
+    }
+
+    // Add METAR and TAF age notes
+    if (metarAge !== null) {
+      timeAge = `<span class="weather-report" style="color: ${metarAge > 60 ? 'yellow' : 'lightgreen'};">[-- ${metarAge} minutes old --]</span>`;
+    }
+    if (tafAge !== null && tafAge > 60) {
+      timeInfo += `<p class="weather-report" style="color: red;">Note: ${station} TAF expired ${tafAge} minutes ago.</p>`;
+    }
+
+    // Build output based on available data
+    if (metar && taf) {
+      output += `<p class="weather-report">${city} is currently ${flightRules}${timeInfo}</p>` +
+                `<p class="weather-report" style="color: red;">${alternateReq}</p>` +
+                `<p class="weather-report">METAR: ${metar.raw} ${timeAge}</p>` +
+                `<p class="weather-report">TAF: ${station} ${taf.time.repr} ${taf.forecast[0].raw || 'N/A'}</p>`;
+      for (let i = 1; i < taf.forecast.length; i++) {
+        output += `<p class="weather-report indented-forecast">${taf.forecast[i].raw || 'N/A'}</p>`;
+      }
+    } else if (metar) {
+      output += `<p class="weather-report">${city} is currently ${flightRules}${timeInfo}</p>` +
+                `<p class="weather-report">METAR: ${metar.raw} ${timeAge}</p>`;
+    } else if (taf) {
+      output += `<p class="weather-report">${city} is currently ${flightRules}${timeInfo}</p>` +
+                `<p class="weather-report" style="color: red;">${alternateReq}</p>` +
+                `<p class="weather-report">TAF: ${station} ${taf.time.repr} ${taf.forecast[0].raw || 'N/A'}</p>`;
+      for (let i = 1; i < taf.forecast.length; i++) {
+        output += `<p class="weather-report indented-forecast">${taf.forecast[i].raw || 'N/A'}</p>`;
+      }
+    } else {
+      output += `<p class="weather-report">No weather data found for ${airportCode}.</p>`;
+    }
+
+    // Append TAF warning if it exists
+    if (tafWarning) {
+      output += tafWarning;
+    }
+
+    return output;
+  });
+}
+
 flightForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -436,262 +551,38 @@ flightForm.addEventListener("submit", async (e) => {
     flightForm.classList.add("hidden");
     results.classList.remove("hidden");
     appendBackButton();
-    return; // Stop submission if validation fails
+    return;
   }
 
   flightForm.classList.add("hidden");
-  results.innerHTML = ""; // Use innerHTML since you're using HTML for display
-  results.innerText = "Loading weather data...";
+  results.innerHTML = "Loading weather data...";
   results.classList.remove("hidden");
+  results.classList.remove("error");
 
   // Sanitize inputs
   const deptCode = deptApt.value.trim().toUpperCase();
   const arrCode = arrApt.value.trim().toUpperCase();
 
-    if (favorite.checked) {
+  if (favorite.checked) {
     localStorage.setItem('favoriteAirport', deptCode);
-    favorite.checked = false; // Uncheck after saving
+    favorite.checked = false;
   }
 
-  localStorage.setItem('deptAirport', deptCode); // Store departure airport code
-  localStorage.setItem('arrAirport', arrCode); // Store arrival airport code
-  
-  // Put together weather output
-  let output = "", strEtdInfo = "", strEtdAge = "", strTafWarning = "";
-  let strEtaInfo = "", strEtaAge = "";
+  localStorage.setItem('deptAirport', deptCode);
+  localStorage.setItem('arrAirport', arrCode);
 
-  // Fetch departure weather
-  const deptMetarResult = await getWeatherData(deptCode, 'metar');
-  const deptTafResult = await getWeatherData(deptCode, 'taf');
-  let deptMetar = null, deptTaf = null;
+  // Fetch and display weather data
+  let output = await generateWeatherOutput(deptCode, 'ETD', etd.value, etdDate);
 
-  // Extract data or handle errors
-  if (deptMetarResult.data) {
-    deptMetar = deptMetarResult.data;
-  } else if (deptMetarResult.error) {
-    output += `<p class="weather-report error">${deptMetarResult.error}</p>`;
-  }
-
-  if (deptTafResult.data) {
-    deptTaf = deptTafResult.data;
-  } else if (deptTafResult.error) {
-    strTafWarning = `<p class="weather-report error">${deptTafResult.error}</p>`;
-  }
-
-  const deptMetarAge = deptMetar ? Math.floor((new Date() - new Date(deptMetar.time.dt)) / 60000) : null; // Age in minutes
-  const deptTafAge = deptTaf ? Math.floor((new Date() - new Date(deptTaf.end_time.dt)) / 60000) : null; // Age in minutes
-  let wxEtdFlightRules = deptMetar ? colorFlightRules(deptMetar.flight_rules ? deptMetar.flight_rules : 'N/A') : `N/A`;
-
-  // Log deptMetar and deptTaf to console for debugging
-  console.dir(deptMetar);
-  console.dir(deptTaf);
-
-  // Determine the station code for departure airport
-  const deptStation = deptMetar ? deptMetar.station : (deptTaf ? deptTaf.station : deptCode);
-  const deptCity = deptMetar ? deptMetar.info.city : deptCode; // Use city from METAR if available, otherwise use ICAO code
-
-  // Handle ETD forecast if available
-  if (etdDate && deptTaf) {
-    for (let i = 0; i < (deptTaf?.forecast?.length || 0); i++) {
-      const forecast = deptTaf.forecast[i].flight_rules || 'N/A';
-      const startTime = deptTaf.forecast[i].start_time.dt || 'N/A';
-      const endTime = deptTaf.forecast[i].end_time.dt || 'N/A';
-
-      if (etdDate >= startTime && etdDate <= endTime) {
-        strEtdInfo = ` and forecasted as ${colorFlightRules(forecast)} at departure time ${etd.value}Z.`;
-      }
-    }
-  }
-
-  // Add METAR and TAF age notes for departure
-  if (deptMetarAge !== null) {
-    if (deptMetarAge > 60) {
-      strEtdAge = `<span class="weather-report" style="color: yellow;">\[-- ${deptMetarAge} minutes old --]</span>`;
-    } else {
-      strEtdAge = `<span class="weather-report" style="color: lightgreen;">\[-- ${deptMetarAge} minutes old --]</span>`;
-    }
-  }
-  if (deptTafAge !== null && deptTafAge > 60) {
-    strEtdInfo += `<p class="weather-report" style="color: red;">TAF expired ${deptTafAge} minutes ago.</p>`;
-  }
-
-  if (deptMetar && deptTaf) {
-    output += `<p class="weather-report">${deptCity} is currently ${wxEtdFlightRules} ${strEtdInfo}</p>` +
-              `<p class="weather-report">METAR: ${deptMetar.raw} ${strEtdAge}</p>` +
-              `<p class="weather-report">TAF: ${deptStation} ${deptTaf.time.repr} ${deptTaf.forecast[0].raw || 'N/A'}</p>`;
-    for (let i = 1; i < deptTaf.forecast.length; i++) {
-      const forecast = deptTaf.forecast[i].raw || 'N/A';
-      output += `<p class="weather-report indented-forecast">${forecast}</p>`;
-    }
-  }
-  if (deptMetar && !deptTaf) {
-    output += `<p class="weather-report">${deptCity} is currently ${wxEtdFlightRules} ${strEtdInfo}</p>` +
-              `<p class="weather-report">METAR: ${deptMetar.raw} ${strEtdAge}</p>`;
-  }
-  if (deptTaf && !deptMetar) {
-    wxEtdFlightRules = colorFlightRules(deptTaf.flight_rules ? deptTaf.flight_rules : 'N/A');
-    output += `<p class="weather-report">${deptCity} is currently ${wxEtdFlightRules}${strEtdInfo}</p>` +
-              `<p class="weather-report">TAF: ${deptStation} ${deptTaf.time.repr} ${deptTaf.forecast[0].raw || 'N/A'}</p>`;
-    for (let i = 1; i < deptTaf.forecast.length; i++) {
-      const forecast = deptTaf.forecast[i].raw || 'N/A';
-      output += `<p class="weather-report indented-forecast">${forecast}</p>`;
-    }
-  }
-  if (!deptMetar && !deptTaf) {
-    output += `<p class="weather-report">No weather data found for ${deptCode}.</p>`;
-    results.classList.add("error");
-  }
-
-  // Append TAF warning if it exists
-  if (strTafWarning) {
-    output += strTafWarning;
-  }
-
-  // Add horizontal rule if there’s arrival info to follow
   if (arrCode) {
     output += `<hr>`;
-  }
-
-  // Fetch arrival weather if provided
-  if (arrCode) {
-    const arrMetarResult = await getWeatherData(arrCode, 'metar');
-    const arrTafResult = await getWeatherData(arrCode, 'taf');
-    let arrMetar = null, arrTaf = null;
-    let arrTafError = "";
-
-    // Extract data or handle errors
-    if (arrMetarResult.data) {
-      arrMetar = arrMetarResult.data;
-    } else if (arrMetarResult.error) {
-      output += `<p class="weather-report error">${arrMetarResult.error}</p>`;
-    }
-
-    if (arrTafResult.data) {
-      arrTaf = arrTafResult.data;
-    } else if (arrTafResult.error) {
-      arrTafError = arrTafResult.error;
-    }
-
-    const arrMetarAge = arrMetar ? Math.floor((new Date() - new Date(arrMetar.time.dt)) / 60000) : null; // Age in minutes
-    const arrTafAge = arrTaf ? Math.floor((new Date() - new Date(arrTaf.end_time.dt)) / 60000) : null; // Age in minutes
-    let wxArrFlightRules = arrMetar ? colorFlightRules(arrMetar.flight_rules ? arrMetar.flight_rules : 'N/A') : `N/A`;
-    console.dir(arrTaf);
-
-    // Determine the station code for arrival airport
-    const arrStation = arrMetar ? arrMetar.station : (arrTaf ? arrTaf.station : arrCode);
-    const arrCity = arrMetar ? arrMetar.info.city : arrCode; // Use city from METAR if available, otherwise use ICAO code
-    console.log("Arrival Station:", arrStation, "City:", arrCity);
-
-    // Handle ETA forecast if available
-    let intTaf = 0;
-    let startTime, endTime;
-    if (etaDate && arrTaf) {
-      for (let i = 0; i < (arrTaf?.forecast?.length || 0); i++) {
-        const forecast = arrTaf.forecast[i].flight_rules || 'N/A';
-        // Use Transition start time for BECMG forecasts
-        if (arrTaf.forecast[i].type === 'BECMG') {
-          startTime = arrTaf.forecast[i].transition_start.dt || 'N/A';
-          endTime = arrTaf.forecast[i].end_time.dt || 'N/A';  // No change for end_time
-        } else {
-        // Use regular start and end times for other forecasts
-          startTime = arrTaf.forecast[i].start_time.dt || 'N/A';
-          endTime = arrTaf.forecast[i].end_time.dt || 'N/A';
-          console.log(`Forecast ${i} start time:`, startTime, "end time:", endTime);
-        }
-       console.log("ETA > Start?", etaDate >= startTime, "ETA < End?", etaDate <= endTime, "Forecast:", forecast);
-        if (etaDate >= startTime && etaDate <= endTime) {
-          strEtaInfo = ` and forecasted as ${colorFlightRules(forecast)} at arrival time ${eta.value}Z.`;
-          intTaf = i; // Store the index of the matching forecast
-        }
-      }
-    }
-
-    // Check if alternate airport is required
-let strAlternateReq = "";
-if (intTaf >= 0 && intTaf < arrTaf?.forecast?.length && arrTaf?.forecast?.length > 1 && etaDate) {
-  try {
-    let etaMinusOne = new Date(etaDate);
-    let etaPlusOne = new Date(etaDate);
-    etaMinusOne.setUTCHours(etaMinusOne.getUTCHours() - 1);
-    etaMinusOne = etaMinusOne.toISOString();
-    etaPlusOne.setUTCHours(etaPlusOne.getUTCHours() + 1);
-    etaPlusOne = etaPlusOne.toISOString();
-    const altWx = [];
-    altWx.push(arrTaf.forecast[intTaf].flight_rules); // Add the current forecast
-
-    if (intTaf > 0 && etaMinusOne >= arrTaf.forecast[intTaf - 1].start_time.dt && etaMinusOne <= arrTaf.forecast[intTaf - 1].end_time.dt) {
-      console.log("ETA minus one hour true: forecast is ", arrTaf.forecast[intTaf - 1].flight_rules);
-      altWx.push(arrTaf.forecast[intTaf - 1].flight_rules);
-    }
-    if (intTaf < arrTaf.forecast.length - 1 && etaPlusOne >= arrTaf.forecast[intTaf + 1].start_time.dt && etaPlusOne <= arrTaf.forecast[intTaf + 1].end_time.dt) {
-      console.log("ETA plus one hour true: forecast is ", arrTaf.forecast[intTaf + 1].flight_rules);
-      altWx.push(arrTaf.forecast[intTaf + 1].flight_rules);
-    }
-    console.log("altWx:", altWx);
-    altWx.some(wx => {
-      if (wx === 'IFR' || wx === 'LIFR') {
-        strAlternateReq = `Note: Alternate airport required for IFR +/- 1 hour.`;
-        return true; // Stops iteration
-      }
-      return false;
-    });
-  } catch (error) {
-    console.error("Error in alternate airport check:", error.message);
-    strAlternateReq = `Note: Unable to check alternate requirements due to invalid ETA.`;
-  }
-}
-    //console.log("etaDate:", etaDate.slice(11,16), "intTaf:", intTaf, "Alternate required:", strAlternateReq);
-    // Add METAR and TAF age notes for arrival
-    if (arrMetarAge !== null) {
-      if (arrMetarAge > 60) {
-        strEtaAge = `<span class="weather-report" style="color: yellow;">\[-- ${arrMetarAge} minutes old --]</span>`;
-      } else {
-        strEtaAge = `<span class="weather-report" style="color: lightgreen">\[-- ${arrMetarAge} minutes old --]</span>`;
-      }
-    }
-    if (arrTafAge !== null && arrTafAge > 60) {
-      strEtaInfo += `<p class="weather-report" style="color: red;">Note: ${arrStation} TAF expired ${arrTafAge} minutes ago.</p>`;
-    }
-
-    if (arrMetar && arrTaf) {
-      output += `<p class="weather-report">${arrCity} is currently ${wxArrFlightRules} ${strEtaInfo}</p>` +
-                `<p class="weather-report" style="color: red;">${strAlternateReq}</p>` +
-                `<p class="weather-report">METAR: ${arrMetar.raw} ${strEtaAge}</p>` +
-                `<p class="weather-report">TAF: ${arrStation} ${arrTaf.time.repr} ${arrTaf.forecast[0].raw || 'N/A'}</p>`;
-      for (let i = 1; i < arrTaf.forecast.length; i++) {
-        const forecast = arrTaf.forecast[i].raw || 'N/A';
-        output += `<p class="weather-report indented-forecast">${forecast}</p>`;
-      }
-    }
-    if (arrMetar && !arrTaf) {
-      output += `<p class="weather-report">${arrCity} is currently ${wxArrFlightRules} ${strEtaInfo}</p>` +
-                `<p class="weather-report">METAR: ${arrMetar.raw} ${strEtaAge}</p>`;
-    }
-    if (arrTaf && !arrMetar) {
-      output += `<p class="weather-report">${arrCity} is currently ${arrTaf.flight_rules || 'N/A'}${strEtaInfo}</p>` +
-                `<p class="weather-report" style="color: red;">${strAlternateReq}</p>` +
-                `<p class="weather-report">TAF: ${arrStation} ${arrTaf.time.repr} ${arrTaf.forecast[0].raw || 'N/A'}</p>`;
-      for (let i = 1; i < arrTaf.forecast.length; i++) {
-        const forecast = arrTaf.forecast[i].raw || 'N/A';
-        output += `<p class="weather-report indented-forecast">${forecast}</p>`;
-      }
-    }
-    if (!arrMetar && !arrTaf) {
-      output += `<p class="weather-report">No weather data found for ${arrCode}.</p>`;
-      results.classList.add("error");
-    }
-
-    // Append TAF error if it exists
-    if (arrTafError) {
-      output += `<p class="weather-report">TAF: ${arrTafError}</p>`;
-    }
+    output += await generateWeatherOutput(arrCode, 'ETA', eta.value, etaDate);
   }
 
   if (output) {
-    results.innerHTML = output; // Using <p> tags, so no need for replace
+    results.innerHTML = output;
   }
 
-  // Append back button
   appendBackButton();
 });
 
