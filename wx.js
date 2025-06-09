@@ -453,8 +453,8 @@ function generateWeatherOutput(airportCode, type, timeStr, timeDate) {
     } else if (tafResult.error) {
       tafWarning = `<p class="weather-report error">${tafResult.error}</p>`;
     }
-    console.log("METAR:", metar);
-    console.log("TAF", taf);
+    console.log(`${airportCode} METAR;`, metar);
+    console.log(`${airportCode} TAF:`, taf);
 
     const metarAge = metar ? Math.floor((new Date() - new Date(metar.time.dt)) / 60000) : null;
     const tafAge = taf ? Math.floor((new Date() - new Date(taf.end_time.dt)) / 60000) : null;
@@ -487,10 +487,13 @@ function generateWeatherOutput(airportCode, type, timeStr, timeDate) {
           timePlusOne.setUTCHours(timePlusOne.getUTCHours() + 1);
           const altWx = [taf.forecast[matchingForecastIndex].flight_rules];
 
-          if (matchingForecastIndex > 0 && timeMinusOne >= taf.forecast[matchingForecastIndex - 1].start_time.dt && timeMinusOne <= taf.forecast[matchingForecastIndex - 1].end_time.dt) {
+          if (matchingForecastIndex > 0 && timeMinusOne >= taf.forecast[matchingForecastIndex - 1].start_time.dt && 
+            timeMinusOne <= taf.forecast[matchingForecastIndex - 1].end_time.dt) {
             altWx.push(taf.forecast[matchingForecastIndex - 1].flight_rules);
           }
-          if (matchingForecastIndex < taf.forecast.length - 1 && timePlusOne >= taf.forecast[matchingForecastIndex + 1].start_time.dt && timePlusOne <= taf.forecast[matchingForecastIndex + 1].end_time.dt) {
+          if (matchingForecastIndex < taf.forecast.length - 1 && 
+              timePlusOne >= taf.forecast[matchingForecastIndex + 1].start_time.dt && 
+              timePlusOne <= taf.forecast[matchingForecastIndex + 1].end_time.dt) {
             altWx.push(taf.forecast[matchingForecastIndex + 1].flight_rules);
           }
           if (altWx.some(wx => wx === 'IFR' || wx === 'LIFR')) {
