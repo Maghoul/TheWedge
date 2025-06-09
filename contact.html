@@ -16,7 +16,6 @@
     <title>Contact - The Wedge</title>
 </head>
 <body>
-    <div id="navbar-placeholder"></div>
     <div class="container">
         <header>
             <h1>Contact The Wedge</h1>
@@ -24,7 +23,7 @@
             <hr />
         </header>
         <main>
-            <form id="contact-form">
+            <form id="form">
                 <div class="form-row">
                     <label for="name">Name</label>
                     <input type="text" id="name" name="name" required placeholder="Your name">
@@ -63,7 +62,7 @@
         });
     })();
 
-    const contactForm = document.getElementById('contact-form');
+    const contactForm = document.getElementById('form');
     const clearBtn = document.getElementById('clear-contact-btn');
     const responseMessage = document.getElementById('form-response');
     const inputs = {
