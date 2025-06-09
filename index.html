@@ -24,13 +24,25 @@
             <p>A simple tool for pilots</p>
             <hr />
         </header>
-        <main class="container">
-            <ul>
-                <li><a href="./wx.html">Weather Information</a></li>
-                <li><a href="./preflight-checklist.html">Preflight Checklist</a></li>
-                <li><a href="./frm.html">Flight Rest Management</a></li>
-                <li><a href="./fraam.html">Fatigue Risk Assessment</a></li>
-            </ul>
+        <main class="main-content">
+            <div class="icon-grid">
+                <a href="./wx.html" class="icon-item">
+                    <img src="./images/weather-icon.png" alt="Weather Information">
+                    <span>Weather Information</span>
+                </a>
+                <a href="./preflight-checklist.html" class="icon-item">
+                    <img src="./images/checklist-icon.png" alt="Preflight Checklist">
+                    <span>Preflight Checklist</span>
+                </a>
+                <a href="./frm.html" class="icon-item">
+                    <img src="./images/rest-icon.png" alt="Flight Rest Management">
+                    <span>Flight Rest Management</span>
+                </a>
+                <a href="./fraam.html" class="icon-item">
+                    <img src="./images/risk-icon.png" alt="Fatigue Risk Assessment">
+                    <span>Fatigue Risk Assessment</span>
+                </a>
+            </div>
         </main>
         <footer>
             <p id="version-display">Version: Loading...</p>
@@ -43,8 +55,6 @@
             navigator.serviceWorker.register('./sw.js')
                 .then(registration => {
                     console.log('Service Worker registered with scope:', registration.scope);
-
-                    // Listen for updates to the service worker
                     registration.addEventListener('updatefound', () => {
                         const newWorker = registration.installing;
                         if (newWorker) {
@@ -72,15 +82,14 @@
         fetch('./sw.js')
             .then(response => response.text())
             .then(text => {
-                // Use a regular expression to find CACHE_NAME
-                const match = text.match(/const CACHE_NAME = 'wedge-cache-([^']+)';/);
+                const match = text.match(/const\s+CACHE_NAME\s*=\s*['"]wedge-cache-([^'"]+)['"];/);
                 if (match && match[1]) {
-                    let version = match[1]; // e.g., 'v1.0.3'
-                    // Ensure the version has three parts (MAJOR.MINOR.PATCH)
-                    const parts = version.split('.');
-                    if (parts.length === 2) {
-                        version = `${parts[0]}.${parts[1]}.0`; // e.g., 'v1.03' -> 'v1.03.0'
+                    let version = match[1];
+                    const parts = version.replace(/^v/, '').split('.');
+                    if (parts.length < 3) {
+                        parts.push('0');
                     }
+                    version = `v${parts.slice(0, 3).join('.')}`;
                     document.getElementById('version-display').textContent = `Version: ${version}`;
                 } else {
                     document.getElementById('version-display').textContent = 'Version: Not found';

@@ -8,19 +8,20 @@
     --primary-color: #f5f6f7;
     --secondary-color: #2ecc71;
     --font-family: 'Arial', sans-serif;
-    --main-bg-color: #003052; /* denim blue */
+    --main-bg-color: #003052;
     --se-gray-color: #4a4a4a;
     --complementary-color: #0d0d2f;
-	--placeholder-color: #512eb8; /* Light purple, visible in both light and dark modes */
+    --placeholder-color: #512eb8;
+    --placeholder-color-dark: #b3a1ff;
 }
-
 
 body {
     font-family: var(--font-family);
     line-height: 1.6;
     color: var(--primary-color);
     background-color: var(--main-bg-color);
-    font-size: 16px; /* Base font size for mobile */
+    font-size: 16px;
+    overflow-x: hidden;
 }
 
 .hidden {
@@ -28,11 +29,11 @@ body {
 }
 
 #version-display {
-	color: lightgray;
-	font-size: 0.8rem;
-	position: fixed;
-	bottom: 10px;
-	right: 10px;
+    color: lightgray;
+    font-size: 0.8rem;
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
 }
 
 hr {
@@ -54,76 +55,50 @@ hr {
     background-color: var(--complementary-color);
 }
 
-main.container {
-    margin: 20px auto; /* Matches your preferred index.html centering */
-}
-
-main.container hr {
-    border: 2px solid var(--primary-color);
-    width: 69%;
-    max-width: 600px; /* Ensure it scales with container */
-    margin: 15px auto; /* Center the hr */
-}
-
-main.container ul li a {
-    padding: 10px; /* Match hover padding to prevent layout shift */
-}
-
-main.container ul li a:hover {
-    border: 1px solid var(--primary-color);
-    border-radius: 5px;
-    font-style: italic;
-    text-decoration: none;
-}
-
-.container ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
+.main-content {
+    margin: 20px auto;
     width: 100%;
+    max-width: 900px;
+    padding: 15px;
+    display: flex;
+    justify-content: center;
 }
 
-.container ul li {
-    margin: 10px 0;
-    padding: 12px;
-    background-color: var(--complementary-color);
-    border-radius: 5px;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+.icon-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
-.container ul li a {
-    color: var(--primary-color);
-    text-decoration: none;
-    font-size: 1.2rem;
-}
-
-.container ul li a:hover {
-    text-decoration: underline;
-}
-
-.container h1 {
-    font-size: 1.8rem;
-    margin-bottom: 15px;
-    text-align: center;
-    color: var(--primary-color);
-}
-
-.container p {
-    font-size: 1.1rem;
-    margin-bottom: 15px;
-    text-align: center;
-    color: var(--primary-color);
-}
-
-#form {
+.icon-item {
     display: flex;
     flex-direction: column;
-    width: 100%;
-    margin: 10px 0;
-    border-radius: 10px;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-    padding: 15px;
-    background-color: var(--complementary-color);
+    align-items: center;
+    text-align: center;
+    color: var(--primary-color);
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.icon-item:hover {
+    background-color: var(--se-gray-color);
+    text-decoration: none;
+}
+
+.icon-item img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    margin-bottom: 10px;
+}
+
+.icon-item span {
+    font-size: 1.1rem;
+    color: var(--primary-color);
 }
 
 .form-row {
@@ -135,26 +110,24 @@ main.container ul li a:hover {
     border-radius: 5px;
     background-color: var(--complementary-color);
     margin: 10px 0;
-    min-height: 48px; /* Ensure enough height for content */
+    min-height: 48px;
     box-sizing: border-box;
 }
 
-/* Horizontal layout for checkbox-label pairs */
 .form-row:has(input[type="checkbox"]) {
     flex-direction: row;
     align-items: left;
-    gap: 12px; /* Space between checkbox and label */
+    gap: 12px;
 }
 
 .form-row label {
-    margin: 0; /* Remove vertical margins for horizontal layout */
+    margin: 0;
     padding: 0 5px;
     text-align: left;
     font-size: 1.3rem;
     width: 100%;
 }
 
-/* For form rows with text/number inputs, keep vertical layout */
 .form-row:has(input[type="text"]),
 .form-row:has(input[type="number"]) {
     flex-direction: column;
@@ -162,17 +135,9 @@ main.container ul li a:hover {
 
 .form-row input[type="checkbox"] {
     transform: scale(1.8);
-    flex-shrink: 0; /* Prevent checkbox from shrinking */
+    flex-shrink: 0;
 }
 
-/* Remove this since checkbox is now a sibling */
-.form-row label:has(input[type="checkbox"]) {
-    display: block;
-    font-size: 1.3rem;
-    line-height: 1.4;
-}
-
-/* For frm.html where checkbox is inside the label */
 .form-row label input[type="checkbox"] {
     margin-right: 12px;
 }
@@ -188,7 +153,7 @@ main.container ul li a:hover {
     padding: 12px;
     border-radius: 5px;
     box-sizing: border-box;
-    height: 50px; /* Ensure consistent height */
+    height: 50px;
 }
 
 details {
@@ -302,7 +267,7 @@ input::placeholder {
 .citation {
     margin-top: 20px;
     padding: 10px;
-    text-align: center;
+    text-align: left;
     color: var(--primary-color);
     font-size: 1.1rem;
     background-color: var(--complementary-color);
@@ -312,6 +277,7 @@ input::placeholder {
 
 .citation p {
     margin: 0;
+    text-align: left !important;
 }
 
 .citation a {
@@ -323,10 +289,9 @@ input::placeholder {
     text-decoration: underline;
 }
 
-/* Media query for mobile devices */
 @media (prefers-color-scheme: dark) {
     input::placeholder {
-        color: #ccc !important;
+        color: var(--placeholder-color-dark);
     }
 }
 
@@ -345,8 +310,23 @@ input::placeholder {
         box-shadow: none;
     }
 
-    main.container {
+    .main-content {
         margin: 0;
+        padding: 10px;
+    }
+
+    .icon-grid {
+        grid-template-columns: 1fr; /* Stack vertically on mobile */
+        gap: 15px;
+    }
+
+    .icon-item img {
+        width: 80px;
+        height: 80px;
+    }
+
+    .icon-item span {
+        font-size: 1rem;
     }
 
     #form {
@@ -362,7 +342,7 @@ input::placeholder {
     }
 
     .form-row:has(input[type="checkbox"]) {
-        gap: 10px; /* Slightly smaller gap on mobile */
+        gap: 10px;
     }
 
     .form-row label {
@@ -406,11 +386,6 @@ input::placeholder {
         font-size: 1.1rem;
     }
 
-    .container ul li a {
-        font-size: 1.1rem;
-        padding: 10px; /* Match hover padding */
-    }
-
     details,
     summary {
         font-size: 1.3rem;
@@ -425,65 +400,65 @@ input::placeholder {
     }
 }
 
-/* Main Content */
 main {
-  padding: 15px;
+    padding: 15px;
 }
 
-/* Desktop Styles */
 @media (min-width: 768px) {
-  .hamburger {
-    display: none;
-  }
+    .hamburger {
+        display: none;
+    }
 
-  .nav-menu {
-    display: flex;
-    flex-direction: row;
-    position: static;
-    width: auto;
-    background: none;
-    margin-left: auto;
-  }
+    .nav-menu {
+        display: flex;
+        flex-direction: row;
+        position: static;
+        width: auto;
+        background: none;
+        margin-left: auto;
+        opacity: 1;
+    }
 
-  .nav-menu li {
-    padding: 0 15px;
-  }
+    .nav-menu li {
+        padding: 0 15px;
+    }
 }
 
 a {
     color: var(--primary-color);
     text-decoration: none;
 }
+
 a:hover {
     text-decoration: underline;
 }
 
 .wx-results {
-    align-items: flex-start; /* Left-align flex items (paragraphs) */
+    align-items: flex-start;
 }
 
 .wx-results p {
-    text-align: left; /* Ensure text is left-aligned */
-    margin: 0 0 0.5em 0; /* Single spacing: 0.5em bottom margin */
-    padding: 0; /* Remove any padding */
-    line-height: 1.2; /* Tighten line height for readability */
-    font-size: 1.3rem; /* Consistent font size */
+    text-align: left;
+    margin: 0 0 0.5em 0;
+    padding: 0;
+    line-height: 1.2;
+    font-size: 1.3rem;
 }
 
 .wx-results p.weather-report {
-    padding-left: 20px; /* Indent all lines by 20px */
+    padding-left: 20px;
     text-indent: 0;
 }
 
 .wx-results p.indented-forecast {
-    padding-left: 40px; /* Indent all lines by 40px */
+    padding-left: 40px;
     text-indent: 0;
 }
 
 .wx-results hr {
     margin: 20px auto;
     border: 2px solid #ccc;
-    width: 69%;   
+    width: 69%;
 }
 
 #token-form {
@@ -494,12 +469,14 @@ a:hover {
     border-radius: 5px;
     text-align: center;
 }
+
 #token-form input {
     width: 80%;
     padding: 10px;
     margin: 10px 0;
     font-size: 1em;
 }
+
 #token-form button {
     padding: 10px 20px;
     background-color: #007bff;
@@ -508,105 +485,117 @@ a:hover {
     border-radius: 5px;
     cursor: pointer;
 }
+
 #token-form button:hover {
     background-color: #0056b3;
 }
+
 #token-error {
     margin-top: 10px;
-    display: block; /* Ensure visibility */
+    display: block;
     color: red;
 }
 
-/* Navbar Styles */
+/* Ensure navbar-placeholder is neutral */
+#navbar-placeholder {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    position: static; /* Prevent positioning conflicts */
+}
+
 .navbar {
-  position: sticky;
-  top: 0;
-  background-color: var(--se-gray-color, #333);
-  color: var(--primary-color, #fff);
-  padding: 10px 15px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
-  max-width: 900px; /* Match the container's max-width */
-  margin: 0 auto; /* Center the navbar */
-  padding-left: 15px; /* Match the container's padding */
-  padding-right: 15px;
+    position: sticky;
+    top: 0;
+    background-color: var(--se-gray-color);
+    color: var(--primary-color);
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    box-sizing: border-box;
 }
 
 .navbar-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .page-icon {
-  width: 32px;
-  height: 32px;
+    width: 32px;
+    height: 32px;
 }
 
 #page-title {
-  font-size: 1.2rem;
-  font-weight: normal;
+    font-size: 1.2rem;
+    font-weight: normal;
+    margin: 0;  /* Remove default margin */
 }
 
-/* Hamburger Menu */
 .hamburger {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 30px;
-  height: 20px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
 }
 
 .hamburger span {
-  width: 100%;
-  height: 3px;
-  background-color: var(--primary-color, #fff);
-  transition: all 0.3s ease;
+    width: 100%;
+    height: 3px;
+    background-color: var(--primary-color);
+    transition: all 0.3s ease;
 }
 
 .hamburger.active span:nth-child(1) {
-  transform: rotate(45deg) translate(5px, 5px);
+    transform: rotate(45deg) translate(5px, 5px);
 }
 
 .hamburger.active span:nth-child(2) {
-  opacity: 0;
+    opacity: 0;
 }
 
 .hamburger.active span:nth-child(3) {
-  transform: rotate(-45deg) translate(7px, -7px);
+    transform: rotate(-45deg) translate(7px, -7px);
 }
 
-/* Navigation Menu */
 .nav-menu {
-  list-style: none;
-  display: none;
-  flex-direction: column;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  background-color: var(--se-gray-color, #333);
-  padding: 10px 0;
+    list-style: none;
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: var(--se-gray-color);
+    padding: 10px 0;
+    transition: opacity 0.3s ease;
+    opacity: 0;
 }
 
 .nav-menu.active {
-  display: flex;
+    display: flex;
+    opacity: 1;
 }
 
 .nav-menu li {
-  padding: 10px 15px;
+    padding: 10px 15px;
 }
 
 .nav-menu a {
-  color: var(--primary-color, #fff);
-  text-decoration: none;
-  font-size: 1rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 1rem;
 }
 
 .nav-menu a:hover {
-  color: #ccc;
+    color: #ccc;
 }
