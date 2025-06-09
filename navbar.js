@@ -3,7 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
   fetch('./navbar.html')
     .then(response => response.text())
     .then(data => {
-      document.getElementById('navbar-placeholder').innerHTML = data;
+      // document.getElementById('navbar-placeholder').innerHTML = data;
+      document.body.insertAdjacentHTML('afterbegin', data);
 
       // Set page-specific icon and title
       const pageIcon = document.getElementById('page-icon');
