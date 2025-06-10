@@ -22,62 +22,7 @@ const apiBaseTaf = "https://avwx.rest/api/taf/";
 let etdDate, etaDate;
 
 // Initialize API token
-let apiToken = `61;$RR[%PQ7J1#BQ*S21&'`;
-
-// let apiToken = localStorage.getItem('avwxToken');
-// if (!apiToken) {
-//     tokenForm.classList.remove("hidden");
-//     flightForm.classList.add("hidden");
-// } else {
-//     tokenForm.classList.add("hidden");
-//     flightForm.classList.remove("hidden");
-// }
-
-// Handle token save
-// saveTokenBtn.addEventListener("click", async () => {
-//     const token = tokenInput.value.trim();
-//     if (!token) {
-//         tokenError.textContent = "Please enter a valid AVWX API token.";
-//         tokenError.classList.remove("hidden");
-//         tokenError.style.display = "block";
-//         return;
-//     }
-
-    // Test token validity with a sample API call
-//     try {
-//         const response = await fetch(`${apiBaseMetar}KMEM`, {
-//             headers: {
-//                 'Authorization': `Bearer ${token}`,
-//                 'Accept': 'application/json'
-//             }
-//         });
-//         if (!response.ok) {
-//             if (response.status === 401 || response.status === 403) {
-//                 throw new Error("Invalid token. Please check your AVWX token.");
-//             } else if (response.status === 429) {
-//                 throw new Error("API rate limit exceeded. Try again later.");
-//             } else {
-//                 throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
-//             }
-//         }
-//         const data = await response.json();
-//         if (data.Error) {
-//             throw new Error(data.Error);
-//         }
-//         // Save token to localStorage and update apiToken
-//         localStorage.setItem('avwxToken', token);
-//         apiToken = token; // Update apiToken for current session
-//         tokenForm.classList.add("hidden");
-//         flightForm.classList.remove("hidden");
-//         tokenError.classList.add("hidden");
-//         tokenError.style.display = "none"; // Reset error display
-//         tokenInput.value = "";
-//     } catch (error) {
-//         tokenError.textContent = `Error: ${error.message}`;
-//         tokenError.classList.remove("hidden");
-//         tokenError.style.display = "block"; // Ensure error is visible
-//     }
-// });
+let apiToken = `BDE7HzwQLhJYWBIGURMLGSJaWxEEPU07AhcEKUVbIAUBAhgfGBpZODYsLQ==`;
 
 //set dynamic placeholders ETA and ETD
 let etdPlaceholder = new Date();
@@ -187,8 +132,10 @@ arrApt.addEventListener("change", () => {
   }
 });
 
-// Convert time to full UTC time
+// put token in correct form
+   apiToken = xorDecrypt(atob(apiToken), 'huh');
 
+// Convert time to full UTC time
 function convertToISODate(date, timeStr) {
     if (!timeStr || !/^\d{4}$/.test(timeStr)) {
         throw new Error("Invalid time format (should be HHmm, e.g., 1430)");
@@ -597,7 +544,7 @@ flightForm.addEventListener("submit", async (e) => {
   localStorage.setItem('arrAirport', arrCode);
 
   // Fetch and display weather data
-   apiToken = xorDecrypt(apiToken, 'brb');
+
   let output = await generateWeatherOutput(deptCode, 'ETD', etd.value, etdDate);
 
   if (arrCode) {
