@@ -68,69 +68,42 @@ eta.addEventListener("focus", () => {
 }); 
 eta.addEventListener("blur", () => eta.classList.remove("focused"));
 
-// Check time formats on eta and etd
-etd.addEventListener("change", () => {
-  const result = formatTime(etd.value);
+// Generalized validation function
+function validateInput(input, errorElement, validateFn, dateVar = null) {
+  const result = validateFn(input.value.trim());
   if (result.error) {
-    etdError.textContent = result.error;
-    etdError.style.display = "block";
-    etd.classList.add("error");
+    errorElement.textContent = result.error;
+    errorElement.style.display = "block";
+    input.classList.add("error");
   } else {
-    etdError.style.display = "none";
-    etd.classList.remove("error");
-    etd.value = result.value || ""; // Use the formatted value, or empty if null
-    if (etd.value) {
-      etdDate = convertToISODate(new Date(), etd.value.replace(":", ""));
-    } else {
-      etdDate = null; // Reset etdDate if the input is invalid or empty
+    errorElement.style.display = "none";
+    input.classList.remove("error");
+    input.value = result.value || ""; // Use validated value or empty string
+    if (dateVar && input.value) {
+      if (dateVar === "etdDate") {
+        etdDate = convertToISODate(new Date(), input.value.replace(":", ""));
+        // console.log("etdDate set to:", etdDate);
+      } else if (dateVar === "etaDate") {
+        etaDate = convertToISODate(new Date(), input.value.replace(":", ""));
+        // console.log("etaDate set to:", etaDate);
+      }
+    } else if (dateVar) {
+      if (dateVar === "etdDate") {
+        etdDate = null;
+        // console.log("etdDate reset to null");
+      } else if (dateVar === "etaDate") {
+        etaDate = null;
+        // console.log("etaDate reset to null");
+      }
     }
   }
-});
+}
 
-eta.addEventListener("change", () => {
-  const result = formatTime(eta.value);
-  if (result.error) {
-    etaError.textContent = result.error;
-    etaError.style.display = "block";
-    eta.classList.add("error");
-  } else {
-    etaError.style.display = "none";
-    eta.classList.remove("error");
-    eta.value = result.value || ""; // Use the formatted value, or empty if null
-    if (eta.value) {
-      etaDate = convertToISODate(new Date(), eta.value.replace(":", ""));
-    } else {
-      etaDate = null; // Reset etaDate if the input is invalid or empty
-    }
-  }
-});
-
-// Check ICAO format on deptApt and arrApt
-deptApt.addEventListener("change", () => {
-  const result = isValidIcao(deptApt.value.trim());
-  if (result.error) {
-    deptError.textContent = result.error;
-    deptError.style.display = "block";
-    deptApt.classList.add("error");
-  } else {
-    deptError.style.display = "none";
-    deptApt.classList.remove("error");
-    deptApt.value = result.value || ""; // Use the normalized ICAO code, or empty if null
-  }
-});
-
-arrApt.addEventListener("change", () => {
-  const result = isValidIcao(arrApt.value.trim());
-  if (result.error) {
-    arrError.textContent = result.error;
-    arrError.style.display = "block";
-    arrApt.classList.add("error");
-  } else {
-    arrError.style.display = "none";
-    arrApt.classList.remove("error");
-    arrApt.value = result.value || ""; // Use the normalized ICAO code, or empty if null
-  }
-});
+// Add event listeners for time and ICAO inputs
+etd.addEventListener("change", () => validateInput(etd, etdError, formatTime, "etdDate"));
+eta.addEventListener("change", () => validateInput(eta, etaError, formatTime, "etaDate"));
+deptApt.addEventListener("change", () => validateInput(deptApt, deptError, isValidIcao));
+arrApt.addEventListener("change", () => validateInput(arrApt, arrError, isValidIcao));
 
 // put token in correct form
    apiToken = xorDecrypt(atob(apiToken), 'huh');
@@ -245,6 +218,7 @@ async function getWeatherData(airportCode, type = 'metar') {
   if (!apiToken) {
     return { error: 'AVWX API token missing.' };
   }
+  
  
   const icaoResult = isValidIcao(airportCode);
   if (icaoResult.error) {
@@ -393,11 +367,14 @@ function generateWeatherOutput(airportCode, type, timeStr, timeDate) {
   let timeAge = "";
   let tafWarning = "";
 
+  // Log timeDate for debugging
+  // console.log(`generateWeatherOutput for ${type}: timeDate =`, timeDate);
+
   // Fetch weather data
   const metarResult = getWeatherData(airportCode, 'metar');
   const tafResult = getWeatherData(airportCode, 'taf');
   const location = type === 'ETD' ? 'departure' : 'arrival';
-
+  
   return Promise.all([metarResult, tafResult]).then(([metarResult, tafResult]) => {
     let metar = null, taf = null;
 
@@ -413,9 +390,10 @@ function generateWeatherOutput(airportCode, type, timeStr, timeDate) {
     } else if (tafResult.error) {
       tafWarning = `<p class="weather-report error">${tafResult.error}</p>`;
     }
-    console.log(`${airportCode} METAR;`, metar);
-    console.log(`${airportCode} TAF:`, taf);
 
+    console.log("METAR: ", metar);
+    console.log("TAF: ", taf);
+    
     const metarAge = metar ? Math.floor((new Date() - new Date(metar.time.dt)) / 60000) : null;
     const tafAge = taf ? Math.floor((new Date() - new Date(taf.end_time.dt)) / 60000) : null;
     const flightRules = metar ? colorFlightRules(metar.flight_rules || 'N/A') : (taf ? colorFlightRules(taf.flight_rules || 'N/A') : 'N/A');
@@ -425,35 +403,41 @@ function generateWeatherOutput(airportCode, type, timeStr, timeDate) {
 
     // Handle time-specific forecast (ETD or ETA)
     let alternateReq = "";
-    if (timeDate && taf) {
+    if (timeDate && taf && Array.isArray(taf.forecast)) {
+      const parsedTimeDate = new Date(timeDate);
       let matchingForecastIndex = -1;
-      for (let i = 0; i < (taf.forecast?.length || 0); i++) {
-        const forecast = taf.forecast[i].flight_rules || 'N/A';
-        const startTime = taf.forecast[i].type === 'BECMG' ? taf.forecast[i].transition_start.dt : taf.forecast[i].start_time.dt;
-        const endTime = taf.forecast[i].end_time.dt;
-
-        if (timeDate >= startTime && timeDate <= endTime) {
-          timeInfo = ` and forecasted as ${colorFlightRules(forecast)} at ${location} time ${timeStr}Z.`;
-          matchingForecastIndex = i;
+      if (!isNaN(parsedTimeDate)) { // Ensure valid date
+        for (let i = 0; i < taf.forecast.length; i++) {
+          const forecast = taf.forecast[i].flight_rules || 'N/A';
+          const startTime = new Date(taf.forecast[i].type === 'BECMG' ? taf.forecast[i].transition_start.dt : taf.forecast[i].start_time.dt);
+          const endTime = new Date(taf.forecast[i].end_time.dt);
+          // console.log(`Forecast ${i} for ${type}:`, { parsedTimeDate, startTime, endTime, inRange: parsedTimeDate >= startTime && parsedTimeDate <= endTime });
+          if (parsedTimeDate >= startTime && parsedTimeDate <= endTime) {
+            timeInfo = ` and forecasted as ${colorFlightRules(forecast)} at ${location} time ${timeStr}Z.`;
+            matchingForecastIndex = i;
+            break; // Exit loop after finding the first match
+          }
         }
+      } else {
+        console.warn(`Invalid timeDate for ${type}:`, timeDate);
       }
 
       // Check for alternate airport requirement
-      if (matchingForecastIndex >= 0 && taf.forecast.length > 1 && timeDate) {
+      if (matchingForecastIndex >= 0 && taf.forecast.length > 1 && !isNaN(parsedTimeDate)) {
         try {
-          let timeMinusOne = new Date(timeDate);
-          let timePlusOne = new Date(timeDate);
+          let timeMinusOne = new Date(parsedTimeDate);
+          let timePlusOne = new Date(parsedTimeDate);
           timeMinusOne.setUTCHours(timeMinusOne.getUTCHours() - 1);
           timePlusOne.setUTCHours(timePlusOne.getUTCHours() + 1);
           const altWx = [taf.forecast[matchingForecastIndex].flight_rules];
 
-          if (matchingForecastIndex > 0 && timeMinusOne >= taf.forecast[matchingForecastIndex - 1].start_time.dt && 
-            timeMinusOne <= taf.forecast[matchingForecastIndex - 1].end_time.dt) {
+          if (matchingForecastIndex > 0 && timeMinusOne >= new Date(taf.forecast[matchingForecastIndex - 1].start_time.dt) &&
+            timeMinusOne <= new Date(taf.forecast[matchingForecastIndex - 1].end_time.dt)) {
             altWx.push(taf.forecast[matchingForecastIndex - 1].flight_rules);
           }
-          if (matchingForecastIndex < taf.forecast.length - 1 && 
-              timePlusOne >= taf.forecast[matchingForecastIndex + 1].start_time.dt && 
-              timePlusOne <= taf.forecast[matchingForecastIndex + 1].end_time.dt) {
+          if (matchingForecastIndex < taf.forecast.length - 1 &&
+              timePlusOne >= new Date(taf.forecast[matchingForecastIndex + 1].start_time.dt) &&
+              timePlusOne <= new Date(taf.forecast[matchingForecastIndex + 1].end_time.dt)) {
             altWx.push(taf.forecast[matchingForecastIndex + 1].flight_rules);
           }
           if (altWx.some(wx => wx === 'IFR' || wx === 'LIFR')) {
@@ -463,6 +447,10 @@ function generateWeatherOutput(airportCode, type, timeStr, timeDate) {
           console.error(`Error in alternate airport check for ${type}:`, error.message);
           alternateReq = `Note: Unable to check alternate requirements due to invalid ${type} time.`;
         }
+      }
+      // Fallback if no forecast match
+      if (!timeInfo && timeStr) {
+        timeInfo = `; no specific TAF forecast available for ${location} time ${timeStr}Z.`;
       }
     }
 
@@ -479,9 +467,12 @@ function generateWeatherOutput(airportCode, type, timeStr, timeDate) {
       output += `<p class="weather-report">${city} is currently ${flightRules}${timeInfo}</p>` +
                 `<p class="weather-report" style="color: red;">${alternateReq}</p>` +
                 `<p class="weather-report">METAR: ${metar.raw} ${timeAge}</p>` +
-                `<p class="weather-report">TAF: ${station} ${taf.time.repr} ${taf.forecast[0].raw || 'N/A'}</p>`;
-      for (let i = 1; i < taf.forecast.length; i++) {
-        output += `<p class="weather-report indented-forecast">${taf.forecast[i].raw || 'N/A'}</p>`;
+                `<p class="weather-report">TAF: ${station} ${taf.time.repr} ${taf.forecast[0]?.raw || 'N/A'}</p>`;
+      if (Array.isArray(taf.forecast)) {
+        for (let i = 1; i < taf.forecast.length; i++) {
+          // console.log(`Rendering forecast ${i}:`, taf.forecast[i].raw);
+          output += `<p class="weather-report indented-forecast">${taf.forecast[i].raw || 'N/A'}</p>`;
+        }
       }
     } else if (metar) {
       output += `<p class="weather-report">${city} is currently ${flightRules}${timeInfo}</p>` +
@@ -489,9 +480,12 @@ function generateWeatherOutput(airportCode, type, timeStr, timeDate) {
     } else if (taf) {
       output += `<p class="weather-report">${city} is currently ${flightRules}${timeInfo}</p>` +
                 `<p class="weather-report" style="color: red;">${alternateReq}</p>` +
-                `<p class="weather-report">TAF: ${station} ${taf.time.repr} ${taf.forecast[0].raw || 'N/A'}</p>`;
-      for (let i = 1; i < taf.forecast.length; i++) {
-        output += `<p class="weather-report indented-forecast">${taf.forecast[i].raw || 'N/A'}</p>`;
+                `<p class="weather-report">TAF: ${station} ${taf.time.repr} ${taf.forecast[0]?.raw || 'N/A'}</p>`;
+      if (Array.isArray(taf.forecast)) {
+        for (let i = 1; i < taf.forecast.length; i++) {
+          // console.log(`Rendering forecast ${i}:`, taf.forecast[i].raw);
+          output += `<p class="weather-report indented-forecast">${taf.forecast[i].raw || 'N/A'}</p>`;
+        }
       }
     } else {
       output += `<p class="weather-report">No weather data found for ${airportCode}.</p>`;
