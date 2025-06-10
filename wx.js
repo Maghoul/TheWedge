@@ -22,60 +22,62 @@ const apiBaseTaf = "https://avwx.rest/api/taf/";
 let etdDate, etaDate;
 
 // Initialize API token
-let apiToken = localStorage.getItem('avwxToken');
-if (!apiToken) {
-    tokenForm.classList.remove("hidden");
-    flightForm.classList.add("hidden");
-} else {
-    tokenForm.classList.add("hidden");
-    flightForm.classList.remove("hidden");
-}
+let apiToken = `61;$RR[%PQ7J1#BQ*S21&'`;
+
+// let apiToken = localStorage.getItem('avwxToken');
+// if (!apiToken) {
+//     tokenForm.classList.remove("hidden");
+//     flightForm.classList.add("hidden");
+// } else {
+//     tokenForm.classList.add("hidden");
+//     flightForm.classList.remove("hidden");
+// }
 
 // Handle token save
-saveTokenBtn.addEventListener("click", async () => {
-    const token = tokenInput.value.trim();
-    if (!token) {
-        tokenError.textContent = "Please enter a valid AVWX API token.";
-        tokenError.classList.remove("hidden");
-        tokenError.style.display = "block";
-        return;
-    }
+// saveTokenBtn.addEventListener("click", async () => {
+//     const token = tokenInput.value.trim();
+//     if (!token) {
+//         tokenError.textContent = "Please enter a valid AVWX API token.";
+//         tokenError.classList.remove("hidden");
+//         tokenError.style.display = "block";
+//         return;
+//     }
 
     // Test token validity with a sample API call
-    try {
-        const response = await fetch(`${apiBaseMetar}KMEM`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Accept': 'application/json'
-            }
-        });
-        if (!response.ok) {
-            if (response.status === 401 || response.status === 403) {
-                throw new Error("Invalid token. Please check your AVWX token.");
-            } else if (response.status === 429) {
-                throw new Error("API rate limit exceeded. Try again later.");
-            } else {
-                throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
-            }
-        }
-        const data = await response.json();
-        if (data.Error) {
-            throw new Error(data.Error);
-        }
-        // Save token to localStorage and update apiToken
-        localStorage.setItem('avwxToken', token);
-        apiToken = token; // Update apiToken for current session
-        tokenForm.classList.add("hidden");
-        flightForm.classList.remove("hidden");
-        tokenError.classList.add("hidden");
-        tokenError.style.display = "none"; // Reset error display
-        tokenInput.value = "";
-    } catch (error) {
-        tokenError.textContent = `Error: ${error.message}`;
-        tokenError.classList.remove("hidden");
-        tokenError.style.display = "block"; // Ensure error is visible
-    }
-});
+//     try {
+//         const response = await fetch(`${apiBaseMetar}KMEM`, {
+//             headers: {
+//                 'Authorization': `Bearer ${token}`,
+//                 'Accept': 'application/json'
+//             }
+//         });
+//         if (!response.ok) {
+//             if (response.status === 401 || response.status === 403) {
+//                 throw new Error("Invalid token. Please check your AVWX token.");
+//             } else if (response.status === 429) {
+//                 throw new Error("API rate limit exceeded. Try again later.");
+//             } else {
+//                 throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
+//             }
+//         }
+//         const data = await response.json();
+//         if (data.Error) {
+//             throw new Error(data.Error);
+//         }
+//         // Save token to localStorage and update apiToken
+//         localStorage.setItem('avwxToken', token);
+//         apiToken = token; // Update apiToken for current session
+//         tokenForm.classList.add("hidden");
+//         flightForm.classList.remove("hidden");
+//         tokenError.classList.add("hidden");
+//         tokenError.style.display = "none"; // Reset error display
+//         tokenInput.value = "";
+//     } catch (error) {
+//         tokenError.textContent = `Error: ${error.message}`;
+//         tokenError.classList.remove("hidden");
+//         tokenError.style.display = "block"; // Ensure error is visible
+//     }
+// });
 
 //set dynamic placeholders ETA and ETD
 let etdPlaceholder = new Date();
@@ -296,7 +298,7 @@ async function getWeatherData(airportCode, type = 'metar') {
   if (!apiToken) {
     return { error: 'AVWX API token missing.' };
   }
-
+ 
   const icaoResult = isValidIcao(airportCode);
   if (icaoResult.error) {
     return { error: icaoResult.error };
@@ -411,6 +413,16 @@ function appendBackButton() {
   });
 }
 
+function xorDecrypt(ciphertext, key) {
+  let plaintext = '';
+  for (let i = 0; i < ciphertext.length; i++) {
+    const keyChar = key.charCodeAt(i % key.length);
+    const cipherChar = ciphertext.charCodeAt(i);
+    plaintext += String.fromCharCode(cipherChar ^ keyChar);
+  }
+  return plaintext;
+}
+
 function colorFlightRules(flightRules) {
   switch (flightRules) {
     case 'VFR':
@@ -437,6 +449,7 @@ function generateWeatherOutput(airportCode, type, timeStr, timeDate) {
   // Fetch weather data
   const metarResult = getWeatherData(airportCode, 'metar');
   const tafResult = getWeatherData(airportCode, 'taf');
+  const location = type === 'ETD' ? 'departure' : 'arrival';
 
   return Promise.all([metarResult, tafResult]).then(([metarResult, tafResult]) => {
     let metar = null, taf = null;
@@ -473,7 +486,7 @@ function generateWeatherOutput(airportCode, type, timeStr, timeDate) {
         const endTime = taf.forecast[i].end_time.dt;
 
         if (timeDate >= startTime && timeDate <= endTime) {
-          timeInfo = ` and forecasted as ${colorFlightRules(forecast)} at ${type} time ${timeStr}Z.`;
+          timeInfo = ` and forecasted as ${colorFlightRules(forecast)} at ${location} time ${timeStr}Z.`;
           matchingForecastIndex = i;
         }
       }
@@ -549,6 +562,15 @@ function generateWeatherOutput(airportCode, type, timeStr, timeDate) {
 flightForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
+  // Ensure internet connection
+  if (!navigator.onLine) {
+    results.innerText = "Please connect to the internet for weather information."
+    flightForm.classList.add("hidden");
+    results.classList.remove("hidden");
+    appendBackButton();
+    return;
+  }
+
   // Validate all fields
   if (!validateForm()) {
     flightForm.classList.add("hidden");
@@ -575,6 +597,7 @@ flightForm.addEventListener("submit", async (e) => {
   localStorage.setItem('arrAirport', arrCode);
 
   // Fetch and display weather data
+   apiToken = xorDecrypt(apiToken, 'brb');
   let output = await generateWeatherOutput(deptCode, 'ETD', etd.value, etdDate);
 
   if (arrCode) {
