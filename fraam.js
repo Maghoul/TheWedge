@@ -108,35 +108,35 @@ function showMessage(checkboxId, text) {
 
 // Add change event listeners for dependent checkboxes
 sleepDebt2.addEventListener("change", () => {
-    if (sleepDebt2.checked) {
+    if (sleepDebt2.checked  && !sleepDebt1.checked) {
         sleepDebt1.checked = true;
         showMessage("sleep-debt1", "If sleep reduced > 4hrs mark both lines.");
     }
 });
 
 wakefulness2.addEventListener("change", () => {
-    if (wakefulness2.checked) {
+    if (wakefulness2.checked && !wakefulness1.checked) {
         wakefulness1.checked = true;
         showMessage("wakefulness1", "If time awake > 6hrs mark both lines.");
     }
 });
 
 wakefulness4.addEventListener("change", () => {
-    if (wakefulness4.checked) {
+    if (wakefulness4.checked && !wakefulness3.checked) {
         wakefulness3.checked = true;
         showMessage("wakefulness3", "If flight time > 12hrs mark both lines.");
     }
 });
 
 circadian4.addEventListener("change", () => {
-    if (circadian4.checked) {
+    if (circadian4.checked && !circadian3.checked) {
         circadian3.checked = true;
         showMessage("circadian3", "If flight time > 2hrs in WOCL mark both lines.");
     }
 });
 
 workload2.addEventListener("change", () => {
-    if (workload2.checked) {
+    if (workload2.checked && !workload1.checked) {
         workload1.checked = true;
         showMessage("workload1", "If 3+ flights at night mark both lines.");
     }
