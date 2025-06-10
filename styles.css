@@ -599,3 +599,16 @@ a:hover {
 .nav-menu a:hover {
     color: #ccc;
 }
+
+#auto-check-message {
+    font-size: 1.2rem; /* Slightly larger for readability */
+    padding: 10px;
+    margin: 10px 0;
+    color: #d32f2f; /* Red text */
+    background-color: rgba(255, 235, 238, 0.9); /* Light red background */
+    border-radius: 5px;
+    text-align: center;
+    min-height: 40px; /* Ensure space even when empty */
+    width: 100%;
+    box-sizing: border-box;
+}

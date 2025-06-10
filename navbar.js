@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
           break;
         case 'fraam.html':
           pageIcon.src = './images/risk-icon.png';
-          pageTitle.textContent = 'Fatigue Risk Assessment and Management';
+          pageTitle.textContent = 'Fatigue Risk Assessment';
           break;
         case 'contact.html':
           pageIcon.src = './images/contact-icon.png';
