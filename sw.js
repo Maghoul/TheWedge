@@ -1,26 +1,6 @@
-const CACHE_NAME = 'wedge-cache-v1.2.19';
+const CACHE_NAME = 'wedge-cache-v1.3.0';
 // Cache versioning to handle updates vMajor.minor.patch
-// Version 1.2.0 - Updated icons and added navbar
-// Version 1.2.1 - Updated wx.js output format
-// Version 1.2.2 - Updated wx.js to add favorite and swap dept/arr
-// Version 1.2.3 - Updated README
-// Version 1.2.4 - bug fixes to wx.js
-// Version 1.2.5 - Updated contact page for email handling
-// Version 1.2.6 - Updated some styling
-// Version 1.2.7 - Added transition start time for BECMG logic in wx.js
-// Version 1.2.8 - Added City info to wx.js and minor bug fix
-// Version 1.2.9 - wx.js ICAO bug fix
-// Version 1.2.10 - fixed navbar not remaining sticky
-// Version 1.2.11 - cleaned up html code comments
-// Version 1.2.12 - Added helper function to wx.js
-// Version 1.2.13 - Added console logs
-// Version 1.2.14 - Updated fraam.js and associated files
-// Version 1.2.15 - wx.html disabled autocorrect, wx.js check for internet, 'encrypted' API Token
-// Version 1.2.16 - fixed API token bug
-// Version 1.2.17 - fixed fraam.js checkbox logic
-// Version 1.2.18 - updated wx.js to reduce code
-// Version 1.2.19 - Fixed status bar coloring
-// Version 1.2.20 - Status bar update and color bug fix
+// Version 1.3.0 - Changed preflight-checklist to before pushback and eliminated stale info
 // This service worker caches essential files for offline use and handles fetch requests
 const urlsToCache = [
     './',
@@ -30,8 +10,8 @@ const urlsToCache = [
     './contact.html',
     './frm.html',
     './navbar.html',
-    './preflight-checklist.html',
-    './preflight.js',
+    './bpb.html',
+    './bpb.js',
     './navbar.js',
     './frm.js',
     './fraam.js',
@@ -109,3 +89,24 @@ self.addEventListener('activate', event => {
 // Version 1.1.13 - skipped
 // Version 1.1.14 - New icons
 // Version 1.1.15 - More new icons
+// Version 1.2.0 - Updated icons and added navbar
+// Version 1.2.1 - Updated wx.js output format
+// Version 1.2.2 - Updated wx.js to add favorite and swap dept/arr
+// Version 1.2.3 - Updated README
+// Version 1.2.4 - bug fixes to wx.js
+// Version 1.2.5 - Updated contact page for email handling
+// Version 1.2.6 - Updated some styling
+// Version 1.2.7 - Added transition start time for BECMG logic in wx.js
+// Version 1.2.8 - Added City info to wx.js and minor bug fix
+// Version 1.2.9 - wx.js ICAO bug fix
+// Version 1.2.10 - fixed navbar not remaining sticky
+// Version 1.2.11 - cleaned up html code comments
+// Version 1.2.12 - Added helper function to wx.js
+// Version 1.2.13 - Added console logs
+// Version 1.2.14 - Updated fraam.js and associated files
+// Version 1.2.15 - wx.html disabled autocorrect, wx.js check for internet, 'encrypted' API Token
+// Version 1.2.16 - fixed API token bug
+// Version 1.2.17 - fixed fraam.js checkbox logic
+// Version 1.2.18 - updated wx.js to reduce code
+// Version 1.2.19 - Fixed status bar coloring
+// Version 1.2.20 - Status bar update and color bug fix

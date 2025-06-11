@@ -27,8 +27,34 @@ function updateCheckboxUI(checkbox) {
 
 // Function to update form background based on all checkboxes
 function updateFormBackground() {
+    // Clear all boxes if the form is stale
+    const loadTime = new Date();
+    const checklistTimeString = localStorage.getItem('checklistTime');
+    const checklistTime = checklistTimeString ? new Date(checklistTimeString) : null;
+
+    // Ensure checklistTime is valid
+    if (!checklistTime || isNaN(checklistTime)) {
+        clearBoxes();
+        return;
+    }
+
+    const timeDiff = (loadTime - checklistTime) / 60 / 60 / 1000; // Time Difference in hours
+    if (timeDiff > 3) {
+        clearBoxes();
+        return;
+    }
     const allChecked = checkboxes.every(checkbox => checkbox.checked);
     preflightForm.style.backgroundColor = allChecked ? "lightgreen" : "var(--complementary-color)";
+}
+
+function clearBoxes () {
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+        updateCheckboxUI(checkbox);
+        // Clear state from localStorage
+        localStorage.removeItem(checkbox.id);
+        preflightForm.style.backgroundColor = "var(--complementary-color)";
+    });
 }
 
 // Restore state from localStorage on page load
@@ -50,6 +76,8 @@ preflightForm.addEventListener("change", () => {
         updateCheckboxUI(checkbox);
         // Save state to localStorage
         localStorage.setItem(checkbox.id, checkbox.checked);
+        localStorage.setItem('checklistTime', new Date().toISOString());
+        // localStorage.setItem('checklistTime', '2025-06-11T11:12:53.188Z') // Used for testing
     });
     // Update form background
     updateFormBackground();
@@ -58,12 +86,6 @@ preflightForm.addEventListener("change", () => {
 // Event listener for clear button
 clearBtn.addEventListener("click", () => {
     // Uncheck all checkboxes and reset UI
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = false;
-        updateCheckboxUI(checkbox);
-        // Clear state from localStorage
-        localStorage.removeItem(checkbox.id);
-    });
-    // Reset form background
-    preflightForm.style.backgroundColor = "var(--complementary-color)";
+    clearBoxes();
+    localStorage.removeItem('checklistTime');
 });

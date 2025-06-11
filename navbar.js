@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
           break;
         case 'preflight-checklist.html':
           pageIcon.src = './images/checklist-icon.png';
-          pageTitle.textContent = 'Preflight Checklist';
+          pageTitle.textContent = 'Before Pushback';
           break;
         case 'frm.html':
           pageIcon.src = './images/rest-icon.png';
