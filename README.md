@@ -1,9 +1,15 @@
 The Wedge
-A personal web app for aviation enthusiasts, providing tools like weather data for flight planning and a planned aircraft weight and balance calculator.
+A personal web app for aviation enthusiasts, providing tools like weather data, in flight rest management for 3 crew members, risk assessment and a before pushback checklist.
 Features
 
 Weather Data: Fetch METAR and TAF data for airports using the AVWX API. Enter departure and arrival airport codes (e.g., KMEM, KIND) to see current and forecasted weather conditions, including flight rules (VFR, IFR, etc.).
-Planned Features: Aircraft weight and balance calculator to help pilots compute total weight, center of gravity, and ensure safe flight parameters.
+
+Flight Rest: Calculate planned rest periods for 3 crew members on extended flight operations
+
+Risk Assessment: Analyze current flight for risk
+
+Before Pushback Checklist: Ensure all required items complete before blocking out
+
 
 Prerequisites
 
@@ -41,8 +47,6 @@ Enter a departure airport code (required) and an arrival airport code (optional)
 Optionally, provide Estimated Time of Departure (ETD) and Estimated Time of Arrival (ETA) in HH:mm format (e.g., 14:30) to see forecasted conditions.
 Submit the form to view METAR and TAF data, including flight rules color-coded (e.g., green for VFR, red for LIFR).
 
-
-Check back later for the weight and balance calculator once it’s implemented!
 
 Project Structure
 
