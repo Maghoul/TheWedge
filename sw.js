@@ -20,6 +20,7 @@ const CACHE_NAME = 'wedge-cache-v1.2.19';
 // Version 1.2.17 - fixed fraam.js checkbox logic
 // Version 1.2.18 - updated wx.js to reduce code
 // Version 1.2.19 - Fixed status bar coloring
+// Version 1.2.20 - Status bar update and color bug fix
 // This service worker caches essential files for offline use and handles fetch requests
 const urlsToCache = [
     './',
