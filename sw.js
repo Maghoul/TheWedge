@@ -1,21 +1,22 @@
-const CACHE_NAME = 'wedge-cache-v1.3.0';
+const CACHE_NAME = 'wedge-cache-v1.3.1';
 // Cache versioning to handle updates vMajor.minor.patch
 // Version 1.3.0 - Changed preflight-checklist to before pushback and eliminated stale info
+// Version 1.3.1 - Changed file structure for The Wedge
 // This service worker caches essential files for offline use and handles fetch requests
 const urlsToCache = [
     './',
     './index.html',
-    './wx.html',
-    './fraam.html',
-    './contact.html',
-    './frm.html',
-    './navbar.html',
-    './bpb.html',
-    './bpb.js',
-    './navbar.js',
-    './frm.js',
-    './fraam.js',
-    './wx.js',
+    './html/wx.html',
+    './html/fraam.html',
+    './html/contact.html',
+    './html/frm.html',
+    './html/navbar.html',
+    './html/bpb.html',
+    './script/bpb.js',
+    './script/navbar.js',
+    './script/frm.js',
+    './script/fraam.js',
+    './script/wx.js',
     'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js',
     './styles.css',
     './manifest.json',
@@ -45,6 +46,29 @@ self.addEventListener('fetch', event => {
         })
     );
 });
+
+// self.addEventListener('install', event => {
+//     event.waitUntil(
+//         caches.open(CACHE_NAME).then(cache => {
+//             return Promise.all(
+//                 urlsToCache.map(url => {
+//                     return fetch(url, { mode: 'no-cors' }) // Use no-cors to avoid CORS issues
+//                         .then(response => {
+//                             if (!response.ok) {
+//                                 console.error(`Failed to fetch ${url}: ${response.statusText}`);
+//                                 throw new Error(`Failed to fetch ${url}`);
+//                             }
+//                             return cache.put(url, response);
+//                         })
+//                         .catch(error => {
+//                             console.error(`Error fetching ${url}:`, error);
+//                             throw error;
+//                         });
+//                 })
+//             );
+//         })
+//     );
+// });
 
 // Handle messages from the client to skip waiting
 self.addEventListener('message', event => {

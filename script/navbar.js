@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   // Fetch and inject the navbar
-  fetch('./navbar.html')
+  fetch('../html/navbar.html')
     .then(response => response.text())
     .then(data => {
       // document.getElementById('navbar-placeholder').innerHTML = data;
@@ -10,36 +10,38 @@ document.addEventListener('DOMContentLoaded', () => {
       const pageIcon = document.getElementById('page-icon');
       const pageTitle = document.getElementById('page-title');
       const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+const pagePath = window.location.pathname; // Get full path
+const normalizedPage = pagePath.includes('/html/') ? pagePath.split('/html/').pop() : currentPage;
 
-      switch (currentPage) {
-        case 'index.html':
-          pageIcon.src = './images/home-icon.png';
-          pageTitle.textContent = 'The Wedge';
-          break;
-        case 'wx.html':
-          pageIcon.src = './images/weather-icon.png';
-          pageTitle.textContent = 'Weather';
-          break;
-        case 'preflight-checklist.html':
-          pageIcon.src = './images/checklist-icon.png';
-          pageTitle.textContent = 'Before Pushback';
-          break;
-        case 'frm.html':
-          pageIcon.src = './images/rest-icon.png';
-          pageTitle.textContent = 'Flight Rest Management';
-          break;
-        case 'fraam.html':
-          pageIcon.src = './images/risk-icon.png';
-          pageTitle.textContent = 'Fatigue Risk Assessment';
-          break;
-        case 'contact.html':
-          pageIcon.src = './images/contact-icon.png';
-          pageTitle.textContent = 'Contact';
-          break;
-        default:
-          pageIcon.src = './images/home-icon.png';
-          pageTitle.textContent = 'The Wedge';
-      }
+switch (normalizedPage) {
+  case 'index.html':
+    pageIcon.src = '../images/home-icon.png';
+    pageTitle.textContent = 'The Wedge';
+    break;
+  case 'wx.html':
+    pageIcon.src = '../images/weather-icon.png';
+    pageTitle.textContent = 'Weather';
+    break;
+  case 'bpb.html': // Updated from preflight-checklist.html
+    pageIcon.src = '../images/checklist-icon.png';
+    pageTitle.textContent = 'Before Pushback';
+    break;
+  case 'frm.html':
+    pageIcon.src = '../images/rest-icon.png';
+    pageTitle.textContent = 'Flight Rest Management';
+    break;
+  case 'fraam.html':
+    pageIcon.src = '../images/risk-icon.png';
+    pageTitle.textContent = 'Fatigue Risk Assessment';
+    break;
+  case 'contact.html':
+    pageIcon.src = '../images/contact-icon.png';
+    pageTitle.textContent = 'Contact';
+    break;
+  default:
+    pageIcon.src = '../images/home-icon.png';
+    pageTitle.textContent = 'The Wedge';
+}
 
       // Add hamburger menu toggle
       const hamburger = document.querySelector('.hamburger');
