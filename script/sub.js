@@ -9,6 +9,12 @@ const results = document.getElementById("results");
 
 const subTimes = [subStart, subEnd, tripEnd, revised];
 const now = new Date();
+const subFlowURL = "https://fdx.alpa.org/Portals/7/Documents/Committees/communications/flowcharts/substitution-decision-flowchart.html"
+const resources = `<hr />
+    <p>Resources:</p>
+    <p>&nbsp&nbsp<a href="${subFlowURL}" target="_blank">ALPA SUB flow chart</a></p>
+    <p>&nbsp&nbsp<a href="../images/subflow.png">SUB flow chart</a></p>
+`;
 
 // Initiate form values
 subTimes.forEach(item => {
@@ -23,8 +29,8 @@ tripGuarantee.value = localStorage.getItem('tripGuarantee') ?
 
 // Practice values for testing
 // The format is "yyyy-MM-ddThh:mm"
-subStart.value = '2024-04-03T16:10';
-subEnd.value = '2024-04-06T05:40';
+// subStart.value = '2024-04-03T16:10';
+// subEnd.value = '2024-04-06T05:40';
 // tripEnd.value = '2025-06-16T09:30';
 // revised.value = '2025-06-16T21:29';
 // tripGuarantee.value = '6:00';
@@ -46,6 +52,7 @@ function generateOutput() {
             valid: item.value && !isNaN(utcDate)
         }
         resultsArray.push(resultObj);
+        localStorage.setItem(item.name, item.value);
     });
 
     console.log(resultsArray);
@@ -70,10 +77,10 @@ function generateOutput() {
 
     localStorage.setItem('tripGuarantee', tripGuarantee.value);
     
-    console.log("Sub Start:", resultsArray[0].value);
-    console.log("Sub End:", resultsArray[1].value);
-    console.log("Trip End:", resultsArray[2].value);
-    console.log("Revised End:", resultsArray[3].value);
+    // console.log("Sub Start:", resultsArray[0].value);
+    // console.log("Sub End:", resultsArray[1].value);
+    // console.log("Trip End:", resultsArray[2].value);
+    // console.log("Revised End:", resultsArray[3].value);
     
     const subDuration = subtractTimes(resultsArray[0].utcDate, resultsArray[1].utcDate);
     console.log("subDuration:", subDuration)
@@ -87,7 +94,7 @@ function generateOutput() {
             <p>&nbsp&nbsp&nbspStart: ${resultsArray[0].output}</p>
             <p>&nbsp&nbsp&nbspEnd: ${resultsArray[1].output}</p>
             <p>&nbsp&nbsp&nbspDuration: ${subDuration} hrs, ${subType} Sub</p>
-            <p>&nbsp&nbsp&nbspGuar Pay: <span style="color: yellow;">${tripCredit.toFixed(1)} hrs</span></p>
+            <p>&nbsp&nbsp&nbspGuar Pay: <span style="color: yellow;">${tripCredit.toFixed(1)}</span> credit hrs</p>
             <hr />
          `
         subOutput += revisionCredit >= tripCredit ?
@@ -97,10 +104,10 @@ function generateOutput() {
                 <p>&nbsp&nbsp&nbsp2. Elect OTP: Keep overage, Paid Sub Guarantee now, makeup at 125%, pay removed in 3 bid periods</p>` :
             `<p><span style="color: yellow; font-size: 1.5rem;">Consider remaining in SUB</span></p>
              <p>Paid ACH for trip (no overage) plus SUB guarantee</p>`;
+        subOutput += resources;
     } else {
         subOutput = `<h2>Substitution Inquiry</h2>
         <p>Update Substitution parameters for SUB information</p>
-        
         `
     }
    
@@ -111,9 +118,12 @@ function generateOutput() {
     console.log("Revision CH:", revisionCredit);
 
     output += `<h2>Potential Overage</h2>
-        <p>Revision extends trip: ${revisedDuration.toFixed(1)} hours:</p>
-        <p>&nbsp&nbsp&nbspOverage may pay <span style="color: yellow;">${(revisionCredit).toFixed(1)}</span> credit hours</p>
-        <p>&nbsp&nbsp&nbspNote: trip can still be shortened by CRS</p>
+        <p>Extension Window:</p>
+        <p>&nbsp&nbsp&nbspTrip End: ${resultsArray[2].output}</p>
+        <p>&nbsp&nbsp&nbspRev End: ${resultsArray[3].output}</p> 
+        <p>&nbsp&nbsp&nbspTotal Extension: ${revisedDuration.toFixed(1)} hours:</p>
+        <p>&nbsp&nbsp&nbspOverage may pay <span style="color: yellow;">${(revisionCredit).toFixed(1)}</span>* credit hours</p>
+        <p>&nbsp&nbsp&nbsp&nbsp&nbsp<span style="font-size: 1.0rem;">* trip can still be shortened by CRS</span></p>
         <hr />`
     output += subOutput;
     return output;
@@ -180,12 +190,19 @@ function appendBackButton() {
   });
 }
 
+tripGuarantee.addEventListener("focus", () => {
+  tripGuarantee.classList.add("focused");
+  tripGuarantee.select();
+});
+tripGuarantee.addEventListener("blur", () => tripGuarantee.classList.remove("focused"));
+// tripGuarantee.addEventListener("change", () => 
+//   tripGuarantee.value = formatTime(tripGuarantee.value));
+
 
  subForm.addEventListener("submit", (e) => {
     e.preventDefault();
     results.innerHTML = "";
     results.innerHTML = generateOutput();
-
     results.classList.remove("hidden");
     subForm.classList.add("hidden");
 
