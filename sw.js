@@ -1,7 +1,8 @@
-const CACHE_NAME = 'wedge-cache-v1.3.1';
+const CACHE_NAME = 'wedge-cache-v1.4.0';
 // Cache versioning to handle updates vMajor.minor.patch
 // Version 1.3.0 - Changed preflight-checklist to before pushback and eliminated stale info
 // Version 1.3.1 - Changed file structure for The Wedge
+// Version 1.4.0 - Added Sub Considerations
 // This service worker caches essential files for offline use and handles fetch requests
 const urlsToCache = [
     './',
@@ -12,11 +13,13 @@ const urlsToCache = [
     './html/frm.html',
     './html/navbar.html',
     './html/bpb.html',
+    './html/sub.html',
     './script/bpb.js',
     './script/navbar.js',
     './script/frm.js',
     './script/fraam.js',
     './script/wx.js',
+    './script/sub.js',
     'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js',
     './styles.css',
     './manifest.json',

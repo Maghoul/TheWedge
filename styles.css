@@ -144,7 +144,8 @@ hr {
 
 .form-row input[type="text"],
 .form-row input[type="number"],
-.form-row input[type="email"] {
+.form-row input[type="email"],
+.form-row input[type="datetime-local"] {
     border-color: rgb(118, 118, 118);
     transition: border 0.2s, background-color 0.2s;
     font-size: 1.3rem;
@@ -205,6 +206,12 @@ details[open] p {
     text-align: center;
     font-size: 1.6rem;
     line-height: 1.2;
+}
+
+#form h2 {
+    text-align: center;
+    font-size: 1.4rem;
+    line-height: 1.0;
 }
 
 #form.hidden {
@@ -350,7 +357,8 @@ input::placeholder {
     }
 
     .form-row input[type="text"],
-    .form-row input[type="number"] {
+    .form-row input[type="number"],
+    .form-row input[type="datetime-local"] {
         font-size: 1.3rem;
         padding: 14px;
         width: 100%;
@@ -611,4 +619,12 @@ a:hover {
     min-height: 40px; /* Ensure space even when empty */
     width: 100%;
     box-sizing: border-box;
+}
+
+.sub-results p {
+    text-align: left;
+    margin: 0 0 0 0;
+    padding: 0;
+    line-height: 1.5;
+    font-size: 1.3rem;
 }

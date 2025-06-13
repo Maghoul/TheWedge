@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#003052">
+    <title>Overage Calculator</title>
+    <link rel="stylesheet" href="../styles.css">
+  </head>
+  <body>
+    <div class="container">
+      <form id="form">
+        <h1>Overage Calculator</h1>
+        <hr />
+                <div class="form-row">
+            <label for="trip-end">Awarded Trip End (Zulu):</label>
+            <input id="trip-end" name="tripEnd" type="datetime-local" required>
+        </div>
+        <div class="form-row">
+            <label for="revised-trip-end">Revised Trip End (Zulu):</label>
+            <input id="revised-trip-end" name="revised" type="datetime-local" required>
+        </div>
+        <hr />
+        <h2>Substitution</h2>
+        <hr />
+        <div class="form-row">
+            <label for="sub-start">Sub Window Start (Zulu):</label>
+            <input id="sub-start" name="subStart" type="datetime-local" >
+        </div>
+        <div class="form-row">
+            <label for="sub-end">Sub Window End (Zulu):</label>
+            <input id="sub-end" name="subEnd" type="datetime-local" >
+        </div>
+        <div class="form-row">
+          <label for="trip-guarantee">Enter Guarantee Pay:</label>
+          <input id="trip-guarantee" name="tripGuarantee" type="text" placeholder="e.g., HH:MM">
+        </div>
+
+        <button type="submit">Calculate</button>
+        <button type="reset">Reset Defaults</button>
+        <button type="button" id="clear-btn">Clear Form</button>
+      </form>
+      <div id="results" class="hidden sub-results"></div>
+    </div>
+    <script src="/script/navbar.js"></script>
+    <script src="../script/sub.js"></script>
+  </body>
+</html>

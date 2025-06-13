@@ -34,6 +34,10 @@ switch (normalizedPage) {
     pageIcon.src = '../images/risk-icon.png';
     pageTitle.textContent = 'Fatigue Risk Assessment';
     break;
+    case 'sub.html':
+    pageIcon.src = '../images/home-icon.png';
+    pageTitle.textContent = 'Substitution Considerations';
+    break;  
   case 'contact.html':
     pageIcon.src = '../images/contact-icon.png';
     pageTitle.textContent = 'Contact';
