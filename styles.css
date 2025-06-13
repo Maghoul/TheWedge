@@ -628,3 +628,31 @@ a:hover {
     line-height: 1.5;
     font-size: 1.3rem;
 }
+
+.form-row input[type="datetime-local"] {
+    color: black; /* Set text color */
+    text-align: left; /* Set alignment (change to center or right if desired) */
+    appearance: none; /* Standard property for compatibility */
+    -webkit-appearance: none; /* Remove default iOS styling */
+}
+
+/* Target WebKit-specific pseudo-elements for iOS */
+.form-row input[type="datetime-local"]::-webkit-datetime-edit {
+    color: black; /* Text color for date/time parts */
+    text-align: left; /* Align text */
+}
+
+.form-row input[type="datetime-local"]::-webkit-datetime-edit-fields-wrapper {
+    color: black; /* Ensure all field parts use the color */
+}
+
+.form-row input[type="datetime-local"]::-webkit-datetime-edit-text,
+.form-row input[type="datetime-local"]::-webkit-datetime-edit-month-field,
+.form-row input[type="datetime-local"]::-webkit-datetime-edit-day-field,
+.form-row input[type="datetime-local"]::-webkit-datetime-edit-year-field,
+.form-row input[type="datetime-local"]::-webkit-datetime-edit-hour-field,
+.form-row input[type="datetime-local"]::-webkit-datetime-edit-minute-field,
+.form-row input[type="datetime-local"]::-webkit-datetime-edit-ampm-field {
+    color: black; /* Specific fields */
+    text-align: left; /* Align individual fields */
+}

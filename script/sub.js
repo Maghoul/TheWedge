@@ -21,11 +21,10 @@ tripGuarantee.value = localStorage.getItem('tripGuarantee') ?
     localStorage.getItem('tripGuarantee') :
     '06:00';
 
-
 // Practice values for testing
 // The format is "yyyy-MM-ddThh:mm"
-// subStart.value = '2024-04-03T16:10';
-// subEnd.value = '2024-04-06T05:40';
+subStart.value = '2024-04-03T16:10';
+subEnd.value = '2024-04-06T05:40';
 // tripEnd.value = '2025-06-16T09:30';
 // revised.value = '2025-06-16T21:29';
 // tripGuarantee.value = '6:00';
@@ -33,40 +32,62 @@ tripGuarantee.value = localStorage.getItem('tripGuarantee') ?
 // generate output data
 function generateOutput() {
              
-    const arrTimes = [];
+    const resultsArray = [];
     let output = "";
+ 
     subTimes.forEach(item => {
-        const utcDate = new Date(item.value + 'Z');
-        if (!isNaN(utcDate)) {
-            localStorage.setItem(item.name, utcDate.toUTCString());
-            arrTimes.push(utcDate);
-        } else {
-            return "Invalid date/time entered.";
+        const utcDate = item.value ? new Date(item.value + 'Z') : null;
+
+        const resultObj = {
+            id: item.name,
+            value: item.value,
+            utcDate: utcDate, // ? utcDate.toISOString() : null,
+            output: formatDate(utcDate),
+            valid: item.value && !isNaN(utcDate)
         }
+        resultsArray.push(resultObj);
     });
-    
+
+    console.log(resultsArray);
+
+    // Ensure Trip End and Sub End occur after Trip Start and Sub Start
+
+    for (i=0; i < 3; i+=2) {
+        if (resultsArray[i+1].utcDate < resultsArray[i].utcDate) {
+            output += `<p>The Trip / Sub time(s) should begin before it ends!</p>`
+            return output;
+        }
+    }
+
+    // Ensure trip guarantee is entered if doing the sub inquiry
+    if (subStart.value && subEnd.value && subStart.value !== subEnd.value && !tripGuarantee.value) {
+        output  += `<p>Please enter the Guarantee Pay</p>`
+        return output;
+    }
+
     const tripCredit = getTripCredit(tripGuarantee.value);
     console.log("Trip Credit:", tripCredit);
 
     localStorage.setItem('tripGuarantee', tripGuarantee.value);
     
-    console.log("Sub Start:", arrTimes[0].toUTCString());
-    console.log("Sub End:", arrTimes[1].toUTCString());
-    console.log("Trip End:", arrTimes[2].toUTCString());
-    console.log("Revised End:", arrTimes[3].toUTCString());
+    console.log("Sub Start:", resultsArray[0].value);
+    console.log("Sub End:", resultsArray[1].value);
+    console.log("Trip End:", resultsArray[2].value);
+    console.log("Revised End:", resultsArray[3].value);
     
-    const subDuration = subtractTimes(arrTimes[0], arrTimes[1]);
-    const revisedDuration  = subtractTimes(arrTimes[2], arrTimes[3]);
+    const subDuration = subtractTimes(resultsArray[0].utcDate, resultsArray[1].utcDate);
+    console.log("subDuration:", subDuration)
+    const revisedDuration  = subtractTimes(resultsArray[2].utcDate, resultsArray[3].utcDate);
     const revisionCredit = calculateOverage(revisedDuration);
     const subType = (subDuration <= 72) ? "Short" : "Long";
     let subOutput = ""
     if (subDuration >= 8) {
         subOutput += `<h2>Substitution Inquiry</h2>
             <p>Assignment Window:</p>
-            <p>&nbsp&nbsp&nbspStart: ${arrTimes[0].toUTCString()}</p>
-            <p>&nbsp&nbsp&nbspEnd: ${arrTimes[1].toUTCString()}</p>
+            <p>&nbsp&nbsp&nbspStart: ${resultsArray[0].output}</p>
+            <p>&nbsp&nbsp&nbspEnd: ${resultsArray[1].output}</p>
             <p>&nbsp&nbsp&nbspDuration: ${subDuration} hrs, ${subType} Sub</p>
-            <p>&nbsp&nbsp&nbspGuar Pay: <span style="color: yellow;">${tripCredit} hrs</span></p>
+            <p>&nbsp&nbsp&nbspGuar Pay: <span style="color: yellow;">${tripCredit.toFixed(1)} hrs</span></p>
             <hr />
          `
         subOutput += revisionCredit >= tripCredit ?
@@ -96,8 +117,6 @@ function generateOutput() {
         <hr />`
     output += subOutput;
     return output;
-
-
 }
 // Ensure good input and return credit value
 function getTripCredit(value) {
@@ -110,7 +129,6 @@ function getTripCredit(value) {
         return hours + minutes / 60;
     }
     return Number(value);
-
 }
 
 function convertStorage (item) {
@@ -131,6 +149,21 @@ function calculateOverage(timeLength) {
     } else {
         return 18 + (2 * ((timeLength - 45)/ 3.75));
     }
+}
+
+function formatDate(date) {
+    // Formats as DDMMMYYHHMMz
+    if (!date || isNaN(date)) return "Invalid Date";
+    
+    const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+    
+    const day = String(date.getUTCDate()).padStart(2, "0"); // DD
+    const month = months[date.getUTCMonth()]; // MMM
+    const year = String(date.getUTCFullYear()).slice(-2); // YY
+    const hours = String(date.getUTCHours()).padStart(2, "0"); // HH
+    const minutes = String(date.getUTCMinutes()).padStart(2, "0"); // MM
+    
+    return `${day}${month}${year} ${hours}${minutes}z`;
 }
 
 function appendBackButton() {
@@ -167,9 +200,7 @@ function appendBackButton() {
         item.value = now.toISOString().slice(0, 16);
         console.log(item.name, item.value)
     });
-    tripGuarantee.value = localStorage.getItem('tripGuarantee') ?
-        localStorage.getItem('tripGuarantee') :
-        '06:00';
+    tripGuarantee.value = null;
 	results.classList.remove("error");
 });
 

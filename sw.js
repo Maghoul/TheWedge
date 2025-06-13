@@ -1,8 +1,9 @@
-const CACHE_NAME = 'wedge-cache-v1.4.0';
+const CACHE_NAME = 'wedge-cache-v1.4.1';
 // Cache versioning to handle updates vMajor.minor.patch
 // Version 1.3.0 - Changed preflight-checklist to before pushback and eliminated stale info
 // Version 1.3.1 - Changed file structure for The Wedge
 // Version 1.4.0 - Added Sub Considerations
+// Version 1.4.1 - sub coloring on apple, sub icon added, and error checking
 // This service worker caches essential files for offline use and handles fetch requests
 const urlsToCache = [
     './',
@@ -31,6 +32,7 @@ const urlsToCache = [
     './images/contact-icon.png',
     './images/rest-icon.png',
     './images/risk-icon.png',
+    './images/sub-icon.png',
     './images/weather-icon.png',
 ];
 
