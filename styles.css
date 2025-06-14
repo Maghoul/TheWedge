@@ -630,6 +630,11 @@ a:hover {
     font-size: 1.3rem;
 }
 
+.sub-results p.indent {
+    padding-left: 40px;
+    text-indent: -25px;
+}
+
 .form-row input[type="datetime-local"] {
     color: black; /* Set text color */
     text-align: left; /* Set alignment (change to center or right if desired) */
@@ -656,4 +661,9 @@ a:hover {
 .form-row input[type="datetime-local"]::-webkit-datetime-edit-ampm-field {
     color: black; /* Specific fields */
     text-align: left; /* Align individual fields */
+}
+
+.super {
+  vertical-align: super;
+  font-size: small; /* Optional: makes the superscript text smaller */
 }

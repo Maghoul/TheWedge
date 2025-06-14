@@ -12,8 +12,10 @@ const now = new Date();
 const subFlowURL = "https://fdx.alpa.org/Portals/7/Documents/Committees/communications/flowcharts/substitution-decision-flowchart.html"
 const resources = `<hr />
     <p>Resources:</p>
-    <p>&nbsp&nbsp<a href="${subFlowURL}" target="_blank">ALPA SUB flow chart</a></p>
-    <p>&nbsp&nbsp<a href="../images/subflow.png">SUB flow chart</a></p>
+    <p class="indent">&#9992; <a href="${subFlowURL}" target="_blank">ALPA interactive SUB flow chart</a></p>
+    <p class="indent">&#9992; <a href="../images/subflow.png">ALPA SUB flow chart diagram</a></p>
+    <p class="indent">&#9992; Overage: CBA 4.BB.3 & 4.BB.4</p>
+    <p class="indent">&#9992; Substitution: CBA 25.H</p>
 `;
 
 // Initiate form values
@@ -91,17 +93,18 @@ function generateOutput() {
     if (subDuration >= 8) {
         subOutput += `<h2>Substitution Inquiry</h2>
             <p>Assignment Window:</p>
-            <p>&nbsp&nbsp&nbspStart: ${resultsArray[0].output}</p>
-            <p>&nbsp&nbsp&nbspEnd: ${resultsArray[1].output}</p>
-            <p>&nbsp&nbsp&nbspDuration: ${subDuration} hrs, ${subType} Sub</p>
-            <p>&nbsp&nbsp&nbspGuar Pay: <span style="color: yellow;">${tripCredit.toFixed(1)}</span> credit hrs</p>
+            <p class="indent">Start: ${resultsArray[0].output}</p>
+            <p  class="indent">End: ${resultsArray[1].output}</p>
+            <p class="indent">Duration: ${subDuration} hrs -- [${subType} Sub]</p>
+            <p class="indent">Guar Pay: <span style="color: yellow;">${tripCredit.toFixed(1)}</span> credit hrs</p>
             <hr />
          `
         subOutput += revisionCredit >= tripCredit ?
             `<p><span style="color: yellow; font-size: 1.5rem;">Consider keeping overage:</span></p>
-            <p>Two Options Available:</p>
-                <p>&nbsp&nbsp&nbsp1. Drop conflict trip(s): Keep overage, hours go to regular makeup bank</p>
-                <p>&nbsp&nbsp&nbsp2. Elect OTP: Keep overage, Paid Sub Guarantee now, makeup at 125%, pay removed in 3 bid periods</p>` :
+            <p>Three Options Available:</p>
+                <p class="indent" style="padding-left: 25px;">1. Drop conflict trip(s): <span style="color: yellow;">Keep overage</span>, hours go to regular makeup bank</p>
+                <p class="indent" style="padding-left: 25px;">2. Elect OTP: <span style="color: yellow;">Keep overage</span>, paid SUB guarantee now, makeup at 125%, pay removed in 3 bid periods</p>
+                <p class="indent" style="padding-left: 25px;">3. Remain in SUB: <span style="color: red;">Lose overage</span>, paid SUB guarantee</p>` :
             `<p><span style="color: yellow; font-size: 1.5rem;">Consider remaining in SUB</span></p>
              <p>Paid ACH for trip (no overage) plus SUB guarantee</p>`;
         subOutput += resources;
@@ -119,11 +122,12 @@ function generateOutput() {
 
     output += `<h2>Potential Overage</h2>
         <p>Extension Window:</p>
-        <p>&nbsp&nbsp&nbspTrip End: ${resultsArray[2].output}</p>
-        <p>&nbsp&nbsp&nbspRev End: ${resultsArray[3].output}</p> 
-        <p>&nbsp&nbsp&nbspTotal Extension: ${revisedDuration.toFixed(1)} hours:</p>
-        <p>&nbsp&nbsp&nbspOverage may pay <span style="color: yellow;">${(revisionCredit).toFixed(1)}</span>* credit hours</p>
-        <p>&nbsp&nbsp&nbsp&nbsp&nbsp<span style="font-size: 1.0rem;">* trip can still be shortened by CRS</span></p>
+        <p class="indent">Trip End: ${resultsArray[2].output}</p>
+        <p class="indent">Rev End: ${resultsArray[3].output}</p> 
+        <p class="indent">Total Extension: ${revisedDuration.toFixed(1)} hours</p>
+        <p class="indent">Overage pays <span style="color: yellow;">~${(revisionCredit).toFixed(1)}</span> credit hours<span class="super">1,2</span></p>
+        <p class="indent">&nbsp&nbsp<span style="font-size: 1.0rem;"><span class="super">1</span>trip can still be revised by CRS</span></p>
+        <p class="indent" style="line-height: 0.75;">&nbsp&nbsp<span style="font-size: 1.0rem;"><span class="super">2</span>assumes on TAFB credit trip</span></p>
         <hr />`
     output += subOutput;
     return output;
