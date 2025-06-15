@@ -94,7 +94,7 @@ function generateOutput() {
         subOutput += `<h2>Substitution Inquiry</h2>
             <p>Assignment Window:</p>
             <p class="indent">Start: ${resultsArray[0].output}</p>
-            <p  class="indent">End: ${resultsArray[1].output}</p>
+            <p class="indent">End: ${resultsArray[1].output}</p>
             <p class="indent">Duration: ${subDuration} hrs -- [${subType} Sub]</p>
             <p class="indent">Guar Pay: <span style="color: yellow;">${tripCredit.toFixed(1)}</span> credit hrs</p>
             <hr />
@@ -108,12 +108,17 @@ function generateOutput() {
             `<p><span style="color: yellow; font-size: 1.5rem;">Consider remaining in SUB</span></p>
              <p>Paid ACH for trip (no overage) plus SUB guarantee</p>`;
         subOutput += resources;
+    } else if (tripCredit) {
+        subOutput += `<h2>Trip Guarantee</h2>
+        <p>Guar Pay: <span style="color: yellow;">${tripCredit.toFixed(1)}</span> credit hrs</p>
+        <p>Update Substitution start/end parameters for SUB Inquiry information</p>
+        `
     } else {
-        subOutput = `<h2>Substitution Inquiry</h2>
+        subOutput += `<h2>Substitution Inquiry</h2>
         <p>Update Substitution parameters for SUB information</p>
         `
     }
-   
+
     console.log("Duration:", subDuration, "hrs");
     console.log("Revision Length: ", revisedDuration, "hrs");
     
