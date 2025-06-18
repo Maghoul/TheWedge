@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wedge-cache-v0.4.4';
+const CACHE_NAME = 'wedge-cache-v0.4.5';
 // Cache versioning to handle updates vMajor.minor.patch
 // Version 1.3.0 - Changed preflight-checklist to before pushback and eliminated stale info
 // Version 1.3.1 - Changed file structure for The Wedge
@@ -7,6 +7,7 @@ const CACHE_NAME = 'wedge-cache-v0.4.4';
 // Version 1.4.2 - sub links and flow chart
 // Version 0.4.3 - sub styling
 // Version 0.4.4 - Trip Guarantee bug fix
+// Version 0.4.5 - CSS tweaks for furture app update
 // This service worker caches essential files for offline use and handles fetch requests
 const urlsToCache = [
     './',

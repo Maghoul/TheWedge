@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#003052">
+    <title>Deviation Bank</title>
+    <link rel="stylesheet" href="../styles.css">
+  </head>
+  <body>
+    <div class="container">
+      <form id="form">
+        <h1>Expense Reporting</h1>
+        <br />
+         <p class="month-input" >Select desired month: <input type="month" id="update-month"></p>
+        <hr />
+        <h2 id="display-month" >Jun 2025</h2>
+        <div class="dispay-container">
+          <div class="display-row"> 
+            <span class="display-label">Sched Bank:</span>
+            <span id="sched-bank" class="display-value"></span>
+          </div>
+          <div class="display-row"> 
+            <span class="display-label">Expenses:</span>
+            <span id="expenses" class="display-value"></span>
+          </div>
+          <div class="display-row total-row"> 
+            <span class="display-label">Remaining:</span>
+            <span id="remaining" class="display-value"></span>
+          </div>
+          <div class="display-row"> 
+            <span class="display-label">DBA Avail:</span>
+            <span id="dbaAvail" class="display-value"></span>
+          </div>
+          <div class="display-row total-row"> 
+            <span class="display-label">Total:</span>
+            <span id="total-expense" class="display-value"></span>
+          </div>
+          <div class="display-row"> 
+            <span class="display-label">Hotel Avail:</span>
+            <span id="hotel-bank" class="display-value"></span>
+          </div>
+          <hr>
+          <div class="display-row"> 
+            <span class="display-label">DBA Fwd:</span>
+            <span id="dba-avail-next" class="display-value"></span>
+          </div>
+          <div class="display-row"> 
+            <span class="display-label">Hotel Fwd:</span>
+            <span id="hotel-bank-next" class="display-value"></span>
+          </div>
+        </div>
+        <hr />
+      <div class="button-group">
+        <button type="button" id="show-expenses">Update Expenses</button>
+        <button type="button" id="update-sched-bank">Update Trip Banks</button>
+        <button type="button" id="update-banks">Update Dev/Hotel Banks</button>
+    </div>
+    </form>
+      <div id="results" class="hidden"></div>
+    </div>
+    <script src="/script/navbar.js"></script>
+    <script src="../script/deviation.js"></script>
+  </body>
+</html>

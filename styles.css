@@ -157,6 +157,75 @@ hr {
     height: 50px;
 }
 
+#form .dispay-container {
+    display: block;
+    max-width: 400px; /* Unchanged */
+    margin: 0 auto; /* Unchanged */
+}
+
+#form .display-row {
+    display: flex;
+    justify-content: space-between; /* Align label center, value left within row */
+    align-items: center;
+    margin: 0 auto 8px; /* Center row, add bottom spacing */
+    width: 270px; 
+}
+
+#form .display-label {
+    width: 150px; /* Fixed width */
+    text-align: right;
+    font-size: 1.3rem;
+    color: var(--primary-color);
+    padding-right: 15px;
+}
+
+#form .display-value {
+    width: 120px;
+    text-align: left;
+    font-size: 1.3rem;
+    color: var(--primary-color);
+    min-width: 100px; /* Ensure enough space for amounts */
+}
+
+#form .month-input {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 1.3rem;
+    color: var(--primary-color);
+}
+
+#form .total-row {
+    border-top: 1px solid var(--primary-color);
+    border-bottom: 1px solid var(--primary-color);
+    font-weight: bold;
+}
+
+#update-month {
+    border-color: rgb(118, 118, 118);
+    transition: border 0.2s, background-color 0.2s;
+    font-size: 1.3rem;
+    background-color: #a3a3a3;
+    width: 50px;
+    padding: 12px;
+    border-radius: 10px;
+    box-sizing: border-box;
+    height: 30px;
+}
+
+.dev-btn {
+    border-color: rgb(118, 118, 118);
+    transition: border 0.2s, background-color 0.2s;
+    font-size: 1.0rem;
+    background-color: #a3a3a3;
+    margin: 0 auto;
+    width: 120px;
+    padding: 0;
+    border-radius: 10px;
+    box-sizing: border-box;
+    height: 25px;
+    
+}
+
 details {
     width: 100%;
     padding: 12px;
@@ -191,15 +260,30 @@ details[open] p {
     width: 100%;
 }
 
+.button-group {
+    display: flex;
+    flex-direction: column; /* Stack buttons vertically */
+    align-items: center; /* Center buttons horizontally */
+    justify-content: center; /* Center buttons vertically */
+    gap: 10px; /* Space between buttons */
+    min-height: 150px; /* Ensure enough height for centering */
+    margin-top: 10px; /* Space after <hr /> */
+}
+
 #form button {
     background-color: var(--se-gray-color);
     color: var(--primary-color);
     border: none;
-    padding: 12px 24px;
+    padding: 12px 0;
     margin: 10px 5px;
     border-radius: 5px;
     cursor: pointer;
     font-size: 1.3rem;
+    min-width: 250px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
 }
 
 #form h1 {
@@ -343,6 +427,32 @@ input::placeholder {
         box-shadow: none;
     }
 
+    #form .dispay-container {
+        max-width: 300px;
+    }
+
+    #form .display-row {
+        max-width: 270px; 
+        padding: 0 5px;
+    }
+
+    #form .display-label {
+        width: 140px; /* Slightly smaller for mobile */
+        font-size: 1.2rem;
+    }
+
+    #form .display-value {
+        font-size: 1.2rem;
+        width: 130px;
+    }
+}
+
+#display-month {
+    text-align: center;
+    text-decoration: underline;
+    margin-bottom: 12px;
+}
+
     .form-row {
         padding: 12px;
         margin: 12px 0;
@@ -366,11 +476,6 @@ input::placeholder {
 
     .form-row input[type="checkbox"] {
         transform: scale(1.8);
-    }
-
-    #form button {
-        font-size: 1.3rem;
-        padding: 14px 24px;
     }
 
     #results {
@@ -406,7 +511,6 @@ input::placeholder {
     .citation {
         font-size: 1.1rem;
     }
-}
 
 main {
     padding: 15px;
@@ -666,4 +770,78 @@ a:hover {
 .super {
   vertical-align: super;
   font-size: small; /* Optional: makes the superscript text smaller */
+}
+
+.negative {
+    color: red;
+}
+
+#results-div {
+    white-space: normal;
+}
+
+#results-div h1 {
+    font-size: 1.6rem;
+}
+
+#results-div h2 {
+    font-size: 1.4rem;
+    text-decoration: underline;
+}
+
+.expenseGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(80px, 120px));
+    column-gap: 10px;
+    justify-content: space-around;
+    font-size: 1.0rem;
+    text-align: center;
+}
+
+.expenseGrid > * {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+.expenseGrid > *:nth-child(-n+4) {
+    border-bottom: 1px solid var(--primary-color); /* #f5f6f7 */
+    padding-bottom: 0; /* Optional: space above line */
+}
+
+.schedGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(80px, 120px));
+    column-gap: 10px;
+    justify-content: space-around;
+    font-size: 1.0rem;
+    text-align: center;
+}
+
+.schedGrid > * {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+.schedGrid > *:nth-child(-n+2) {
+    border-bottom: 1px solid var(--primary-color); /* #f5f6f7 */
+    padding-bottom: 0; /* Optional: space above line */
+}
+
+.action-menu { margin-top: 5px; display: flex; gap: 5px; }
+.expense-cell.selected { background-color: var(--se-gray-color); }
+.expense-cell { cursor: pointer; }
+.sched-cell { cursor: pointer; }
+.sched-cell.selected { background-color: var(--se-gray-color); }
+
+#expenseAmount, #expenseComment,
+ #expenseDate, #expenseSlide,
+ #scheduledBankDate, #scheduledBankAmount {
+    background-color: #a3a3a3;
+    font-size: 1.1rem;
+}
+
+#expenseSlide {
+    transform: scale(1.6);
+    margin-left: 10px;
+    accent-color: #a3a3a3;
 }
