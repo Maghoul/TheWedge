@@ -177,58 +177,93 @@ function getAmount(compareMonth, arrCompare) {
   return totalizer;
 }
 
-function updateUI() {
-  const schedMonth = updateMonthInput.value; // e.g., "2025-07"
-  const schedMonthDay = `${schedMonth}-01`  // e.g., "2025-07-01"
-  const schedBankAmount = getAmount(schedMonth, data.scheduledBank);
-  const expensesAmount = getAmount(schedMonth, data.expenses); 
-  const [year, monthNum] = schedMonth.split("-"); // [2025, 7]
-  const prevMonthDate = new Date(parseInt(year), parseInt(monthNum) - 2); // Subtract 2 to get previous month
-  const prevMonth = `${prevMonthDate.getFullYear()}-${(prevMonthDate.getMonth() + 1).toString().padStart(2, "0")}-01`;
-  displayMonth.innerText = `${months[parseInt(monthNum) - 1]} ${year}`;
-  schedBank.innerText = `$${schedBankAmount.toFixed(2)}`;
-  expenses.innerText = `$${expensesAmount.toFixed(2)}`;
-  const difference = schedBankAmount - expensesAmount;
-  remaining.innerHTML = difference < 0 ?
-    `<span class="negative">($${(-difference).toFixed(2)})</span>` :
-    `$${difference.toFixed(2)}`;
-  const dbaAmount = getAmount(schedMonth, data.deviationBank)
-  dbaAvail.innerText = `$${dbaAmount.toFixed(2)}`;
-  const totalRemaining = schedBankAmount - expensesAmount + dbaAmount;
-  totalExp.innerHTML = totalRemaining < 0 ?
-    `<span class="negative">($${(-totalRemaining).toFixed(2)})</span>` :
-    `$${totalRemaining.toFixed(2)}`;
-  const hotelAmount = data.hotelBank.find(entry => entry.date === prevMonth)?.amount || 0;
-  hotelBank.innerText = `$${hotelAmount.toFixed(2)}`;
-  const hotelSpend = (data.hotelBank.find(s => s.date === schedMonthDay)).spend;
-  const hotelEarn = (data.hotelBank.find(e => e.date === schedMonthDay)).earn;
-  hotelFwd.innerText = `$${(hotelAmount - hotelSpend + hotelEarn).toFixed(2)}`
-   
-  // const dbaSpent = difference > 0 ? 0 :    // Nothing spent if expense < bank
-  //       totalRemaining < 0 ? dbaAmount :   // Everything spent if Total is negative
-  //       difference;                        // Only difference spent if total is positive             
-
-
-  const dbaRemaining = totalRemaining < 0 ? 0 :  // No DBA if total is still negative
-        (totalRemaining) / 2;
-  devFwd.innerText = `$${dbaRemaining.toFixed(2)}`
-
-  
-  
-  
-
-  
-  console.log("Remaining", difference, 'total remain', totalRemaining, )
-  console.log("dba to forward", dbaRemaining)
-
-
-
-
-  data.metadata.totalExpense = expensesAmount;
+// Round a Number to 2 digits
+function twoDigits (num) {
+  return Math.round(num * 100) / 100  // rounds a Number to two digits
 }
 
-//Initialize Screen data to the inital month
+function updateUI() {
+  try {
+    const schedDates = getYearMonthDay();
+    const schedBankAmount = getAmount(schedDates.currMonth, data.scheduledBank);
+    const expensesAmount = getAmount(schedDates.currMonth, data.expenses);
+
+    // Single find for deviationBank
+    const dbaPrevMonthEntry = data.deviationBank.find(entry => entry.date === schedDates.prevMonthDay);
+    const dbaCurrMonthEntry = data.deviationBank.find(entry => entry.date === schedDates.currMonthDay);
+    let dbaAmount = 0;
+    if (dbaPrevMonthEntry && dbaCurrMonthEntry) {
+      dbaAmount = twoDigits(dbaPrevMonthEntry.amountXfer);
+      dbaCurrMonthEntry.amount = dbaAmount;
+    } else {
+      console.warn('Missing deviation bank entry for', dbaPrevMonthEntry ? schedDates.currMonthDay : schedDates.prevMonthDay);
+    }
+    console.log('dbaAmount', dbaAmount);
+
+    // Ensure DOM elements exist
+    if (!displayMonth || !schedBank || !expenses || !remaining || !dbaAvail || !totalExp || !hotelBank) {
+      console.error('Missing required DOM elements');
+      return;
+    }
+
+    displayMonth.innerText = `${schedDates.mmmYYYY}`;
+    schedBank.innerText = `$${schedBankAmount.toFixed(2)}`;
+    expenses.innerText = `$${expensesAmount.toFixed(2)}`;
+    const difference = twoDigits(schedBankAmount - expensesAmount);
+    remaining.innerHTML = difference < 0 ?
+      `<span class="negative">($${(-difference).toFixed(2)})</span>` :
+      `$${difference.toFixed(2)}`;
+
+    dbaAvail.innerText = `$${dbaAmount.toFixed(2)}`;
+    const totalRemaining = twoDigits(schedBankAmount - expensesAmount + dbaAmount);
+    totalExp.innerHTML = totalRemaining < 0 ?
+      `<span class="negative">($${(-totalRemaining).toFixed(2)})</span>` :
+      `$${totalRemaining.toFixed(2)}`;
+
+    const hotelAmount = data.hotelBank.find(entry => entry.date === schedDates.prevMonthDay)?.amount || 0;
+    hotelBank.innerText = `$${hotelAmount.toFixed(2)}`;
+
+    // Single find for hotel bank
+    const hotelEntry = data.hotelBank.find(entry => entry.date === schedDates.currMonthDay) || { spend: 0, earn: 0 };
+    const hotelSpend = hotelEntry.spend;
+    const hotelEarn = hotelEntry.earn;
+
+    if (hotelFwd) {
+      hotelFwd.innerText = `$${(hotelAmount - hotelSpend + hotelEarn).toFixed(2)}`;
+    } else {
+      console.warn('hotelFwd element not found');
+    }
+
+    let dbaRemaining = totalRemaining < 0 ? 0 : (totalRemaining) / 2;
+    dbaRemaining = twoDigits(dbaRemaining);
+    if (devFwd) {
+      devFwd.innerText = `$${dbaRemaining.toFixed(2)}`;
+    } else {
+      console.warn('devFwd element not found');
+    }
+
+    // Update deviation bank amountXfer
+    if (dbaCurrMonthEntry) {
+      dbaCurrMonthEntry.amountXfer = dbaRemaining;
+    } else {
+      console.warn('Deviation bank entry not found for', schedDates.currMonthDay);
+    }
+
+    console.log("Remaining", difference, 'total remain', totalRemaining);
+    console.log("dba to forward", dbaRemaining);
+
+    // Ensure metadata exists
+    data.metadata = data.metadata || {};
+    data.metadata.currentMonth = schedDates.mmmYYYY;
+    data.metadata.totalExpense = expensesAmount;
+  } catch (error) {
+    console.error('Error in updateUI:', error);
+  }
+}
+
+// Run saveData immediately
 updateUI();
+saveData();
 
 // // Save data to local storage
 function saveData() {
@@ -283,6 +318,36 @@ function getSlideDate (checkDate, booSlide) {
     return checkSlideStatusDate  
 }
 
+// output formats for date usage
+  // Based on 2025-06 input, returns {'mmmYYYY': `Jun 2025`, 'currMonthDay': `2025-06-01`, 
+  // 'prevMonth': '2025-05', 'prevMonthDay:' `2025-05-01`}
+function getYearMonthDay(day = '01', cMonth = updateMonthInput.value) {
+  const thisMonth = cMonth;  // e.g., "2025-06"
+  const [year, month] = thisMonth.split("-");
+  const prevMonthDate = new Date(parseInt(year), parseInt(month) - 2); // Subtract 2 to get previous month
+  const nextMonthDate = new Date(parseInt(year), parseInt(month));
+  const currMonthDay = `${thisMonth}-${day}`;  // e.g., 2025-06-01
+  const prevMonth = `${prevMonthDate.getFullYear()}-${(prevMonthDate.
+                  getMonth() + 1).toString().padStart(2, "0")}`;  // e.g., 2025-05
+  const nextMonth = `${nextMonthDate.getFullYear()}-${(nextMonthDate.
+                  getMonth() + 1).toString().padStart(2, "0")}`;  // e.g., 2025-07
+  const prevMonthDay = `${prevMonthDate.getFullYear()}-${(prevMonthDate.
+                  getMonth() + 1).toString().padStart(2, "0")}-${day}`;  // e.g., 2025-05-01
+  const mmmYYYY = months[parseInt(month)-1] + " " + year;  // e.g., Jun 2025
+  const ddMMM = `${day} ${months[month - 1]}`;
+ 
+  return {
+    'mmmYYYY': mmmYYYY,             // Jun 2025
+    'ddMMM': ddMMM,                 // 01 Jun
+    'currMonth': thisMonth,         // 2025-06
+    'currMonthDay': currMonthDay,   // 2025-06-01
+    'prevMonth': prevMonth,         // 2025-05 
+    'prevMonthDay': prevMonthDay,   // 2025-05-01
+    'nextMonth': nextMonth          // 2025-07
+  }
+}
+
+
 function initiateResults (strBtn) {
   results.innerHTML = `
     <div id="results-div">
@@ -296,10 +361,8 @@ function initiateResults (strBtn) {
   const idBtn = document.getElementById("btnID");
   const btnMonth = document.getElementById("btnMonth");
   const resultsDiv = document.getElementById(`resultsDiv`)
-  const thisMonth = updateMonthInput.value;
   idBtn.innerText = strBtn;
-  const [year, monthNum] = thisMonth.split("-");
-  btnMonth.innerText = `For ${months[parseInt(monthNum) - 1]} ${year}`
+  btnMonth.innerText = `For ${getYearMonthDay().mmmYYYY}`
   btnMonth.style.textDecoration = "underline";
 
   return resultsDiv
@@ -524,9 +587,6 @@ function showModDevHotel (compareMonth) {
 
   console.log(compareDate, dev, hotel)
 
-  
-
-
 }
 
 // Function to show form for modifying a bank
@@ -589,9 +649,6 @@ function showModifyBankForm(bankId, compareMonth) {
   });
 }
 
-
-
-
 // Function to show form for modifying an expense
 function showModifyExpenseForm(expenseId, compareMonth) {
   const expense = data.expenses.find(exp => exp.id === expenseId);
@@ -621,14 +678,26 @@ function showModifyExpenseForm(expenseId, compareMonth) {
 
   document.getElementById('resultsDiv').prepend(formContainer);
 
+  //Need to update slide date if date changes
+  document.getElementById('expenseDate').addEventListener('change', (e) => {
+    const newDate = (e.target.value).slice(0, 7);  // yyyy-mm
+    // const newDay = (e.target.value).slice(8) // dd
+    const isChecked = document.getElementById('expenseSlide').checked;
+    const newSlideDate = getSlideDate(newDate, isChecked);
+    expense.date = e.target.value;     // Save the new date
+    expense.slideDate = newSlideDate;  // Save the new slideDate
+    document.getElementById('expenseSlideDate').innerText = expense.slideDate;
+    // console.log("New Date:", newDate, 'newSlide', expense.slideDate, 'Slide?', isChecked);
+  })
+
   document.getElementById('expenseSlide').addEventListener('change', (e) => {
     const isChecked = e.target.checked;
+    // console.log('slide box expense date', expense.slideDate)
     const newSlideDate = getSlideDate(expense.date, isChecked)
-    // console.log("The Slide to save", newSlideDate)
+      // console.log("The Slide to save", newSlideDate)
     expense.slideDate = newSlideDate;
     document.getElementById('expenseSlideDate').innerText = expense.slideDate;
-    // console.log("Saved data", document.getElementById('expenseSlideDate').innerText)
-  })
+    })
 
   // Handle form submission
   document.getElementById('modifyExpenseForm').addEventListener('submit', (e) => {
@@ -641,6 +710,8 @@ function showModifyExpenseForm(expenseId, compareMonth) {
       slide: document.getElementById('expenseSlide').checked,
       slideDate: document.getElementById('expenseSlideDate').innerText
     };
+
+    console.log('Date to save:', updatedExpense.date)
 
     // Basic validation
     if (!dateRegex.test(updatedExpense.date) || !monthRegex.test(updatedExpense.slideDate)) {
@@ -694,8 +765,9 @@ updateSchedBankBtn.addEventListener("click", () => {
   for (let i = 0; i < schedArray.length; i++) {
     const compareDate = schedArray[i].date.slice(0, 7);
     if (compareDate === compareMonth) {
+      const displayDate = new Date(schedArray[i].date).toISOString().slice(8, 10);  // returns UTC day of Month
       output += `
-        <div class="sched-cell" data-id="${schedArray[i].id}" data-row-group="${i}">${schedArray[i].date}</div>
+        <div class="sched-cell" data-id="${schedArray[i].id}" data-row-group="${i}">${getYearMonthDay(displayDate).ddMMM}</div>
         <div class="sched-cell" data-id="${schedArray[i].id}" data-row-group="${i}">$${schedArray[i].amount.toFixed(2)}</div>
       `;
     }
@@ -741,14 +813,15 @@ showExpensesBtn.addEventListener("click", () => {
   `;
 
   for (let i = 0; i < expenseArray.length; i++) {
-    const compareDate = expenseArray[i].slideDate;
+    const compareDate = expenseArray[i].slideDate;  // e.g., 2025-06
+     
     if (compareDate === compareMonth) {
-      let displayDate = expenseArray[i].date;
-      const [year, monthNum, dayNum] = displayDate.split("-").map(Number);
-      displayDate = `${dayNum} ${months[monthNum - 1]}`;
+      const dayDate = new Date(expenseArray[i].date).toISOString().slice(8, 10);  // returns day of Month
+      const expDate = expenseArray[i].date.slice(0,7);  // returns expense date yyyy-mm ensures date displays with correct month
+      console.log("exp Date", expDate);
 
       output += `
-        <div class="expense-cell" data-id="${expenseArray[i].id}" data-row-group="${i}">${displayDate}</div>
+        <div class="expense-cell" data-id="${expenseArray[i].id}" data-row-group="${i}">${getYearMonthDay(dayDate, expDate).ddMMM}</div>
         <div class="expense-cell" data-id="${expenseArray[i].id}" data-row-group="${i}">$${expenseArray[i].amount.toFixed(2)}</div>
         <div class="expense-cell" data-id="${expenseArray[i].id}" data-row-group="${i}">${expenseArray[i].comment}</div>
         <div class="expense-cell" data-id="${expenseArray[i].id}" data-row-group="${i}">${expenseArray[i].slide ? `<span style="color: yellow;">Yes</span>` : "No"}</div>
@@ -788,35 +861,25 @@ updateDevHotelBtn.addEventListener("click", () => {
   const devBankArray = data.deviationBank;
   const hotelBankArray = data.hotelBank;
   const expenseArray = data.expenses;
-  const compareMonth = updateMonthInput.value;
-  const compareDate = `${compareMonth}-01`
-  const [year, monthNum] = updateMonthInput.value.split("-"); 
-  
-  const prevMonthDate = new Date(parseInt(year), parseInt(monthNum) - 2); // Subtract 2 to get previous month
-  const prevMonth = `${prevMonthDate.getFullYear()}-${(prevMonthDate.getMonth() + 1).toString().padStart(2, "0")}`;
+  const schedDates = getYearMonthDay();
 
-  console.log(year, monthNum, prevMonthDate, prevMonth)
+  console.log("Dev Bank:", getAmount(schedDates.currMonth, devBankArray))
+  console.log("Hotel Bank:", getAmount(schedDates.prevMonth, hotelBankArray))
 
-  console.log("Dev Bank:", getAmount(compareMonth, devBankArray))
-  console.log("Hotel Bank:", getAmount(prevMonth, hotelBankArray))
-
-  // This gets the current hotel bank but should pull bank from previous month
-  // Hotel bank starts with the end of the previous month, then adds
-  // Earning and subtracts Spendings for the final value
   let output = `<div>
-  <p>Avail Deviation Bank: $${getAmount(compareMonth, devBankArray)}<p>
-  <p>Starting Hotel Bank: $${getAmount(compareMonth, hotelBankArray)}</p>
-  <li>Spent: $${(data.hotelBank.find(d => d.date === compareDate).spend)}</li>
-  <li>Earned: $${(data.hotelBank.find(d => d.date === compareDate).earn)}</li>
+  <p>Avail Deviation Bank: $${getAmount(schedDates.currMonth, devBankArray)}<p>
+  <p>Starting Hotel Bank: $${getAmount(schedDates.prevMonth, hotelBankArray)}</p>
+  <li>Spent: $${(data.hotelBank.find(d => d.date === schedDates.currMonthDay).spend)}</li>
+  <li>Earned: $${(data.hotelBank.find(d => d.date === schedDates.currMonthDay).earn)}</li>
   </div>
   <br />
   <button class="dev-btn" id="mod-dev-hotel">Modify</button>
   `
   resultsDiv.innerHTML = output;
-console.log((data.hotelBank.find(d => d.date === compareDate).spend))
+console.log((data.hotelBank.find(d => d.date === schedDates.currMonthDay).spend))
   // Event listener for Add Expense button
   document.getElementById('mod-dev-hotel').addEventListener('click', () => {
-    showModDevHotel(compareMonth);
+    showModDevHotel(schedDates.currMonth);
   });
 
   appendBackButton();
