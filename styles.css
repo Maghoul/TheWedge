@@ -835,9 +835,14 @@ a:hover {
 
 #expenseAmount, #expenseComment,
  #expenseDate, #expenseSlide,
- #scheduledBankDate, #scheduledBankAmount {
+ #scheduledBankDate, #scheduledBankAmount,
+ #devInfo, #hotelInfo,
+ #spendInfo, #earnInfo {
     background-color: #a3a3a3;
     font-size: 1.1rem;
+    width: 140px;
+    text-align: center;
+    border-radius: 5px;
 }
 
 #expenseSlide {

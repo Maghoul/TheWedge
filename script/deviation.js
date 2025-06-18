@@ -94,9 +94,11 @@ if (!Array.isArray(data.hotelBank)) {
   data.hotelBank = [];
   isValid = false;
 } else {
+  const hotelDates = new Set();
   for (const entry of data.hotelBank) {
     if (
       !dateRegex.test(entry.date) ||
+      hotelDates.has(entry.date) || // Check for duplicates
       typeof entry.amount !== "number" || isNaN(entry.amount) || !isFinite(entry.amount) ||
       typeof entry.spend !== "number" || isNaN(entry.spend) || !isFinite(entry.spend) ||
       typeof entry.earn !== "number" || isNaN(entry.earn) || !isFinite(entry.earn)
@@ -106,6 +108,7 @@ if (!Array.isArray(data.hotelBank)) {
       isValid = false;
       break;
     }
+    hotelDates.add(entry.date);
   }
 }
 
@@ -116,23 +119,21 @@ if (!Array.isArray(data.hotelBank)) {
     isValid = false;
   } else {
     const schedBankIds = new Set();
-    let validSchedBank = true;
-    for (const entry of data.scheduledBank) {
-      if (
-        typeof entry.id !== "number" ||
-        schedBankIds.has(entry.id) ||
-        typeof entry.amount !== "number" || entry.amount < 0 || isNaN(entry.amount) || !isFinite(entry.amount) ||
-        !dateRegex.test(entry.date) || isNaN(new Date(entry.date).getTime()) ||
-        new Date(entry.date).toISOString().slice(0, 10) !== entry.date
-      ) {
-        console.warn("Invalid scheduled bank entry, resetting scheduledBank");
-        data.scheduledBank = defaultData.scheduledBank;
-        validSchedBank = false;
-        isValid = false;
-        break;
-      }
-      schedBankIds.add(entry.id);
-    }
+for (const entry of data.scheduledBank) {
+  if (
+    typeof entry.id !== "number" ||
+    schedBankIds.has(entry.id) ||
+    typeof entry.amount !== "number" || entry.amount < 0 || isNaN(entry.amount) || !isFinite(entry.amount) ||
+    !dateRegex.test(entry.date) || isNaN(new Date(entry.date).getTime()) ||
+    new Date(entry.date).toISOString().slice(0, 10) !== entry.date
+  ) {
+    console.warn("Invalid scheduled bank entry, resetting scheduledBank");
+    data.scheduledBank = defaultData.scheduledBank;
+    isValid = false;
+    break;
+  }
+  schedBankIds.add(entry.id);
+}
   }
   // Validate metadata
   if (
@@ -148,8 +149,9 @@ if (!Array.isArray(data.hotelBank)) {
   // Notify user if any section was reset
   if (!isValid) {
     console.warn("Some data sections were invalid and reset to defaults");
-    // Optionally show warning in #results, e.g., results.textContent = "Some data was reset due to errors";
-  }
+    results.textContent = "Some data was reset due to errors";
+    results.classList.add("error");
+}
   console.log("Data after validation:", data);
 } catch (e) {
   console.error("Parse error:", e);
@@ -578,15 +580,93 @@ function showAddExpenseForm(compareMonth) {
   });
 }
 
-// Function to modify dev and hotel banks
-function showModDevHotel (compareMonth) {
-  // compareMonth in form 2025-06
-  const compareDate = `${compareMonth}-01`
-  const dev = data.deviationBank.find(d => d.date === compareDate)
-  const hotel = data.hotelBank.find(d => d.date === compareDate)
+function showModDevHotel(compareMonth) {
+  const compareDate = `${compareMonth}-01`;
+  const dev = data.deviationBank.find(d => d.date === compareDate);
+  const hotel = data.hotelBank.find(d => d.date === compareDate);
+  if (!dev || !hotel) {
+    console.warn('Deviation or hotel bank entry not found for', compareDate);
+    results.innerText = "Bank entries not found";
+    results.classList.add("error");
+    return;
+  }
 
-  console.log(compareDate, dev, hotel)
+  console.log(compareDate, dev, hotel);
 
+  // Remove any existing form container
+  const existingForm = document.getElementById('modDevHotel');
+  if (existingForm) existingForm.remove();
+
+  const formContainer = document.createElement('div');
+  formContainer.id = 'modDevHotel';
+  formContainer.innerHTML = `
+    <h3>Modify Deviation / Hotel Banks</h3>
+    <form id="modDevHotelForm">
+      <p>Change DBA: <input type="number" id="devInfo" step="0.01" min="0" value="${dev.amount}" required></p>
+      <p>Change Hotel Bank: <input type="number" id="hotelInfo" step="0.01" min="0" value="${hotel.amount}" required></p>
+      <li>Hotel Spend: <input type="number" id="spendInfo" step="0.01" min="0" value="${hotel.spend}" required></li>
+      <li>Hotel Earned: <input type="number" id="earnInfo" step="0.01" min="0" value="${hotel.earn}" required></li>
+      <button class="dev-btn form-btn" type="submit">Save</button>
+      <button class="dev-btn form-btn" type="button" id="cancelForm">Cancel</button>
+      <hr />
+    </form>
+  `;
+
+  const resultsDiv = document.getElementById('resultsDiv');
+  if (!resultsDiv) {
+    console.error('resultsDiv not found');
+    results.innerText = "Error: Unable to display form";
+    results.classList.add("error");
+    return;
+  }
+  resultsDiv.prepend(formContainer);
+
+  document.getElementById('modDevHotelForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const updatedDev = {
+      date: dev.date,
+      amount: parseFloat(document.getElementById('devInfo').value),
+      amountXfer: dev.amountXfer // Preserve existing amountXfer
+    };
+    const updatedHotel = {
+      date: hotel.date,
+      amount: parseFloat(document.getElementById('hotelInfo').value),
+      spend: parseFloat(document.getElementById('spendInfo').value),
+      earn: parseFloat(document.getElementById('earnInfo').value)
+    };
+
+    // Validation
+    if (
+      !dateRegex.test(updatedDev.date) ||
+      !dateRegex.test(updatedHotel.date) ||
+      isNaN(updatedDev.amount) || updatedDev.amount < 0 ||
+      isNaN(updatedHotel.amount) || updatedHotel.amount < 0 ||
+      isNaN(updatedHotel.spend) || updatedHotel.spend < 0 ||
+      isNaN(updatedHotel.earn) || updatedHotel.earn < 0
+    ) {
+      results.innerText = "Invalid input values";
+      results.classList.add("error");
+      return;
+    }
+
+    const devIndex = data.deviationBank.findIndex(d => d.date === compareDate);
+    const hotelIndex = data.hotelBank.findIndex(h => h.date === compareDate);
+    if (devIndex !== -1 && hotelIndex !== -1) {
+      data.deviationBank[devIndex] = updatedDev;
+      data.hotelBank[hotelIndex] = updatedHotel;
+      saveData();
+      formContainer.remove();
+      updateDevHotelBtn.click();
+      updateUI();
+    } else {
+      results.innerText = "Bank entries not found";
+      results.classList.add("error");
+    }
+  });
+
+  document.getElementById('cancelForm').addEventListener('click', () => {
+    formContainer.remove();
+  });
 }
 
 // Function to show form for modifying a bank
@@ -745,8 +825,8 @@ function deleteItem(itemId, arrayProperty, itemType, refreshCallback) {
 }
 
 updateMonthInput.addEventListener("change", () => {
-   updateUI();
-  //  saveData();
+  updateUI();
+  saveData();
 });
 
 updateSchedBankBtn.addEventListener("click", () => {
@@ -862,6 +942,7 @@ updateDevHotelBtn.addEventListener("click", () => {
   const hotelBankArray = data.hotelBank;
   const expenseArray = data.expenses;
   const schedDates = getYearMonthDay();
+  const hotelEntry = data.hotelBank.find(d => d.date === schedDates.currMonthDay) || { spend: 0, earn: 0 };
 
   console.log("Dev Bank:", getAmount(schedDates.currMonth, devBankArray))
   console.log("Hotel Bank:", getAmount(schedDates.prevMonth, hotelBankArray))
@@ -869,8 +950,8 @@ updateDevHotelBtn.addEventListener("click", () => {
   let output = `<div>
   <p>Avail Deviation Bank: $${getAmount(schedDates.currMonth, devBankArray)}<p>
   <p>Starting Hotel Bank: $${getAmount(schedDates.prevMonth, hotelBankArray)}</p>
-  <li>Spent: $${(data.hotelBank.find(d => d.date === schedDates.currMonthDay).spend)}</li>
-  <li>Earned: $${(data.hotelBank.find(d => d.date === schedDates.currMonthDay).earn)}</li>
+    <li>Spent: $${hotelEntry.spend.toFixed(2)}</li>
+    <li>Earned: $${hotelEntry.earn.toFixed(2)}</li>
   </div>
   <br />
   <button class="dev-btn" id="mod-dev-hotel">Modify</button>

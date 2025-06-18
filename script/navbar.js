@@ -22,7 +22,7 @@ switch (normalizedPage) {
     pageIcon.src = '../images/weather-icon.png';
     pageTitle.textContent = 'Weather';
     break;
-  case 'bpb.html': // Updated from preflight-checklist.html
+  case 'bpb.html':
     pageIcon.src = '../images/checklist-icon.png';
     pageTitle.textContent = 'Before Pushback';
     break;
@@ -37,6 +37,10 @@ switch (normalizedPage) {
     case 'sub.html':
     pageIcon.src = '../images/sub-icon.png';
     pageTitle.textContent = 'Substitution Considerations';
+    break; 
+  case 'deviation.html':
+    pageIcon.src = '../images/home-icon.png';
+    pageTitle.textContent = 'Deviation Banks';
     break;  
   case 'contact.html':
     pageIcon.src = '../images/contact-icon.png';

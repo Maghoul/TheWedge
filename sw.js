@@ -1,20 +1,13 @@
-const CACHE_NAME = 'wedge-cache-v0.4.6';
+const CACHE_NAME = 'wedge-cache-v0.5.0';
 // Cache versioning to handle updates vMajor.minor.patch
-// Version 1.3.0 - Changed preflight-checklist to before pushback and eliminated stale info
-// Version 1.3.1 - Changed file structure for The Wedge
-// Version 1.4.0 - Added Sub Considerations
-// Version 1.4.1 - sub coloring on apple, sub icon added, and error checking
-// Version 1.4.2 - sub links and flow chart
-// Version 0.4.3 - sub styling
-// Version 0.4.4 - Trip Guarantee bug fix
-// Version 0.4.5 - CSS tweaks for furture app update
-// Version 0.4.6 - +getYearMonthDay function, updateUI changes
+// Version 0.5.0 - Introduce Deviation Handling
 // This service worker caches essential files for offline use and handles fetch requests
 const urlsToCache = [
     './',
     './index.html',
     './html/wx.html',
     './html/fraam.html',
+    './html/deviation.html',
     './html/contact.html',
     './html/frm.html',
     './html/navbar.html',
@@ -24,6 +17,7 @@ const urlsToCache = [
     './script/navbar.js',
     './script/frm.js',
     './script/fraam.js',
+    './script/deviation.js',
     './script/wx.js',
     './script/sub.js',
     'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js',
@@ -145,3 +139,12 @@ self.addEventListener('activate', event => {
 // Version 1.2.18 - updated wx.js to reduce code
 // Version 1.2.19 - Fixed status bar coloring
 // Version 1.2.20 - Status bar update and color bug fix
+// Version 1.3.0 - Changed preflight-checklist to before pushback and eliminated stale info
+// Version 1.3.1 - Changed file structure for The Wedge
+// Version 1.4.0 - Added Sub Considerations
+// Version 1.4.1 - sub coloring on apple, sub icon added, and error checking
+// Version 1.4.2 - sub links and flow chart
+// Version 0.4.3 - sub styling
+// Version 0.4.4 - Trip Guarantee bug fix
+// Version 0.4.5 - CSS tweaks for furture app update
+// Version 0.4.6 - +getYearMonthDay function, updateUI changes
