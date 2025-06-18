@@ -197,6 +197,8 @@ function updateUI() {
     if (dbaPrevMonthEntry && dbaCurrMonthEntry) {
       dbaAmount = twoDigits(dbaPrevMonthEntry.amountXfer);
       dbaCurrMonthEntry.amount = dbaAmount;
+    } else if (!dbaPrevMonthEntry && dbaCurrMonthEntry) {
+      dbaAmount = twoDigits(dbaCurrMonthEntry.amount);
     } else {
       console.warn('Missing deviation bank entry for', dbaPrevMonthEntry ? schedDates.currMonthDay : schedDates.prevMonthDay);
     }
@@ -222,13 +224,26 @@ function updateUI() {
       `<span class="negative">($${(-totalRemaining).toFixed(2)})</span>` :
       `$${totalRemaining.toFixed(2)}`;
 
-    const hotelAmount = data.hotelBank.find(entry => entry.date === schedDates.prevMonthDay)?.amount || 0;
-    hotelBank.innerText = `$${hotelAmount.toFixed(2)}`;
+    const hotelPrevMonthEntry = data.hotelBank.find(entry => entry.date === schedDates.prevMonthDay)?.amount || 0;
+    const hotelCurrMonthEntry = data.hotelBank.find(entry => entry.date === schedDates.currMonthDay) || { spend: 0, earn: 0 };
+    let hotelAmount = 0;
+     if (hotelPrevMonthEntry && hotelCurrMonthEntry) {
+      hotelAmount = hotelPrevMonthEntry.amount;
+      hotelBank.innerText = `$${hotelAmount.toFixed(2)}`;
+    } else if (!dbaPrevMonthEntry && dbaCurrMonthEntry) {
+      hotelAmount = twoDigits(hotelCurrMonthEntry.amount);
+      hotelBank.innerText = `$${hotelAmount.toFixed(2)}`;
+    } else {
+      console.warn('Missing hotel bank entry for', hotelPrevMonthEntry ? schedDates.currMonthDay : schedDates.prevMonthDay);
+    }
+
+
+    // const hotelAmount = data.hotelBank.find(entry => entry.date === schedDates.prevMonthDay)?.amount || 0;
+    // hotelBank.innerText = `$${hotelAmount.toFixed(2)}`;
 
     // Single find for hotel bank
-    const hotelEntry = data.hotelBank.find(entry => entry.date === schedDates.currMonthDay) || { spend: 0, earn: 0 };
-    const hotelSpend = hotelEntry.spend;
-    const hotelEarn = hotelEntry.earn;
+    const hotelSpend = hotelCurrMonthEntry.spend;
+    const hotelEarn = hotelCurrMonthEntry.earn;
 
     if (hotelFwd) {
       hotelFwd.innerText = `$${(hotelAmount - hotelSpend + hotelEarn).toFixed(2)}`;
@@ -582,13 +597,19 @@ function showAddExpenseForm(compareMonth) {
 
 function showModDevHotel(compareMonth) {
   const compareDate = `${compareMonth}-01`;
-  const dev = data.deviationBank.find(d => d.date === compareDate);
-  const hotel = data.hotelBank.find(d => d.date === compareDate);
-  if (!dev || !hotel) {
-    console.warn('Deviation or hotel bank entry not found for', compareDate);
-    results.innerText = "Bank entries not found";
-    results.classList.add("error");
-    return;
+  let dev = data.deviationBank.find(d => d.date === compareDate);
+  let hotel = data.hotelBank.find(d => d.date === compareDate);
+
+  // Create default entries if missing
+  if (!dev) {
+    dev = { date: compareDate, amount: 0, amountXfer: 0 };
+    data.deviationBank.push(dev); // Add new entry
+    console.log('Created default deviation bank entry for', compareDate);
+  }
+  if (!hotel) {
+    hotel = { date: compareDate, amount: 0, spend: 0, earn: 0 };
+    data.hotelBank.push(hotel); // Add new entry
+    console.log('Created default hotel bank entry for', compareDate);
   }
 
   console.log(compareDate, dev, hotel);
@@ -649,6 +670,16 @@ function showModDevHotel(compareMonth) {
       return;
     }
 
+    // Ensure no duplicate dates
+    const devDates = new Set(data.deviationBank.map(d => d.date));
+    const hotelDates = new Set(data.hotelBank.map(h => h.date));
+    if (devDates.size !== data.deviationBank.length || hotelDates.size !== data.hotelBank.length) {
+      results.innerText = "Duplicate dates detected";
+      results.classList.add("error");
+      return;
+    }
+
+    // Update or add entries
     const devIndex = data.deviationBank.findIndex(d => d.date === compareDate);
     const hotelIndex = data.hotelBank.findIndex(h => h.date === compareDate);
     if (devIndex !== -1 && hotelIndex !== -1) {
@@ -957,7 +988,7 @@ updateDevHotelBtn.addEventListener("click", () => {
   <button class="dev-btn" id="mod-dev-hotel">Modify</button>
   `
   resultsDiv.innerHTML = output;
-console.log((data.hotelBank.find(d => d.date === schedDates.currMonthDay).spend))
+  // console.log((data.hotelBank.find(d => d.date === schedDates.currMonthDay).spend))
   // Event listener for Add Expense button
   document.getElementById('mod-dev-hotel').addEventListener('click', () => {
     showModDevHotel(schedDates.currMonth);
