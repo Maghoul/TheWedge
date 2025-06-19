@@ -844,6 +844,8 @@ a:hover {
     text-align: center;
     border-radius: 5px;
     color: black;
+    appearance: none;
+    -webkit-appearance: none; /* Remove default iOS styling */
 }
 
 #expenseSlide {

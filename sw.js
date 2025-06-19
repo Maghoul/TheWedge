@@ -4,6 +4,7 @@ const CACHE_NAME = 'wedge-cache-v0.5.3';
 // Version 0.5.1 - Bug fix for intial download
 // Version 0.5.2 - Initialization bug fix
 // Version 0.5.3 - Yet more bug fixes
+// Version 0.5.4 - Stylesheet update
 // This service worker caches essential files for offline use and handles fetch requests
 const urlsToCache = [
     './',
