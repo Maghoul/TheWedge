@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Rick Griffin. All rights reserved.
 const numberCrew = 3;
 const eta = document.getElementById("eta");
 const startTime = document.getElementById("start-time");

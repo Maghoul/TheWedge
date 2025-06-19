@@ -1,3 +1,4 @@
+/* Copyright (c) 2025 Rick Griffin. All rights reserved. */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -53,6 +54,13 @@ hr {
     border: 1px solid #999;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     background-color: var(--complementary-color);
+}
+
+.copyright {
+    text-align: center;
+    background-color: var(--complementary-color);
+    color: #5a5aea;
+    font-size: 1.0rem;
 }
 
 .main-content {

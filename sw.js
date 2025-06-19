@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wedge-cache-v0.5.5';
+const CACHE_NAME = 'wedge-cache-v0.5.6';
 // Cache versioning to handle updates vMajor.minor.patch
 // Version 0.5.0 - Introduce Deviation Handling
 // Version 0.5.1 - Bug fix for intial download
@@ -6,7 +6,9 @@ const CACHE_NAME = 'wedge-cache-v0.5.5';
 // Version 0.5.3 - Yet more bug fixes
 // Version 0.5.4 - Stylesheet update
 // Version 0.5.5 - Add About Page and substitution hyperlinks
+// Version 0.5.6 - Added copyright
 // This service worker caches essential files for offline use and handles fetch requests
+// Copyright (c) 2025 Rick Griffin. All rights reserved.
 const urlsToCache = [
     './',
     './index.html',

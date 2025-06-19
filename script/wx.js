@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Rick Griffin. All rights reserved.
 const deptApt = document.getElementById("departure-airport");
 const arrApt = document.getElementById("arrival-airport");
 const flightForm = document.getElementById("form");

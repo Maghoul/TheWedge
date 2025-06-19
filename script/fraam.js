@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Rick Griffin. All rights reserved.
 const sleepDebt1 = document.getElementById("sleep-debt1");
 const sleepDebt2 = document.getElementById("sleep-debt2");
 const sleepDebt3 = document.getElementById("sleep-debt3");

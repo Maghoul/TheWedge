@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Rick Griffin. All rights reserved.
 "use strict";
 const devForm = document.getElementById("form");
 const displayMonth = document.getElementById("display-month")

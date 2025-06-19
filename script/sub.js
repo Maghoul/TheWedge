@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Rick Griffin. All rights reserved.
 const subStart = document.getElementById("sub-start");
 const subEnd = document.getElementById("sub-end");
 const tripGuarantee = document.getElementById("trip-guarantee");

@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Rick Griffin. All rights reserved.
 const release = document.getElementById('preflight1');
 const clearance = document.getElementById('preflight2');
 const edt = document.getElementById('preflight8');
