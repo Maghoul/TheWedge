@@ -233,15 +233,81 @@ function twoDigits (num) {
 function updateUI() {
   try {
     const schedDates = getYearMonthDay();
-    const schedBankAmount = getAmount(schedDates.currMonth, data.scheduledBank);
-    const expensesAmount = getAmount(schedDates.currMonth, data.expenses);
+    const currentMonth = schedDates.currMonth; // e.g., "2022-06"
+    const prevMonth = schedDates.prevMonth; // e.g., "2022-05"
+    const nextMonth = schedDates.nextMonth; // e.g., "2022-07"
 
-    // Single find for deviationBank
-    const dbaPrevMonthEntry = data.deviationBank.find(entry => entry.date === schedDates.prevMonthDay);
-    const dbaCurrMonthEntry = data.deviationBank.find(entry => entry.date === schedDates.currMonthDay);
+    // Validate schedDates
+    if (
+      !dateRegex.test(schedDates.currMonthDay) ||
+      !dateRegex.test(schedDates.prevMonthDay) ||
+      !dateRegex.test(schedDates.nextMonthDay)
+    ) {
+      console.error('Invalid schedDates:', schedDates);
+      results.innerText = "Invalid month selected";
+      results.classList.add("error");
+      return;
+    }
+
+    // Ensure valid entries exist for prev, curr, and nextMonth
+    let dbaPrevMonthEntry = data.deviationBank.find(entry => entry.date === schedDates.prevMonthDay);
+    let dbaCurrMonthEntry = data.deviationBank.find(entry => entry.date === schedDates.currMonthDay);
+    let dbaNextMonthEntry = data.deviationBank.find(entry => entry.date === schedDates.nextMonthDay);
+    let hotelPrevMonthEntry = data.hotelBank.find(entry => entry.date === schedDates.prevMonthDay);
+    let hotelCurrMonthEntry = data.hotelBank.find(entry => entry.date === schedDates.currMonthDay);
+    let hotelNextMonthEntry = data.hotelBank.find(entry => entry.date === schedDates.nextMonthDay);
+
+    // Create default entries if missing
+    if (!dbaPrevMonthEntry) {
+      data.deviationBank.push({ date: schedDates.prevMonthDay, amount: 0, amountXfer: 0 });
+      dbaPrevMonthEntry = data.deviationBank.find(entry => entry.date === schedDates.prevMonthDay);
+      console.log('Created default deviation bank entry for', schedDates.prevMonthDay);
+    }
+    if (!dbaCurrMonthEntry) {
+      data.deviationBank.push({ date: schedDates.currMonthDay, amount: 0, amountXfer: 0 });
+      dbaCurrMonthEntry = data.deviationBank.find(entry => entry.date === schedDates.currMonthDay);
+      console.log('Created default deviation bank entry for', schedDates.currMonthDay);
+    }
+    if (!dbaNextMonthEntry) {
+      data.deviationBank.push({ date: schedDates.nextMonthDay, amount: 0, amountXfer: 0 });
+      dbaNextMonthEntry = data.deviationBank.find(entry => entry.date === schedDates.nextMonthDay);
+      console.log('Created default deviation bank entry for', schedDates.nextMonthDay);
+    }
+    if (!hotelPrevMonthEntry) {
+      data.hotelBank.push({ date: schedDates.prevMonthDay, amount: 0, spend: 0, earn: 0 });
+      hotelPrevMonthEntry = data.hotelBank.find(entry => entry.date === schedDates.prevMonthDay);
+      console.log('Created default hotel bank entry for', schedDates.prevMonthDay);
+    }
+    if (!hotelCurrMonthEntry) {
+      data.hotelBank.push({ date: schedDates.currMonthDay, amount: 0, spend: 0, earn: 0 });
+      hotelCurrMonthEntry = data.hotelBank.find(entry => entry.date === schedDates.currMonthDay);
+      console.log('Created default hotel bank entry for', schedDates.currMonthDay);
+    }
+    if (!hotelNextMonthEntry) {
+      data.hotelBank.push({ date: schedDates.nextMonthDay, amount: 0, spend: 0, earn: 0 });
+      hotelNextMonthEntry = data.hotelBank.find(entry => entry.date === schedDates.nextMonthDay);
+      console.log('Created default hotel bank entry for', schedDates.nextMonthDay);
+    }
+
+    // Save defaults to persist
+    saveData();
+    
+    const schedBankAmount = getAmount(currentMonth, data.scheduledBank);
+    const expensesAmount = getAmount(currentMonth, data.expenses);
+
+    
+
+  
     let dbaAmount = 0;
-    if (dbaPrevMonthEntry) {
+
+        console.log("Prev Month dba:", dbaPrevMonthEntry, "Curr month dba", dbaCurrMonthEntry)
+
+    if (dbaPrevMonthEntry && dbaCurrMonthEntry &&   // Needed for first time use when no history is recorded
+        dbaPrevMonthEntry.amount === 0 && dbaCurrMonthEntry.amount > 0) {
+          dbaAmount = twoDigits(dbaCurrMonthEntry.amount);
+    } else  if (dbaPrevMonthEntry) {
       dbaAmount = twoDigits(dbaPrevMonthEntry.amountXfer);
+      console.log("DBA Amount line 250 =", dbaAmount)
       dbaCurrMonthEntry.amount = dbaAmount;
     } else if (dbaCurrMonthEntry) {
       dbaAmount = twoDigits(dbaCurrMonthEntry.amount);
@@ -271,10 +337,11 @@ function updateUI() {
       `$${totalRemaining.toFixed(2)}`;
 
     // Hotel bank logic
-    const hotelPrevMonthEntry = data.hotelBank.find(entry => entry.date === schedDates.prevMonthDay);
-    const hotelCurrMonthEntry = data.hotelBank.find(entry => entry.date === schedDates.currMonthDay) || { spend: 0, earn: 0, amount: 0 };
     let hotelAmount = 0;
-    if (hotelPrevMonthEntry) {
+    if (hotelPrevMonthEntry && hotelCurrMonthEntry &&   // Needed for first time use when no history is recorded
+        hotelPrevMonthEntry.amount === 0 && hotelCurrMonthEntry.amount > 0) {
+          hotelAmount = twoDigits(hotelCurrMonthEntry.amount);
+    } else if (hotelPrevMonthEntry) {
       hotelAmount = twoDigits(hotelPrevMonthEntry.amount);
     } else if (hotelCurrMonthEntry) {
       hotelAmount = twoDigits(hotelCurrMonthEntry.amount);
@@ -390,6 +457,8 @@ function getYearMonthDay(day = '01', cMonth = updateMonthInput.value) {
                   getMonth() + 1).toString().padStart(2, "0")}`;  // e.g., 2025-05
   const nextMonth = `${nextMonthDate.getFullYear()}-${(nextMonthDate.
                   getMonth() + 1).toString().padStart(2, "0")}`;  // e.g., 2025-07
+  const nextMonthDay = `${nextMonthDate.getFullYear()}-${(nextMonthDate.
+                  getMonth() + 1).toString().padStart(2, "0")}-${day}`;  // e.g., 2025-07-01
   const prevMonthDay = `${prevMonthDate.getFullYear()}-${(prevMonthDate.
                   getMonth() + 1).toString().padStart(2, "0")}-${day}`;  // e.g., 2025-05-01
   const mmmYYYY = months[parseInt(month)-1] + " " + year;  // e.g., Jun 2025
@@ -402,7 +471,8 @@ function getYearMonthDay(day = '01', cMonth = updateMonthInput.value) {
     'currMonthDay': currMonthDay,   // 2025-06-01
     'prevMonth': prevMonth,         // 2025-05 
     'prevMonthDay': prevMonthDay,   // 2025-05-01
-    'nextMonth': nextMonth          // 2025-07
+    'nextMonth': nextMonth,         // 2025-07
+    'nextMonthDay': nextMonthDay    // 2025-07-01
   }
 }
 
