@@ -41,7 +41,11 @@ switch (normalizedPage) {
   case 'deviation.html':
     pageIcon.src = '../images/home-icon.png';
     pageTitle.textContent = 'Deviation Banks';
-    break;  
+    break;
+  case 'about.html':
+    pageIcon.src = '../images/home-icon.png';
+    pageTitle.textContent = 'About Pilot Wedge';
+    break;    
   case 'contact.html':
     pageIcon.src = '../images/contact-icon.png';
     pageTitle.textContent = 'Contact';

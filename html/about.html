@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#003052">
+    <title>About Pilot Wedge</title>
+    <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+    <div class="container">
+        <form id="form">
+            <div style="margin: 0 20px;">
+                <h1> About Pilot Wedge</h1><hr>
+                <em>Pilot Wedge was designed to provide simple tools to quickly access data in one place.  
+                    The design aides decision making. It is a progressive web app which means
+                    you can save it to your home screen and use it offline, except for external links such
+                    as weather and some hyperlinks.</em><br><hr>
+            </div>
+            <div class="form-row">
+                <details>
+                 <summary>Weather Information</summary>
+                 <p>Pulls METAR and TAF for departure and arrival destinations.  
+                    If ETD and ETA are entered, will give a quick synopsis of the conditions at ETD / ETA</p>
+                </details>
+            </div>
+            <div class="form-row">
+                <details>
+                 <summary>Before Pushback</summary>
+                 <p>Simple checklist to ensure all requirements met before pushing back from the gate</p>
+                </details>
+            </div>
+            <div class="form-row">
+                <details>
+                 <summary>Flight Rest Management</summary>
+                 <p>For 3-pilot crews determines rest blocks. Enter the Start rest time, arrival time, 
+                    minutes prior to arrival time, and transition time.  Quickly outputs pilot res periods.</p>
+                </details>
+            </div>
+            <div class="form-row">
+                <details>
+                 <summary>Fatigue Risk Assessment</summary>
+                 <p>A decision aide to assess risk based on the Tritschler model for an individual flight leg. 
+                    Company risk models make sleep assumptions; whereas this tool uses actual sleep. Each check 
+                    is worth one point. Ten or more points indicate high risk. Risk mitigation steps could 
+                    include adding naps, caffeine usage, flight leg modification, etc. This is 
+                    <span style="color: red;">NOT</span> a go / no-go tool.</p>
+                </details>
+            </div>
+            <div class="form-row">
+                <details>
+                 <summary>Substitution Considerations</summary>
+                 <p>This tool is for trip holders to aide decision making when determining to SUB or not to SUB.
+                    Entering the scheduled trip end and the revised trip end will provide a rough overage calulation
+                    based purely on TAFB. Entering the SUB wingow Start / End will provide a recommendation for how to
+                    handle your decision to remain in SUB or keep overage. There are many considerations and the 
+                    decision to remain in SUB or not is up to the individaul pilot.
+                 </p>
+                </details>
+            </div>
+            <div class="form-row">
+                <details>
+                 <summary>Deviation Banks</summary>
+                 <p>This tool will help track your deviation bank. You can enter your starting deviation bank / hotel bank.
+                    If entered correctly the tool should manage deviation bank. Knowing your current bank is half the battle.
+                    You can enter individual expenses for a month or sum them into one entry. The same goes for trip banks.
+                    If you earn hotel bank, be sure to update that information. This tool is still new, so many bugs exist.
+                    Also, information will be wiped if you erase your website history, so be sure to note your deviaiton 
+                    bank. A future version will have the ability to save information long term.
+                 </p>
+                </details>
+            </div>
+            
+        </form>
+        <div id="results" class="hidden"></div>
+        <footer class="citation">
+            <p style="color: yellow;">Note: This is an educational resource. As always the 
+                decision to continue operations is up to the individual pilot.</p>
+        </footer>
+    </div>
+    <script src="/script/navbar.js"></script>
+</body>
+</html>

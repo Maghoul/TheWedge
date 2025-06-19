@@ -10,12 +10,14 @@ const results = document.getElementById("results");
 const subTimes = [subStart, subEnd, tripEnd, revised];
 const now = new Date();
 const subFlowURL = "https://fdx.alpa.org/Portals/7/Documents/Committees/communications/flowcharts/substitution-decision-flowchart.html"
+const cbaFourURL = 'https://fdx.alpa.org/Portals/7/Documents/Committees/negotiating/contract-library/2015/2015FDXCBA_web.html#link_4BB3ci'
+const cbaTwoFiveURL = 'https://fdx.alpa.org/Portals/7/Documents/Committees/negotiating/contract-library/2015/2015FDXCBA_web.html#link_25H'
 const resources = `<hr />
     <p>Resources:</p>
     <p class="indent">&#9992; <a href="${subFlowURL}" target="_blank">ALPA interactive SUB flow chart</a></p>
     <p class="indent">&#9992; <a href="../images/subflow.png">ALPA SUB flow chart diagram</a></p>
-    <p class="indent">&#9992; Overage: CBA 4.BB.3 & 4.BB.4</p>
-    <p class="indent">&#9992; Substitution: CBA 25.H</p>
+    <p class="indent">&#9992; <a href="${cbaFourURL}" target="_blank">Overage: CBA 4.BB.3 & 4.BB.4</a></p>
+    <p class="indent">&#9992; <a href="${cbaTwoFiveURL}" target="_blank">Substitution: CBA 25.H</a></p>
 `;
 
 // Initiate form values
