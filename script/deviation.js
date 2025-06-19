@@ -19,12 +19,21 @@ const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 const monthRegex = /^\d{4}-\d{2}$/;
 const now = new Date();
 
+// Function to generate default bank entries for a month
+function createDefaultBankEntries(month) { // e.g., "2025-06"
+  const date = `${month}-01`;
+  return {
+    deviationBank: [{ date, amount: 0, amountXfer: 0 }],
+    hotelBank: [{ date, amount: 0, spend: 0, earn: 0 }]
+  };
+}
+
 const defaultData = {
   expenses: [],
   deviationBank: [],
   hotelBank: [],
   scheduledBank: [],
-  metadata: { currentMonth: "Jul 2025", totalExpense: 0 } // Align with JSON
+  metadata: { currentMonth: "Jul 2025", totalExpense: 0 }
 };
 
 //Initialize month for display
@@ -37,10 +46,27 @@ updateMonthInput.value = `${now.getFullYear()}-${initialMonth}`;
 let data;
 try {
   const stored = localStorage.getItem("expenseReport_data");
-  data = stored ? JSON.parse(stored) : defaultData;
-  let isValid = true; // Track overall validity
+  if (stored) {
+    data = JSON.parse(stored);
+  } else {
+    // Get current and previous months
+    const schedDates = getYearMonthDay();
+    const currentMonth = schedDates.currMonth; // e.g., "2025-06"
+    const prevMonth = schedDates.prevMonth; // e.g., "2025-05"
+    
+    // Create default entries for current and previous months
+    const currentDefaults = createDefaultBankEntries(currentMonth);
+    const prevDefaults = createDefaultBankEntries(prevMonth);
+    
+    data = {
+      ...defaultData,
+      deviationBank: [...prevDefaults.deviationBank, ...currentDefaults.deviationBank],
+      hotelBank: [...prevDefaults.hotelBank, ...currentDefaults.hotelBank],
+      metadata: { currentMonth: schedDates.mmmYYYY, totalExpense: 0 }
+    };
+  }
 
-  // console.log("Data before validation:", data);
+  let isValid = true;
 
   // Validate expenses
   if (!Array.isArray(data.expenses)) {
@@ -68,49 +94,51 @@ try {
       expenseIds.add(expense.id);
     }
   }
-// Validate deviationBank
-if (!Array.isArray(data.deviationBank)) {
-  console.warn("Deviation bank is not an array, resetting");
-  data.deviationBank = [];
-  isValid = false;
-} else {
-  for (const entry of data.deviationBank) {
-    if (
-      !dateRegex.test(entry.date) || isNaN(new Date(entry.date).getTime()) ||
-      new Date(entry.date).toISOString().slice(0, 10) !== entry.date ||
-      typeof entry.amount !== "number" || isNaN(entry.amount) || !isFinite(entry.amount) ||
-      typeof entry.amountXfer !== "number" || isNaN(entry.amountXfer) || !isFinite(entry.amountXfer)
-    ) {
-      console.warn("Invalid deviation bank entry, resetting deviationBank");
-      data.deviationBank = [];
-      isValid = false;
-      break;
+
+  // Validate deviationBank
+  if (!Array.isArray(data.deviationBank)) {
+    console.warn("Deviation bank is not an array, resetting");
+    data.deviationBank = defaultData.deviationBank;
+    isValid = false;
+  } else {
+    const deviationDates = new Set();
+    for (const entry of data.deviationBank) {
+      if (
+        !dateRegex.test(entry.date) || deviationDates.has(entry.date) ||
+        typeof entry.amount !== "number" || isNaN(entry.amount) || !isFinite(entry.amount) ||
+        typeof entry.amountXfer !== "number" || isNaN(entry.amountXfer) || !isFinite(entry.amountXfer)
+      ) {
+        console.warn("Invalid deviation bank entry, resetting deviationBank");
+        data.deviationBank = defaultData.deviationBank;
+        isValid = false;
+        break;
+      }
+      deviationDates.add(entry.date);
     }
   }
-}
-// Validate hotelBank
-if (!Array.isArray(data.hotelBank)) {
-  console.warn("Hotel bank is not an array, resetting");
-  data.hotelBank = [];
-  isValid = false;
-} else {
-  const hotelDates = new Set();
-  for (const entry of data.hotelBank) {
-    if (
-      !dateRegex.test(entry.date) ||
-      hotelDates.has(entry.date) || // Check for duplicates
-      typeof entry.amount !== "number" || isNaN(entry.amount) || !isFinite(entry.amount) ||
-      typeof entry.spend !== "number" || isNaN(entry.spend) || !isFinite(entry.spend) ||
-      typeof entry.earn !== "number" || isNaN(entry.earn) || !isFinite(entry.earn)
-    ) {
-      console.warn("Invalid hotel bank entry, resetting hotelBank");
-      data.hotelBank = [];
-      isValid = false;
-      break;
+
+  // Validate hotelBank
+  if (!Array.isArray(data.hotelBank)) {
+    console.warn("Hotel bank is not an array, resetting");
+    data.hotelBank = defaultData.hotelBank;
+    isValid = false;
+  } else {
+    const hotelDates = new Set();
+    for (const entry of data.hotelBank) {
+      if (
+        !dateRegex.test(entry.date) || hotelDates.has(entry.date) ||
+        typeof entry.amount !== "number" || isNaN(entry.amount) || !isFinite(entry.amount) ||
+        typeof entry.spend !== "number" || isNaN(entry.spend) || !isFinite(entry.spend) ||
+        typeof entry.earn !== "number" || isNaN(entry.earn) || !isFinite(entry.earn)
+      ) {
+        console.warn("Invalid hotel bank entry, resetting hotelBank");
+        data.hotelBank = defaultData.hotelBank;
+        isValid = false;
+        break;
+      }
+      hotelDates.add(entry.date);
     }
-    hotelDates.add(entry.date);
   }
-}
 
   // Validate scheduledBank
   if (!Array.isArray(data.scheduledBank)) {
@@ -119,22 +147,23 @@ if (!Array.isArray(data.hotelBank)) {
     isValid = false;
   } else {
     const schedBankIds = new Set();
-for (const entry of data.scheduledBank) {
-  if (
-    typeof entry.id !== "number" ||
-    schedBankIds.has(entry.id) ||
-    typeof entry.amount !== "number" || entry.amount < 0 || isNaN(entry.amount) || !isFinite(entry.amount) ||
-    !dateRegex.test(entry.date) || isNaN(new Date(entry.date).getTime()) ||
-    new Date(entry.date).toISOString().slice(0, 10) !== entry.date
-  ) {
-    console.warn("Invalid scheduled bank entry, resetting scheduledBank");
-    data.scheduledBank = defaultData.scheduledBank;
-    isValid = false;
-    break;
+    for (const entry of data.scheduledBank) {
+      if (
+        typeof entry.id !== "number" ||
+        schedBankIds.has(entry.id) ||
+        typeof entry.amount !== "number" || entry.amount < 0 || isNaN(entry.amount) || !isFinite(entry.amount) ||
+        !dateRegex.test(entry.date) || isNaN(new Date(entry.date).getTime()) ||
+        new Date(entry.date).toISOString().slice(0, 10) !== entry.date
+      ) {
+        console.warn("Invalid scheduled bank entry, resetting scheduledBank");
+        data.scheduledBank = defaultData.scheduledBank;
+        isValid = false;
+        break;
+      }
+      schedBankIds.add(entry.id);
+    }
   }
-  schedBankIds.add(entry.id);
-}
-  }
+
   // Validate metadata
   if (
     data.metadata == null ||
@@ -146,16 +175,33 @@ for (const entry of data.scheduledBank) {
     data.metadata = defaultData.metadata;
     isValid = false;
   }
-  // Notify user if any section was reset
+
   if (!isValid) {
     console.warn("Some data sections were invalid and reset to defaults");
     results.textContent = "Some data was reset due to errors";
     results.classList.add("error");
-}
+  }
+
+  // Save default data if new
+  if (!stored) {
+    saveData();
+  }
+
   console.log("Data after validation:", data);
 } catch (e) {
   console.error("Parse error:", e);
-  data = defaultData;
+  const schedDates = getYearMonthDay();
+  const currentMonth = schedDates.currMonth;
+  const prevMonth = schedDates.prevMonth;
+  const currentDefaults = createDefaultBankEntries(currentMonth);
+  const prevDefaults = createDefaultBankEntries(prevMonth);
+  data = {
+    ...defaultData,
+    deviationBank: [...prevDefaults.deviationBank, ...currentDefaults.deviationBank],
+    hotelBank: [...prevDefaults.hotelBank, ...currentDefaults.hotelBank],
+    metadata: { currentMonth: schedDates.mmmYYYY, totalExpense: 0 }
+  };
+  saveData();
 }
 // Get the appropriate spending for a particular month
 function getAmount(compareMonth, arrCompare) {
@@ -194,10 +240,10 @@ function updateUI() {
     const dbaPrevMonthEntry = data.deviationBank.find(entry => entry.date === schedDates.prevMonthDay);
     const dbaCurrMonthEntry = data.deviationBank.find(entry => entry.date === schedDates.currMonthDay);
     let dbaAmount = 0;
-    if (dbaPrevMonthEntry && dbaCurrMonthEntry) {
+    if (dbaPrevMonthEntry) {
       dbaAmount = twoDigits(dbaPrevMonthEntry.amountXfer);
       dbaCurrMonthEntry.amount = dbaAmount;
-    } else if (!dbaPrevMonthEntry && dbaCurrMonthEntry) {
+    } else if (dbaCurrMonthEntry) {
       dbaAmount = twoDigits(dbaCurrMonthEntry.amount);
     } else {
       console.warn('Missing deviation bank entry for', dbaPrevMonthEntry ? schedDates.currMonthDay : schedDates.prevMonthDay);
@@ -224,22 +270,18 @@ function updateUI() {
       `<span class="negative">($${(-totalRemaining).toFixed(2)})</span>` :
       `$${totalRemaining.toFixed(2)}`;
 
-    const hotelPrevMonthEntry = data.hotelBank.find(entry => entry.date === schedDates.prevMonthDay)?.amount || 0;
-    const hotelCurrMonthEntry = data.hotelBank.find(entry => entry.date === schedDates.currMonthDay) || { spend: 0, earn: 0 };
+    // Hotel bank logic
+    const hotelPrevMonthEntry = data.hotelBank.find(entry => entry.date === schedDates.prevMonthDay);
+    const hotelCurrMonthEntry = data.hotelBank.find(entry => entry.date === schedDates.currMonthDay) || { spend: 0, earn: 0, amount: 0 };
     let hotelAmount = 0;
-     if (hotelPrevMonthEntry && hotelCurrMonthEntry) {
-      hotelAmount = hotelPrevMonthEntry.amount;
-      hotelBank.innerText = `$${hotelAmount.toFixed(2)}`;
-    } else if (!dbaPrevMonthEntry && dbaCurrMonthEntry) {
+    if (hotelPrevMonthEntry) {
+      hotelAmount = twoDigits(hotelPrevMonthEntry.amount);
+    } else if (hotelCurrMonthEntry) {
       hotelAmount = twoDigits(hotelCurrMonthEntry.amount);
-      hotelBank.innerText = `$${hotelAmount.toFixed(2)}`;
     } else {
-      console.warn('Missing hotel bank entry for', hotelPrevMonthEntry ? schedDates.currMonthDay : schedDates.prevMonthDay);
+      console.warn('Missing hotel bank entry for', schedDates.prevMonthDay);
     }
-
-
-    // const hotelAmount = data.hotelBank.find(entry => entry.date === schedDates.prevMonthDay)?.amount || 0;
-    // hotelBank.innerText = `$${hotelAmount.toFixed(2)}`;
+    hotelBank.innerText = `$${hotelAmount.toFixed(2)}`;
 
     // Single find for hotel bank
     const hotelSpend = hotelCurrMonthEntry.spend;
