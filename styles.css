@@ -223,7 +223,7 @@ hr {
     border-radius: 10px;
     box-sizing: border-box;
     height: 25px;
-    
+    color: black;
 }
 
 details {
@@ -262,12 +262,12 @@ details[open] p {
 
 .button-group {
     display: flex;
-    flex-direction: column; /* Stack buttons vertically */
-    align-items: center; /* Center buttons horizontally */
-    justify-content: center; /* Center buttons vertically */
-    gap: 10px; /* Space between buttons */
-    min-height: 150px; /* Ensure enough height for centering */
-    margin-top: 10px; /* Space after <hr /> */
+    flex-direction: column;
+    align-items: center; 
+    justify-content: center; 
+    gap: 10px; 
+    min-height: 150px;
+    margin-top: 10px; 
 }
 
 #form button {
@@ -844,12 +844,71 @@ a:hover {
     text-align: center;
     border-radius: 5px;
     color: black;
-    appearance: none;
-    -webkit-appearance: none; /* Remove default iOS styling */
+   
 }
 
-#expenseSlide {
+#results-div {
+    line-height: 1.6;
+}
+
+#results-div input[type="text"],
+#results-div input[type="number"],
+#results-div input[type="date"] {
+    border-color: rgb(118, 118, 118);
+    transition: border 0.2s, background-color 0.2s;
+    font-size: 1.2rem;
+    background-color: #a3a3a3;
+    width: 169px;
+    padding: 12px;
+    border-radius: 5px;
+    box-sizing: border-box;
+    height: 30px;
+    margin-left: 10px;   
+}
+
+#results-div input[type="checkbox"] {
     transform: scale(1.6);
     margin-left: 10px;
     accent-color: #a3a3a3;
+    width: 20px;
+}
+
+#update-month {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: #a3a3a3;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 8px 10px;
+  font-size: 16px;
+  height: 30px;
+  width: 60px;
+  color: black;
+  cursor: pointer;
+}
+
+#update-month:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+#update-month::-webkit-calendar-picker-indicator {
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="%23333" d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V8h14v12z"/></svg>') no-repeat center;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  opacity: 0.7;
+  margin-left: 5px;
+}
+
+#update-month::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* Firefox fallback */
+@supports (-moz-appearance: none) {
+  #update-month {
+    padding-right: 10px;
+  }
 }

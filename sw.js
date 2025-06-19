@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wedge-cache-v0.5.3';
+const CACHE_NAME = 'wedge-cache-v0.5.4';
 // Cache versioning to handle updates vMajor.minor.patch
 // Version 0.5.0 - Introduce Deviation Handling
 // Version 0.5.1 - Bug fix for intial download
