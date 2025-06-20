@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wedge-cache-v0.5.7';
+const CACHE_NAME = 'wedge-cache-v0.5.8';
 // Cache versioning to handle updates vMajor.minor.patch
 // Version 0.5.0 - Introduce Deviation Handling
 // Version 0.5.1 - Bug fix for intial download
@@ -8,6 +8,7 @@ const CACHE_NAME = 'wedge-cache-v0.5.7';
 // Version 0.5.5 - Add About Page and substitution hyperlinks
 // Version 0.5.6 - Added copyright
 // Version 0.5.7 - Removed copyright from html pages
+// Version 0.5.8 - Deviation icon
 // This service worker caches essential files for offline use and handles fetch requests
 // Copyright (c) 2025 Rick Griffin. All rights reserved.
 const urlsToCache = [
@@ -38,6 +39,7 @@ const urlsToCache = [
     './images/home-icon.png',
     './images/checklist-icon.png',
     './images/contact-icon.png',
+    './images/deviation-icon.png',
     './images/rest-icon.png',
     './images/risk-icon.png',
     './images/sub-icon.png',

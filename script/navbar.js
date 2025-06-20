@@ -39,7 +39,7 @@ switch (normalizedPage) {
     pageTitle.textContent = 'Substitution Considerations';
     break; 
   case 'deviation.html':
-    pageIcon.src = '../images/home-icon.png';
+    pageIcon.src = '../images/deviation-icon.png';
     pageTitle.textContent = 'Deviation Banks';
     break;
   case 'about.html':
