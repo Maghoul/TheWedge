@@ -42,7 +42,6 @@ const defaultData = {
 let initialMonth = now.getMonth() + 1;
 initialMonth = initialMonth.toString().padStart(2, "0");
 updateMonthInput.value = `${now.getFullYear()}-${initialMonth}`;
-// const schedMonth = updateMonthInput.value;
 
 // Retrieve and validate data from local storage
 let data;
@@ -218,9 +217,7 @@ function getAmount(compareMonth, arrCompare) {
     } else {
       const compareDate = arrCompare[i].date.slice(0, 7);
       if (compareDate === compareMonth) {
-        // console.log("DBA:", arrCompare[i].amount);
         totalizer += arrCompare[i].amount;
-        // console.log("Bank Value:", totalizer, "at index:", i);
       }
     }
   }
@@ -263,32 +260,26 @@ function updateUI() {
     if (!dbaPrevMonthEntry) {
       data.deviationBank.push({ date: schedDates.prevMonthDay, amount: 0, amountXfer: 0 });
       dbaPrevMonthEntry = data.deviationBank.find(entry => entry.date === schedDates.prevMonthDay);
-      console.log('Created default deviation bank entry for', schedDates.prevMonthDay);
     }
     if (!dbaCurrMonthEntry) {
       data.deviationBank.push({ date: schedDates.currMonthDay, amount: 0, amountXfer: 0 });
       dbaCurrMonthEntry = data.deviationBank.find(entry => entry.date === schedDates.currMonthDay);
-      console.log('Created default deviation bank entry for', schedDates.currMonthDay);
     }
     if (!dbaNextMonthEntry) {
       data.deviationBank.push({ date: schedDates.nextMonthDay, amount: 0, amountXfer: 0 });
       dbaNextMonthEntry = data.deviationBank.find(entry => entry.date === schedDates.nextMonthDay);
-      console.log('Created default deviation bank entry for', schedDates.nextMonthDay);
     }
     if (!hotelPrevMonthEntry) {
       data.hotelBank.push({ date: schedDates.prevMonthDay, amount: 0, spend: 0, earn: 0 });
       hotelPrevMonthEntry = data.hotelBank.find(entry => entry.date === schedDates.prevMonthDay);
-      console.log('Created default hotel bank entry for', schedDates.prevMonthDay);
     }
     if (!hotelCurrMonthEntry) {
       data.hotelBank.push({ date: schedDates.currMonthDay, amount: 0, spend: 0, earn: 0 });
       hotelCurrMonthEntry = data.hotelBank.find(entry => entry.date === schedDates.currMonthDay);
-      console.log('Created default hotel bank entry for', schedDates.currMonthDay);
-    }
+      }
     if (!hotelNextMonthEntry) {
       data.hotelBank.push({ date: schedDates.nextMonthDay, amount: 0, spend: 0, earn: 0 });
       hotelNextMonthEntry = data.hotelBank.find(entry => entry.date === schedDates.nextMonthDay);
-      console.log('Created default hotel bank entry for', schedDates.nextMonthDay);
     }
 
     // Save defaults to persist
@@ -296,27 +287,20 @@ function updateUI() {
     
     const schedBankAmount = getAmount(currentMonth, data.scheduledBank);
     const expensesAmount = getAmount(currentMonth, data.expenses);
-
-    
-
   
     let dbaAmount = 0;
-
-        console.log("Prev Month hotel:", hotelPrevMonthEntry, "Curr month hotel", hotelCurrMonthEntry)
 
     if (dbaPrevMonthEntry && dbaCurrMonthEntry &&   // Needed for first time use when no history is recorded
         dbaPrevMonthEntry.amount === 0 && dbaCurrMonthEntry.amount > 0) {
           dbaAmount = twoDigits(dbaCurrMonthEntry.amount);
     } else  if (dbaPrevMonthEntry) {
       dbaAmount = twoDigits(dbaPrevMonthEntry.amountXfer);
-      console.log("DBA Amount line 250 =", dbaAmount)
       dbaCurrMonthEntry.amount = dbaAmount;
     } else if (dbaCurrMonthEntry) {
       dbaAmount = twoDigits(dbaCurrMonthEntry.amount);
     } else {
       console.warn('Missing deviation bank entry for', dbaPrevMonthEntry ? schedDates.currMonthDay : schedDates.prevMonthDay);
     }
-    console.log('dbaAmount', dbaAmount);
 
     // Ensure DOM elements exist
     if (!displayMonth || !schedBank || !expenses || !remaining || !dbaAvail || !totalExp || !hotelBank) {
@@ -388,9 +372,6 @@ function updateUI() {
       console.warn('Hotel bank entry not found for', schedDates.currMonthDay);
     }
 
-    console.log("Remaining", difference, 'total remain', totalRemaining);
-    console.log("dba to forward", dbaRemaining);
-
     // Ensure metadata exists
     data.metadata = data.metadata || {};
     data.metadata.currentMonth = schedDates.mmmYYYY;
@@ -445,7 +426,6 @@ function appendBackButton() {
 // Check to see if the expense slide moves to previous or next month
 function getSlideDate (checkDate, booSlide) {
   let checkSlideStatusDate = checkDate;
-    // console.log("check Date", checkDate, "Status:", booSlide);
     const [year, numMonth, numDay] = checkSlideStatusDate.split('-').map(Number);
     if (booSlide) {
       let slideMonth = numMonth;
@@ -523,11 +503,9 @@ function createActionMenu(type, id) {
 // Helper: Handle action button clicks
 function handleActionClick(event, modMenu, delMenu, id, rowGroup, modifyCallback, deleteCallback) {
   event.stopPropagation(); // Prevent bubbling to parent cell
-  console.log(`${event.target.textContent} clicked, ID:`, id, 'Menus before remove:', document.querySelectorAll('.action-menu').length);
   // Remove action menus
   modMenu.remove();
   delMenu.remove();
-  console.log('Menus after remove:', document.querySelectorAll('.action-menu').length);
   // Unhighlight row
   document.querySelectorAll(`[data-row-group="${rowGroup}"]`).forEach(c => c.classList.remove('selected'));
   // Call appropriate callback
@@ -552,7 +530,6 @@ function attachRowClickHandlers({
     // Prevent re-binding
     if (!cell.dataset.listenerAttached) {
       cell.addEventListener('click', (e) => {
-        console.log('Cell clicked, ID:', cell.getAttribute(idAttr), 'Row group:', cell.getAttribute(rowGroupAttr));
         // Remove all existing action menus
         document.querySelectorAll('.action-menu').forEach(menu => menu.remove());
 
@@ -671,7 +648,6 @@ function showAddExpenseForm(compareMonth) {
 
   // Initialize slide  date when date selected
   document.getElementById('expenseDate').addEventListener('change', () => {
-    console.log("Date should look like:", expenseDate.value)
     const checkSlide = document.getElementById('expenseSlide').checked;
     const newSlideDate = getSlideDate(expenseDate.value, checkSlide);
     document.getElementById('expenseSlideDate').innerText = newSlideDate;
@@ -679,9 +655,8 @@ function showAddExpenseForm(compareMonth) {
 
    document.getElementById('expenseSlide').addEventListener('change', (e) => {
     const isChecked = e.target.checked;
-    // console.log("test", expenseDate.value)
+
     if (!expenseDate.value) {
-      // console.log("No Way Jose");
       return;
     }
     const newSlideDate = getSlideDate(expenseDate.value, isChecked)
@@ -729,15 +704,11 @@ function showModDevHotel(compareMonth) {
   if (!dev) {
     dev = { date: compareDate, amount: 0, amountXfer: 0 };
     data.deviationBank.push(dev); // Add new entry
-    console.log('Created default deviation bank entry for', compareDate);
   }
   if (!hotel) {
     hotel = { date: compareDate, amount: 0, spend: 0, earn: 0 };
     data.hotelBank.push(hotel); // Add new entry
-    console.log('Created default hotel bank entry for', compareDate);
   }
-
-  console.log(compareDate, dev, hotel);
 
   // Remove any existing form container
   const existingForm = document.getElementById('modDevHotel');
@@ -894,7 +865,6 @@ function showModifyExpenseForm(expenseId, compareMonth) {
   const existingForm = document.getElementById('expenseFormContainer');
   if (existingForm) existingForm.remove();
 
-  // console.log("Expense:", expense);
   const formContainer = document.createElement('div');
   formContainer.id = 'expenseFormContainer';
   formContainer.innerHTML = `
@@ -923,14 +893,11 @@ function showModifyExpenseForm(expenseId, compareMonth) {
     expense.date = e.target.value;     // Save the new date
     expense.slideDate = newSlideDate;  // Save the new slideDate
     document.getElementById('expenseSlideDate').innerText = expense.slideDate;
-    // console.log("New Date:", newDate, 'newSlide', expense.slideDate, 'Slide?', isChecked);
   })
 
   document.getElementById('expenseSlide').addEventListener('change', (e) => {
     const isChecked = e.target.checked;
-    // console.log('slide box expense date', expense.slideDate)
     const newSlideDate = getSlideDate(expense.date, isChecked)
-      // console.log("The Slide to save", newSlideDate)
     expense.slideDate = newSlideDate;
     document.getElementById('expenseSlideDate').innerText = expense.slideDate;
     })
@@ -946,8 +913,6 @@ function showModifyExpenseForm(expenseId, compareMonth) {
       slide: document.getElementById('expenseSlide').checked,
       slideDate: document.getElementById('expenseSlideDate').innerText
     };
-
-    console.log('Date to save:', updatedExpense.date)
 
     // Basic validation
     if (!dateRegex.test(updatedExpense.date) || !monthRegex.test(updatedExpense.slideDate)) {
@@ -979,6 +944,96 @@ function deleteItem(itemId, arrayProperty, itemType, refreshCallback) {
     updateUI(); // Update totals
   }
 }
+
+// ******* ADD SWIPT LEFT / RIGHT TO MAIN PAGE
+// DOM elements
+const displayContainer = document.querySelector('.display-container');
+const monthInput = document.getElementById('update-month');
+
+// Touch variables
+let touchStartX = 0;
+let touchEndX = 0;
+const SWIPE_THRESHOLD = 50;
+let isSwiping = false;
+
+// Swipe event listeners
+displayContainer.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].clientX;
+});
+
+displayContainer.addEventListener('touchmove', (e) => {
+    const currentX = e.changedTouches[0].clientX;
+    const swipeDistance = currentX - touchStartX;
+
+    // Clear previous classes to prevent conflicts
+    displayContainer.classList.remove('swipe-left', 'swipe-right');
+
+    if (swipeDistance > SWIPE_THRESHOLD) {
+        displayContainer.classList.add('swipe-right');
+    } else if (swipeDistance < -SWIPE_THRESHOLD) {
+        displayContainer.classList.add('swipe-left');
+    }
+});
+
+displayContainer.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].clientX;
+    displayContainer.classList.remove('swipe-left', 'swipe-right');
+    handleSwipe();
+});
+
+// Handle swipe
+function handleSwipe() {
+    if (isSwiping) {
+        return;
+    }
+    isSwiping = true;
+
+    const swipeDistance = touchEndX - touchStartX;
+    if (Math.abs(swipeDistance) < SWIPE_THRESHOLD) {
+        isSwiping = false;
+        return;
+    }
+
+    // Parse current month from monthInput.value or default to Jun 2025
+    let year, month;
+    if (monthInput.value) {
+        [year, month] = monthInput.value.split('-').map(Number);
+    } else {
+        year = 2025;
+        month = 6; // Default to June 2025
+    }
+
+    // Calculate new month
+    if (swipeDistance > 0) {
+        // Swipe left: Previous month
+        month -= 1;
+        if (month < 1) {
+            month = 12;
+            year -= 1;
+        } 
+        
+     } else {
+        // Swipe right: Next month
+        month += 1;
+        if (month > 12) {
+            month = 1;
+            year += 1;
+        }
+    }
+
+    // Update monthInput value
+    monthInput.value = `${year}-${String(month).padStart(2, '0')}`;
+
+    // Dispatch synthetic change event
+    const changeEvent = new InputEvent('change', { bubbles: true });
+    monthInput.dispatchEvent(changeEvent);
+
+    // Reset debounce
+    setTimeout(() => {
+        isSwiping = false;
+    }, 300);
+}
+// ******* ADD SWIPT LEFT / RIGHT TO MAIN PAGE
 
 updateMonthInput.addEventListener("change", () => {
   updateUI();
@@ -1060,7 +1115,6 @@ expenseArray.sort((a, b) => new Date(a.date) - new Date(b.date));
     if (compareDate === compareMonth) {
       const dayDate = new Date(expenseArray[i].date).toISOString().slice(8, 10);  // returns day of Month
       const expDate = expenseArray[i].date.slice(0,7);  // returns expense date yyyy-mm ensures date displays with correct month
-      console.log("exp Date", expDate);
 
       output += `
         <div class="expense-cell" data-id="${expenseArray[i].id}" data-row-group="${i}">${getYearMonthDay(dayDate, expDate).ddMMM}</div>
@@ -1106,9 +1160,6 @@ updateDevHotelBtn.addEventListener("click", () => {
   const schedDates = getYearMonthDay();
   const hotelEntry = data.hotelBank.find(d => d.date === schedDates.currMonthDay) || { spend: 0, earn: 0 };
 
-  console.log("Dev Bank:", getAmount(schedDates.currMonth, devBankArray))
-  console.log("Hotel Bank:", getAmount(schedDates.currMonth, hotelBankArray))
-
   let output = `<div>
   <p>Avail Deviation Bank: $${getAmount(schedDates.currMonth, devBankArray)}<p>
   <p>Starting Hotel Bank: $${getAmount(schedDates.currMonth, hotelBankArray)}</p>
@@ -1119,8 +1170,7 @@ updateDevHotelBtn.addEventListener("click", () => {
   <button class="dev-btn" id="mod-dev-hotel">Modify</button>
   `
   resultsDiv.innerHTML = output;
-  // console.log((data.hotelBank.find(d => d.date === schedDates.currMonthDay).spend))
-  // Event listener for Add Expense button
+   // Event listener for Add Expense button
   document.getElementById('mod-dev-hotel').addEventListener('click', () => {
     showModDevHotel(schedDates.currMonth);
   });

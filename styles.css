@@ -920,3 +920,16 @@ a:hover {
     padding-right: 10px;
   }
 }
+
+/* styles.css */
+.display-container {
+    transition: transform 0.3s ease;
+    touch-action: pan-y;
+    will-change: transform; /* Optimize for animation */
+}
+.swipe-left {
+    transform: translateX(-20px);
+}
+.swipe-right {
+    transform: translateX(20px);
+}
