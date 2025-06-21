@@ -9,6 +9,7 @@ const remaining = document.getElementById("remaining");
 const dbaAvail = document.getElementById("dbaAvail");
 const totalExp = document.getElementById("total-expense");
 const hotelBank = document.getElementById("hotel-bank");
+const applyHotel = document.getElementById("apply-hotel");
 const devFwd = document.getElementById('dba-avail-next');
 const hotelFwd = document.getElementById('hotel-bank-next')
 const updateSchedBankBtn = document.getElementById("update-sched-bank");
@@ -301,7 +302,7 @@ function updateUI() {
   
     let dbaAmount = 0;
 
-        console.log("Prev Month dba:", dbaPrevMonthEntry, "Curr month dba", dbaCurrMonthEntry)
+        console.log("Prev Month hotel:", hotelPrevMonthEntry, "Curr month hotel", hotelCurrMonthEntry)
 
     if (dbaPrevMonthEntry && dbaCurrMonthEntry &&   // Needed for first time use when no history is recorded
         dbaPrevMonthEntry.amount === 0 && dbaCurrMonthEntry.amount > 0) {
@@ -343,7 +344,8 @@ function updateUI() {
         hotelPrevMonthEntry.amount === 0 && hotelCurrMonthEntry.amount > 0) {
           hotelAmount = twoDigits(hotelCurrMonthEntry.amount);
     } else if (hotelPrevMonthEntry) {
-      hotelAmount = twoDigits(hotelPrevMonthEntry.amount);
+      hotelAmount = twoDigits(hotelPrevMonthEntry.amount - 
+        hotelPrevMonthEntry.spend + hotelPrevMonthEntry.earn);
     } else if (hotelCurrMonthEntry) {
       hotelAmount = twoDigits(hotelCurrMonthEntry.amount);
     } else {
@@ -354,6 +356,9 @@ function updateUI() {
     // Single find for hotel bank
     const hotelSpend = hotelCurrMonthEntry.spend;
     const hotelEarn = hotelCurrMonthEntry.earn;
+    const hotelApplied = hotelEarn - hotelSpend
+    applyHotel.innerHTML = hotelApplied >= 0 ? `<span>$${(hotelApplied).toFixed(2)}</span>` : 
+      `<span class="negative">($${(-hotelApplied).toFixed(2)})</span>`;
 
     if (hotelFwd) {
       hotelFwd.innerText = `$${(hotelAmount - hotelSpend + hotelEarn).toFixed(2)}`;
@@ -374,6 +379,13 @@ function updateUI() {
       dbaCurrMonthEntry.amountXfer = dbaRemaining;
     } else {
       console.warn('Deviation bank entry not found for', schedDates.currMonthDay);
+    }
+
+     // Update Hotel bank amount
+    if (hotelCurrMonthEntry) {
+      hotelCurrMonthEntry.amount = hotelAmount;
+    } else {
+      console.warn('Hotel bank entry not found for', schedDates.currMonthDay);
     }
 
     console.log("Remaining", difference, 'total remain', totalRemaining);
@@ -986,6 +998,9 @@ updateSchedBankBtn.addEventListener("click", () => {
       <div>Bank</div>
   `;
 
+  // sort the array first
+schedArray.sort((a, b) => new Date(a.date) - new Date(b.date));
+
   for (let i = 0; i < schedArray.length; i++) {
     const compareDate = schedArray[i].date.slice(0, 7);
     if (compareDate === compareMonth) {
@@ -1035,6 +1050,9 @@ showExpensesBtn.addEventListener("click", () => {
       <div>Comment</div>
       <div>Slid</div>
   `;
+
+// Sort the array before running for display
+expenseArray.sort((a, b) => new Date(a.date) - new Date(b.date));
 
   for (let i = 0; i < expenseArray.length; i++) {
     const compareDate = expenseArray[i].slideDate;  // e.g., 2025-06
@@ -1089,11 +1107,11 @@ updateDevHotelBtn.addEventListener("click", () => {
   const hotelEntry = data.hotelBank.find(d => d.date === schedDates.currMonthDay) || { spend: 0, earn: 0 };
 
   console.log("Dev Bank:", getAmount(schedDates.currMonth, devBankArray))
-  console.log("Hotel Bank:", getAmount(schedDates.prevMonth, hotelBankArray))
+  console.log("Hotel Bank:", getAmount(schedDates.currMonth, hotelBankArray))
 
   let output = `<div>
   <p>Avail Deviation Bank: $${getAmount(schedDates.currMonth, devBankArray)}<p>
-  <p>Starting Hotel Bank: $${getAmount(schedDates.prevMonth, hotelBankArray)}</p>
+  <p>Starting Hotel Bank: $${getAmount(schedDates.currMonth, hotelBankArray)}</p>
     <li>Spent: $${hotelEntry.spend.toFixed(2)}</li>
     <li>Earned: $${hotelEntry.earn.toFixed(2)}</li>
   </div>

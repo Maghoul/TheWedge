@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wedge-cache-v0.5.8';
+const CACHE_NAME = 'wedge-cache-v0.5.9';
 // Cache versioning to handle updates vMajor.minor.patch
 // Version 0.5.0 - Introduce Deviation Handling
 // Version 0.5.1 - Bug fix for intial download
@@ -9,6 +9,7 @@ const CACHE_NAME = 'wedge-cache-v0.5.8';
 // Version 0.5.6 - Added copyright
 // Version 0.5.7 - Removed copyright from html pages
 // Version 0.5.8 - Deviation icon
+// Version 0.5.9 - Fixed Hotel bank bugs, added sort for display, correct about syntax
 // This service worker caches essential files for offline use and handles fetch requests
 // Copyright (c) 2025 Rick Griffin. All rights reserved.
 const urlsToCache = [
@@ -62,29 +63,6 @@ self.addEventListener('fetch', event => {
         })
     );
 });
-
-// self.addEventListener('install', event => {
-//     event.waitUntil(
-//         caches.open(CACHE_NAME).then(cache => {
-//             return Promise.all(
-//                 urlsToCache.map(url => {
-//                     return fetch(url, { mode: 'no-cors' }) // Use no-cors to avoid CORS issues
-//                         .then(response => {
-//                             if (!response.ok) {
-//                                 console.error(`Failed to fetch ${url}: ${response.statusText}`);
-//                                 throw new Error(`Failed to fetch ${url}`);
-//                             }
-//                             return cache.put(url, response);
-//                         })
-//                         .catch(error => {
-//                             console.error(`Error fetching ${url}:`, error);
-//                             throw error;
-//                         });
-//                 })
-//             );
-//         })
-//     );
-// });
 
 // Handle messages from the client to skip waiting
 self.addEventListener('message', event => {
