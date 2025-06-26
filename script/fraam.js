@@ -183,7 +183,7 @@ fraamForm.addEventListener("submit", (e) => {
 	// Append resources
 	const resourcesP = document.createElement("p");
 	const link = document.createElement("a");
-	link.href = "https://scheduling.fdx.alpa.org/fatigue";
+	link.href = "https://scheduling.fdx.alpa.org/fatigue#/fatigue";
 	link.target = "_blank";
 	link.innerText = "- ALPA Fatigue Assessment"
 	resourcesP.appendChild(link);

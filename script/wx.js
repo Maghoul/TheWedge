@@ -363,13 +363,15 @@ function colorFlightRules(flightRules) {
 }
 
 function generateWeatherOutput(airportCode, type, timeStr, timeDate) {
+  // airportCode: four-letter identifier, type: 'ETD' or 'ETA', 
+  // timeStr: time associated with ETD/ETA 20:17, timeDate: full ISO time string 
+  
+  //console.log(airportCode, type, timeStr, timeDate); // debug code
+
   let output = "";
   let timeInfo = "";
   let timeAge = "";
   let tafWarning = "";
-
-  // Log timeDate for debugging
-  // console.log(`generateWeatherOutput for ${type}: timeDate =`, timeDate);
 
   // Fetch weather data
   const metarResult = getWeatherData(airportCode, 'metar');
@@ -406,17 +408,34 @@ function generateWeatherOutput(airportCode, type, timeStr, timeDate) {
     let alternateReq = "";
     if (timeDate && taf && Array.isArray(taf.forecast)) {
       const parsedTimeDate = new Date(timeDate);
+
+      //console.log("Timedate:", timeDate, "TAF", taf, "TAF Array", taf.forecast, "Parsed Time Date", parsedTimeDate); //For debug
+
       let matchingForecastIndex = -1;
+      const currentTaf = [];      // array to capture prevailing vs intermittent forecast
       if (!isNaN(parsedTimeDate)) { // Ensure valid date
+        const startTafTime = taf.start_time.dt;
+        const endTafTime = taf.end_time.dt;
+        
+        //console.log("TAF Start:", startTafTime, "TAF End:", endTafTime)
         for (let i = 0; i < taf.forecast.length; i++) {
           const forecast = taf.forecast[i].flight_rules || 'N/A';
           const startTime = new Date(taf.forecast[i].type === 'BECMG' ? taf.forecast[i].transition_start.dt : taf.forecast[i].start_time.dt);
           const endTime = new Date(taf.forecast[i].end_time.dt);
-          // console.log(`Forecast ${i} for ${type}:`, { parsedTimeDate, startTime, endTime, inRange: parsedTimeDate >= startTime && parsedTimeDate <= endTime });
+          // Assign the TAF true if it is prevailing (FM or BECMG) and false if it is intermittent (TEMPO or PROB)
+          if ((taf.forecast[i].type === 'BECMG' || taf.forecast[i].type === 'FROM') &&
+            taf.forecast[i].raw.slice(0,4) !== 'PROB') {
+            currentTaf.push(true)
+          } else {
+            currentTaf.push(false);
+          }
+                        
+            //console.log("currentTaf:", currentTaf, "Current i", i);
           if (parsedTimeDate >= startTime && parsedTimeDate <= endTime) {
             timeInfo = ` and forecasted as ${colorFlightRules(forecast)} at ${location} time ${timeStr}Z.`;
             matchingForecastIndex = i;
-            break; // Exit loop after finding the first match
+            // DO NOT Exit loop after finding the first match.  A tempo or PROB condition could
+            // still occur after the initial match
           }
         }
       } else {
