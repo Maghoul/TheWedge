@@ -136,6 +136,10 @@ hr {
     width: 100%;
 }
 
+.form-row.hidden {
+    display: none;
+}
+
 .form-row:has(input[type="text"]),
 .form-row:has(input[type="number"]) {
     flex-direction: column;
@@ -163,6 +167,10 @@ hr {
     border-radius: 5px;
     box-sizing: border-box;
     height: 50px;
+}
+
+#preflight-checklist-row {
+    padding-left: 45px;
 }
 
 #form .dispay-container {

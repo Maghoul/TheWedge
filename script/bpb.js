@@ -8,11 +8,14 @@ const finalWandB = document.getElementById('preflight5');
 const security = document.getElementById('preflight6');
 const perishibleLives = document.getElementById('preflight7');
 const gendec = document.getElementById('preflight9');
+const preflightChecklist = document.getElementById('preflight-pc');
+const preflightChecklistRow = document.getElementById('preflight-checklist-row');
 const preflightForm = document.getElementById('form');
 const clearBtn = document.getElementById('clear-btn');
 
 // Array of checkboxes for easier iteration
-const checkboxes = [release, clearance, edt, fuel, dg, finalWandB, security, perishibleLives, gendec];
+const checkboxes = [release, clearance, edt, fuel, dg, finalWandB, 
+    security, perishibleLives, gendec, preflightChecklist];
 
 // Function to update UI based on checkbox state
 function updateCheckboxUI(checkbox) {
@@ -46,6 +49,9 @@ function updateFormBackground() {
     }
     const allChecked = checkboxes.every(checkbox => checkbox.checked);
     preflightForm.style.backgroundColor = allChecked ? "lightgreen" : "var(--complementary-color)";
+    preflightForm.querySelector('h1').style.color = allChecked ?
+        "black" :
+        "var(--primary-color)";
 }
 
 function clearBoxes () {
@@ -70,6 +76,14 @@ checkboxes.forEach(checkbox => {
 // Update form background on page load
 updateFormBackground();
 
+fuel.addEventListener("change", () => {
+    if (fuel.checked) {
+        preflightChecklistRow.classList.remove('hidden'); // Remove the hidden class
+    } else {
+        preflightChecklistRow.classList.add('hidden'); // Add the hidden class back
+    }
+});
+
 // Event listener for checkbox changes
 preflightForm.addEventListener("change", () => {
     // Update UI for all checkboxes
@@ -88,5 +102,7 @@ preflightForm.addEventListener("change", () => {
 clearBtn.addEventListener("click", () => {
     // Uncheck all checkboxes and reset UI
     clearBoxes();
+    preflightChecklistRow.classList.add('hidden');
+    preflightForm.querySelector('h1').style.color = "var(--primary-color)";
     localStorage.removeItem('checklistTime');
 });
