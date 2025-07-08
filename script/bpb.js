@@ -80,6 +80,8 @@ fuel.addEventListener("change", () => {
     if (fuel.checked) {
         preflightChecklistRow.classList.remove('hidden'); // Remove the hidden class
     } else {
+        console.log("Value is", preflightChecklist.value)
+        preflightChecklist.checked = false;
         preflightChecklistRow.classList.add('hidden'); // Add the hidden class back
     }
 });
